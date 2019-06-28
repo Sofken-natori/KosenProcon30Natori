@@ -2,11 +2,11 @@
 
 
 
-Agent::Agent()
+Procon30::Agent::Agent()
 {
 }
 
 
-Agent::~Agent()
+Procon30::Agent::~Agent()
 {
 }

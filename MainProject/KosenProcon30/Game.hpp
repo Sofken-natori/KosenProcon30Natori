@@ -4,21 +4,24 @@
 #include "Field.hpp"
 #include <Siv3D.hpp>
 #include <utility>
-class Game
-{
-public:
-	Field field;
+namespace Procon30 {
 
-	//first: MyTeam
-	//second: EnemyTeam
-	std::pair<Team, Team> teams;
+	class Game
+	{
+	public:
+		Field field;
 
-	int32 turn;
-	int32 Maxturn;
+		//first: MyTeam
+		//second: EnemyTeam
+		std::pair<Team, Team> teams;
 
-	Stopwatch turnTimer;
-	Stopwatch gameTimer;
-	Game();
-	~Game();
-};
+		int32 turn;
+		int32 Maxturn;
 
+		Stopwatch turnTimer;
+		Stopwatch gameTimer;
+		Game();
+		~Game();
+	};
+
+}

@@ -2,11 +2,11 @@
 
 
 
-Team::Team()
+Procon30::Team::Team()
 {
 }
 
 
-Team::~Team()
+Procon30::Team::~Team()
 {
 }

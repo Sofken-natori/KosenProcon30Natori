@@ -2,11 +2,11 @@
 
 
 
-GUI::GUI()
+Procon30::GUI::GUI()
 {
 }
 
 
-GUI::~GUI()
+Procon30::GUI::~GUI()
 {
 }

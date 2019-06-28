@@ -2,11 +2,11 @@
 
 
 
-Game::Game()
+Procon30::Game::Game()
 {
 }
 
 
-Game::~Game()
+Procon30::Game::~Game()
 {
 }

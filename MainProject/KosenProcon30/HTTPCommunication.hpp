@@ -1,8 +1,13 @@
 #pragma once
-class HTTPCommunication
-{
-public:
-	HTTPCommunication();
-	~HTTPCommunication();
-};
+#include "KosenProcon30.hpp"
 
+namespace Procon30 {
+
+	class HTTPCommunication
+	{
+	public:
+		HTTPCommunication();
+		~HTTPCommunication();
+	};
+
+}

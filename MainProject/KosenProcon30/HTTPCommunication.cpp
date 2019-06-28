@@ -2,11 +2,11 @@
 
 
 
-HTTPCommunication::HTTPCommunication()
+Procon30::HTTPCommunication::HTTPCommunication()
 {
 }
 
 
-HTTPCommunication::~HTTPCommunication()
+Procon30::HTTPCommunication::~HTTPCommunication()
 {
 }

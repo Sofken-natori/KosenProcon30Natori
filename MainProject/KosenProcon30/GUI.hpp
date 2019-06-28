@@ -1,8 +1,13 @@
 #pragma once
-class GUI
-{
-public:
-	GUI();
-	~GUI();
-};
+#include "KosenProcon30.hpp"
 
+namespace Procon30 {
+
+	class GUI
+	{
+	public:
+		GUI();
+		~GUI();
+	};
+
+}
