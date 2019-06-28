@@ -1,0 +1,47 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Condition="'$(Force-Enable-cpprestsdk)' == '' And ('$(PlatformToolset)' != 'v141' And '$(PlatformToolset)' != 'v142')">
+    <Disable-cpprestsdk>true</Disable-cpprestsdk>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Force-Disable-cpprestsdk)' != ''">
+    <Disable-cpprestsdk>true</Disable-cpprestsdk>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup Condition="'$(Disable-cpprestsdk)' == ''">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <!--
+		<Link>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+		</Link>
+		-->
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Disable-cpprestsdk)' == ''">
+    <Link>
+      <AdditionalDependencies Condition="'$(Configuration)' == 'Debug' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(MSBuildThisFileDirectory)x86\lib\cpprest141_2_10d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)' == 'Release' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(MSBuildThisFileDirectory)x86\lib\cpprest141_2_10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+
+      <AdditionalDependencies Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'x64'">$(MSBuildThisFileDirectory)x64\lib\cpprest141_2_10d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64'">$(MSBuildThisFileDirectory)x64\lib\cpprest141_2_10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86') And '$(Disable-cpprestsdk)' == '' ">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)x86\bin\cpprest141_2_10d.dll" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86') And '$(Disable-cpprestsdk)' == '' ">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)x86\bin\cpprest141_2_10.dll" />
+  </ItemGroup>
+
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'x64' And '$(Disable-cpprestsdk)' == '' ">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)x64\bin\cpprest141_2_10d.dll" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64' And '$(Disable-cpprestsdk)' == '' ">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)x64\bin\cpprest141_2_10.dll" />
+  </ItemGroup>
+
+</Project>
