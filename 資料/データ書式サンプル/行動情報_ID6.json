@@ -1,0 +1,16 @@
+{
+    "actions": [
+        {
+            "agentID": 11,
+            "type": "move",
+            "dx": 1,
+            "dy": 0
+        },
+        {
+            "agentID": 12,
+            "type": "move",
+            "dx": 0,
+            "dy": -1
+        }
+    ]
+}
