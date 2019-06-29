@@ -2,7 +2,7 @@
 #include "KosenProcon30.hpp"
 #include "Agent.hpp"
 #include "Tile.hpp"
-#include <Siv3D.hpp>
+
 namespace Procon30 {
 
 	class Field

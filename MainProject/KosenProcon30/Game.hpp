@@ -2,7 +2,6 @@
 #include "KosenProcon30.hpp"
 #include "Team.hpp"
 #include "Field.hpp"
-#include <Siv3D.hpp>
 #include <utility>
 namespace Procon30 {
 

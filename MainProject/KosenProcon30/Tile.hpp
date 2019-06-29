@@ -1,6 +1,5 @@
 #pragma once
 #include "KosenProcon30.hpp"
-#include <Siv3D.hpp>
 
 namespace Procon30 {
 
