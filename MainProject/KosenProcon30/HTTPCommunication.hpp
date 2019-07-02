@@ -8,8 +8,8 @@ namespace Procon30 {
 	class HTTPCommunication
 	{
 	public:
-		int teamID;
-		s3d::Array<int> agetnsID;
+		int32 teamID;
+		s3d::Array<int32> agentsID;
 
 		HTTPCommunication();
 		~HTTPCommunication();

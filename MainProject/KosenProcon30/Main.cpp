@@ -1,21 +1,17 @@
 ﻿
 # include "KosenProcon30.hpp"
+# include "GUI.hpp"
 
 void Main()
 {
+	Window::Resize(Procon30::WindowSize);
 	Graphics::SetBackground(ColorF(0.8, 0.9, 1.0));
-	
-	const Font font(60);
 
-	const Texture textureCat(Emoji(U"🐈"), TextureDesc::Mipped);
+	Procon30::GUI gui;
 
 	while (System::Update())
 	{
-		font(U"Hello, Siv3D!🐣").drawAt(Window::Center(), Palette::Black);
-
-		font(Cursor::Pos()).draw(20, 500, ColorF(0.6));
-
-		textureCat.resized(80).draw(700, 500);
+		gui.draw();
 
 		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
 	}

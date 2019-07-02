@@ -14,6 +14,7 @@ namespace Procon30 {
 		//second: EnemyTeam
 		std::pair<Team, Team> teams;
 
+
 		int32 turn;
 		int32 Maxturn;
 
