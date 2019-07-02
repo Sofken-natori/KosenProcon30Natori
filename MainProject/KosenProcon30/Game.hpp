@@ -1,9 +1,13 @@
 #pragma once
+#include <utility>
+
 #include "KosenProcon30.hpp"
 #include "Team.hpp"
 #include "Field.hpp"
-#include <utility>
+
 namespace Procon30 {
+
+	class Observer;
 
 	class Game
 	{
@@ -20,8 +24,14 @@ namespace Procon30 {
 
 		Stopwatch turnTimer;
 		Stopwatch gameTimer;
+
+		std::shared_ptr<Observer> observer;
+
 		Game();
 		~Game();
+		
+		//UNDONE: When member variable changed, You must check this function. 
+		Game& operator=(const Procon30::Game& right);
 	};
 
 }

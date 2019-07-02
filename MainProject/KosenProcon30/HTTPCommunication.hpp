@@ -5,11 +5,14 @@
 
 namespace Procon30 {
 
+	class Observer;
+
 	class HTTPCommunication
 	{
 	public:
 		int32 teamID;
 		s3d::Array<int32> agentsID;
+		std::shared_ptr<Observer> observer;
 
 		HTTPCommunication();
 		~HTTPCommunication();

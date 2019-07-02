@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Siv3D.hpp>
+#include <memory>
 
 namespace Procon30 {
 
