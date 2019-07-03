@@ -1,4 +1,3 @@
-#include "Observer.hpp"
 #include "Game.hpp"
 
 bool Procon30::Game::dataReceived = false;
