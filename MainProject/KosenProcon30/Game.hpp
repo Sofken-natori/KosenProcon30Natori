@@ -24,6 +24,7 @@ namespace Procon30 {
 
 		//nasatame
 		int32 calculateScore(TeamColor color);
+		int32 calculateTileScore(TeamColor color);
 
 		int32 turn;
 		int32 Maxturn;
