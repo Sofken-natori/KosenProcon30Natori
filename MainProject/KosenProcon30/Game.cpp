@@ -1,3 +1,4 @@
+#include "Observer.hpp"
 #include "Game.hpp"
 
 Procon30::Game::Game()
