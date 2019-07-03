@@ -10,6 +10,8 @@ namespace Procon30 {
 		Action action;
 		Point nextPosition;
 		Point nowPosition;
+
+
 		Agent();
 		~Agent();
 	};
