@@ -2,6 +2,7 @@
 
 #include <Siv3D.hpp>
 #include <memory>
+#include <thread>
 
 namespace Procon30 {
 
