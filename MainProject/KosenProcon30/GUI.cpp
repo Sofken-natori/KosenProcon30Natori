@@ -9,6 +9,7 @@ void Procon30::GUI::dataUpdate()
 {
 }
 
+
 Procon30::GUI::GUI()
 {
 	observer = std::shared_ptr<Observer>(new Observer());
