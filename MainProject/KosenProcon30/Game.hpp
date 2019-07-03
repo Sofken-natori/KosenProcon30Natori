@@ -10,9 +10,13 @@ namespace Procon30 {
 
 	class Game
 	{
-
+		static std::mutex HTTPWaitMtx;
+		static std::condition_variable HttpWaitCond;
+		static bool dataReceived;	
+		static std::mutex ReceiveMtx;
 	public:
-		
+		//NEED:HTTPCommunication‚©‚çŒÄ‚Ño‚·
+		static void HTTPReceived();
 
 		Field field;
 

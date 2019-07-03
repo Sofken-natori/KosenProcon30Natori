@@ -1,5 +1,17 @@
 #include "Game.hpp"
 
+bool Procon30::Game::dataReceived = false;
+std::mutex Procon30::Game::HTTPWaitMtx;
+std::condition_variable Procon30::Game::HttpWaitCond;
+std::mutex Procon30::Game::ReceiveMtx;
+
+void Procon30::Game::HTTPReceived()
+{
+	std::lock_guard<std::mutex> lock(HTTPWaitMtx);
+	dataReceived = true;
+	HttpWaitCond.notify_all();
+}
+
 int32 Procon30::Game::calculateScore(TeamColor color)
 {
 	Array<Array<bool>> visit(MaxFieldY, Array<bool>(MaxFieldX, false));
@@ -109,7 +121,17 @@ int32 Procon30::Game::calculateTileScore(TeamColor color)
 
 void Procon30::Game::dataUpdate()
 {
-	
+	//Waitïî
+	std::unique_lock<std::mutex> lockWait(HTTPWaitMtx);
+	while (!dataReceived) {
+		HttpWaitCond.wait(lockWait);
+	}
+
+	//èàóùïî
+
+	//ñ¢éÛêMïœçXïî
+	std::lock_guard<std::mutex> lockFlag(ReceiveMtx);
+	dataReceived = false;
 }
 
 void Procon30::Game::parseJson(String fileName)
@@ -137,6 +159,7 @@ Procon30::Game& Procon30::Game::operator=(const Procon30::Game& right)
 	this->turn = right.turn;
 	this->Maxturn = right.Maxturn;
 	this->turnTimer = right.turnTimer;
+	this->isSearchfinished = right.isSearchfinished;
 
 	return (*this);
 }

@@ -23,5 +23,7 @@ namespace Procon30 {
 
 		const HTTPCommunication& getStock();
 		const Game& getStock(int32 game_id);
+
+		Observer();
 	};
 }
