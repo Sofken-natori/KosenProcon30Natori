@@ -7,9 +7,10 @@ namespace Procon30 {
 
 	class Field
 	{
-	public:
+
 		using TileGrid = Grid<Tile>;
 
+	public:
 		TileGrid m_board{ MaxFieldX,MaxFieldY };
 		Size boardSize;
 		Field();

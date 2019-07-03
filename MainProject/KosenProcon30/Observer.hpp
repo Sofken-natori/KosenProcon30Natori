@@ -13,8 +13,10 @@ namespace Procon30 {
 		//いったん全てのリソースをロックするようにする。これでバグらないはず。
 		std::mutex resourceMtx;
 
+
 		HTTPCommunication http;
-		Game game[observerStockMAX];
+		std::array<Game, observerStockMAX> games;
+
 	public:
 		void notify(int32 game_id,const Game &stock);
 		void notify(const HTTPCommunication &stock);

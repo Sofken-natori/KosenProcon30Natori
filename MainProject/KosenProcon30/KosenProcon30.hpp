@@ -3,6 +3,9 @@
 #include <Siv3D.hpp>
 #include <memory>
 #include <thread>
+#include <array>
+#include <utility>
+#include <queue>
 
 namespace Procon30 {
 

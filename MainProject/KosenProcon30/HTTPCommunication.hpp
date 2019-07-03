@@ -10,14 +10,23 @@ namespace Procon30 {
 	class HTTPCommunication
 	{
 	public:
-		int32 teamID;
+		
+
+		
 		s3d::Array<int32> agentsID;
 		std::shared_ptr<Observer> observer;
+		
+		//receive
+		
+		void jsonDistribute();
+
+		//send
+
 
 		HTTPCommunication();
 		~HTTPCommunication();
 
-		void parseJson(String fileName,Field &field,Team &team);
+		
 
 
 	};
