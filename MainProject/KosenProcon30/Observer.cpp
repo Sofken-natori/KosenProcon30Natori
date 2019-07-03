@@ -23,3 +23,7 @@ inline const Procon30::Game& Procon30::Observer::getStock(int32 game_id)
 	std::lock_guard<std::mutex> lock(this->resourceMtx);
 	return this->games.at(game_id);
 }
+
+Procon30::Observer::Observer()
+{
+}
