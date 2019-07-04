@@ -9,6 +9,9 @@ namespace Procon30 {
 	public:
 		TeamColor color;
 		int32 score;
+		int32 tileScore;
+		int32 areaScore;
+		int32 teamID;
 		int32 agentNum;
 		Array<Agent> agents;
 		Team();

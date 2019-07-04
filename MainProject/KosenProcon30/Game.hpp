@@ -12,8 +12,14 @@ namespace Procon30 {
 	{
 		static std::mutex HTTPWaitMtx;
 		static std::condition_variable HttpWaitCond;
-		static bool dataReceived;	
+		static bool dataReceived;
 		static std::mutex ReceiveMtx;
+	private:
+
+		void parseAgentsData(Team &team,JSONValue object);
+		void parseTeamsData(JSONValue object);
+		void parseActionsData(JSONValue object);
+
 	public:
 		//NEED:HTTPCommunicationÇ©ÇÁåƒÇ—èoÇ∑
 		static void HTTPReceived();
@@ -24,7 +30,7 @@ namespace Procon30 {
 		//second: EnemyTeam
 		std::pair<Team, Team> teams;
 
-		bool isSearchfinished;
+		bool isSearchFinished;
 
 		//nasatame
 		int32 calculateScore(TeamColor color);
@@ -32,6 +38,8 @@ namespace Procon30 {
 
 		int32 turn;
 		int32 Maxturn;
+
+		int32 startedAtUnixTime;
 
 		//YASAI
 		void dataUpdate();

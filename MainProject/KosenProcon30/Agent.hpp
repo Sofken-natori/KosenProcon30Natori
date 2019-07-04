@@ -10,7 +10,7 @@ namespace Procon30 {
 		Action action;
 		Point nextPosition;
 		Point nowPosition;
-
+		int32 agentID;
 
 		Agent();
 		~Agent();
