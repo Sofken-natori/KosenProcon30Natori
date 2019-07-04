@@ -207,6 +207,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="Team.cpp" />
+    <ClCompile Include="VirtualServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\engine\texture\box-shadow\128.png" />
@@ -283,6 +284,7 @@
     <ClInclude Include="Observer.hpp" />
     <ClInclude Include="Team.hpp" />
     <ClInclude Include="Tile.hpp" />
+    <ClInclude Include="VirtualServer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
