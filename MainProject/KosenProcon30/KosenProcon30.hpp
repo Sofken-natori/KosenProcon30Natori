@@ -5,7 +5,7 @@
 #include <thread>
 #include <array>
 #include <utility>
-#include <queue>
+#include <deque>
 
 namespace Procon30 {
 
@@ -14,6 +14,7 @@ namespace Procon30 {
 	constexpr int32 TileSize = 50;
 	constexpr int32 SideAreaX = 400;
 	constexpr Size WindowSize{ MaxFieldX * TileSize + SideAreaX * 2, MaxFieldY * TileSize };
+	constexpr size_t MaxGameNumber = 3;
 
 	enum class Action {
 		Stay,

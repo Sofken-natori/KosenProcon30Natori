@@ -3,6 +3,7 @@
 #include "Team.hpp"
 #include "Field.hpp"
 #include "HTTPCommunication.hpp"
+#include "SendBuffer.hpp"
 
 namespace Procon30 {
 
@@ -43,6 +44,7 @@ namespace Procon30 {
 
 		//YASAI
 		void dataUpdate();
+		void sendToHTTP(FilePath path);
 
 		//nasatame
 		//TODO : AgentIDなどを前もって聞いていないので適当実装、後で書き換える必要あり
@@ -55,6 +57,7 @@ namespace Procon30 {
 		Stopwatch gameTimer;
 
 		std::shared_ptr<Observer> observer;
+		std::shared_ptr<SendBuffer> buffer;
 
 		Game();
 		~Game();

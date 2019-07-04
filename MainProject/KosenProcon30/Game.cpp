@@ -136,6 +136,11 @@ void Procon30::Game::dataUpdate()
 	dataReceived = false;
 }
 
+void Procon30::Game::sendToHTTP(FilePath path)
+{
+	buffer->pushPath(path);
+}
+
 Procon30::Game::Game()
 {
 	isSearchFinished = false;
@@ -143,7 +148,6 @@ Procon30::Game::Game()
 	turn = 0;
 	startedAtUnixTime = -1;
 }
-
 
 Procon30::Game::~Game()
 {

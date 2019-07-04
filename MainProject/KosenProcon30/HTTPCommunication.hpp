@@ -2,25 +2,25 @@
 #include "KosenProcon30.hpp"
 #include "Team.hpp"
 #include "Field.hpp"
+#include "SendBuffer.hpp"
+#include "InformatonID.hpp"
 
 namespace Procon30 {
 
 	class Observer;
 	class Game;
 
-	struct InformationID {
-		int32 teamID;
-		Array<int32> AgentIDs;
-		InformationID();
-		InformationID(int32 teamid, Array<int32> agentids);
-	};
-
 	class HTTPCommunication
 	{
+	private:
+		//DONT DELETE
+		std::shared_ptr<SendBuffer> buffer;
+
 	public:
 		
 
 		InformationID MyTeamInformationID;
+		Array<InformationID> EnemyTeamInformationIDs;
 		
 		
 		std::shared_ptr<Observer> observer;
@@ -30,7 +30,11 @@ namespace Procon30 {
 		//DONT USE:This function is not implement
 		void jsonDistribute();
 
-		//send
+		//DONT USE:This function is not implement
+		void getServer();
+
+		//DONT USE:This function is not implement
+		void postServer();
 
 		HTTPCommunication();
 		~HTTPCommunication();

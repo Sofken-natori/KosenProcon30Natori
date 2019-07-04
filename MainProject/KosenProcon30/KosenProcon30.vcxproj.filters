@@ -93,6 +93,9 @@
     <ClCompile Include="VirtualServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SendBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -292,6 +295,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VirtualServer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SendBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InformatonID.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
