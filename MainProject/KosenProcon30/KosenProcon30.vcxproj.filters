@@ -285,5 +285,8 @@
     <ClInclude Include="Observer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithm.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
