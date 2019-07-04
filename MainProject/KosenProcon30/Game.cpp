@@ -7,8 +7,10 @@ std::mutex Procon30::Game::ReceiveMtx;
 
 void Procon30::Game::HTTPReceived()
 {
-	std::lock_guard<std::mutex> lock(HTTPWaitMtx);
-	dataReceived = true;
+	{
+		std::lock_guard<std::mutex> lock(HTTPWaitMtx);
+		dataReceived = true;
+	}
 	HttpWaitCond.notify_all();
 }
 
@@ -123,7 +125,7 @@ void Procon30::Game::dataUpdate()
 {
 	//Wait•”
 	std::unique_lock<std::mutex> lockWait(HTTPWaitMtx);
-	while (!dataReceived) {
+	if (!dataReceived) {
 		HttpWaitCond.wait(lockWait);
 	}
 
