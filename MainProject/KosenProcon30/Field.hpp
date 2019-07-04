@@ -3,13 +3,13 @@
 #include "Agent.hpp"
 #include "Tile.hpp"
 
-namespace Procon30 {
+namespace Procon30
+{
+
+	using TileGrid = Grid<Tile>;
 
 	class Field
 	{
-
-		using TileGrid = Grid<Tile>;
-
 	public:
 		TileGrid m_board{ MaxFieldX,MaxFieldY };
 		Size boardSize;

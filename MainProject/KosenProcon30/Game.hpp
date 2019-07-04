@@ -10,11 +10,11 @@ namespace Procon30 {
 
 	class Game
 	{
+	private:
 		static std::mutex HTTPWaitMtx;
 		static std::condition_variable HttpWaitCond;
 		static bool dataReceived;
 		static std::mutex ReceiveMtx;
-	private:
 
 		void parseAgentsData(Team &team,JSONValue object);
 		void parseTeamsData(JSONValue object);
