@@ -80,8 +80,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SIV3D_0_3_2)\include;$(SIV3D_0_3_2)\include\ThirdParty;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SIV3D_0_3_2)\lib\Windows(x64);$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\sofken\Documents\OpenSiv3D%280.3.2%29\include\ThirdParty;C:\Users\sofken\Documents\OpenSiv3D%280.3.2%29\include;$(SIV3D_0_3_2)\include;$(SIV3D_0_3_2)\include\ThirdParty;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\sofken\Documents\OpenSiv3D%280.3.2%29\lib\Windows%28x64%29;$(SIV3D_0_3_2)\lib\Windows(x64);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)Intermediate\$(ProjectName)\Debug-x64\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\Debug-x64\Intermediate\</IntDir>
     <TargetName>$(ProjectName)(debug_64-bit)</TargetName>
