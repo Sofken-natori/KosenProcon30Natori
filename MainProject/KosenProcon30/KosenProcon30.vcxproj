@@ -201,6 +201,7 @@
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameJson.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="HTTPCommunication.cpp" />
     <ClCompile Include="Main.cpp" />

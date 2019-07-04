@@ -5,45 +5,6 @@ std::mutex Procon30::Game::HTTPWaitMtx;
 std::condition_variable Procon30::Game::HttpWaitCond;
 std::mutex Procon30::Game::ReceiveMtx;
 
-void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
-{
-	team.agentNum = object.arrayCount();
-	team.agents = Array< Agent >(team.agentNum);
-	{
-		int num = 0;
-		for (const auto& agent : object.arrayView()) {
-			team.agents[num].agentID = agent[U"agentID"].get<int32>();
-			team.agents[num].nowPosition.x = agent[U"x"].get<int32>();
-			team.agents[num].nowPosition.y = agent[U"y"].get<int32>();
-			num++;
-		}
-	}
-}
-
-void Procon30::Game::parseTeamsData(JSONValue object)
-{
-	{
-		const auto& team = *object.arrayView().begin();
-		this->teams.first.teamID = team[U"teamID"].get<int32>();
-		this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
-		this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
-		this->teams.first.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
-		parseAgentsData(this->teams.first,team[U"agents"]);
-	}
-	{
-		const auto& team = *(++object.arrayView().begin());
-		this->teams.second.teamID = team[U"teamID"].get<int32>();
-		this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
-		this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
-		this->teams.second.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
-		parseAgentsData(this->teams.second, team[U"agents"]);
-	}
-}
-
-void Procon30::Game::parseActionsData(JSONValue object)
-{
-}
-
 void Procon30::Game::HTTPReceived()
 {
 	std::lock_guard<std::mutex> lock(HTTPWaitMtx);
@@ -173,57 +134,12 @@ void Procon30::Game::dataUpdate()
 	dataReceived = false;
 }
 
-void Procon30::Game::parseJson(String fileName)
-{
-	s3d::JSONReader reader(fileName);
-
-	assert(reader);
-
-	{
-		field.boardSize.y = reader[U"height"].get<int32>();
-		field.boardSize.x = reader[U"width"].get<int32>();
-		{
-			int32 y = 0;
-			for (const auto& row : reader[U"points"].arrayView()) {
-				int32 x = 0;
-				for (const auto& point : row.arrayView()) {
-					field.m_board[y][x].score = point.get<int>();
-					x++;
-				}
-				y++;
-			}
-		}
-		this->startedAtUnixTime = reader[U"startedAtUnixTime"].get<int32>();
-
-		parseTeamsData(reader[U"teams"]);
-		parseActionsData(reader[U"actions"]);
-
-
-		this->turn = reader[U"turn"].get<int32>();
-		{
-			int32 y = 0;
-			for (const auto& row : reader[U"tiled"].arrayView()) {
-				int32 x = 0;
-				for (const auto& tile : row.arrayView()) {
-					field.m_board[y][x].color = (tile.get<int>() == this->teams.first.teamID) ? (TeamColor::Blue)
-						: tile.get<int>() == this->teams.second.teamID ? (TeamColor::Red)
-						: TeamColor::None;
-					x++;
-				}
-				y++;
-			}
-		}
-	}
-
-}
-
-void Procon30::Game::convertToJson(String fileName)
-{
-}
-
 Procon30::Game::Game()
 {
-
+	isSearchFinished = false;
+	Maxturn = 60;
+	turn = 0;
+	startedAtUnixTime = -1;
 }
 
 
