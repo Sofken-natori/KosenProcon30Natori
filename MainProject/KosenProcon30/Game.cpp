@@ -11,10 +11,11 @@ void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
 	team.agents = Array< Agent >(team.agentNum);
 	{
 		int num = 0;
-		for (const auto& agent : object.objectView()) {
-			team.agents[num].agentID = agent.value[U"AgentID"].get<int32>();
-			team.agents[num].nowPosition.x = agent.value[U"x"].get<int32>();
-			team.agents[num].nowPosition.y = agent.value[U"y"].get<int32>();
+		for (const auto& agent : object.arrayView()) {
+			team.agents[num].agentID = agent[U"agentID"].get<int32>();
+			team.agents[num].nowPosition.x = agent[U"x"].get<int32>();
+			team.agents[num].nowPosition.y = agent[U"y"].get<int32>();
+			num++;
 		}
 	}
 }
@@ -22,20 +23,20 @@ void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
 void Procon30::Game::parseTeamsData(JSONValue object)
 {
 	{
-		const auto& team = *object.objectView().begin();
-		this->teams.first.teamID = team.value[U"teamID"].get<int32>();
-		this->teams.first.tileScore = team.value[U"tilePoint"].get<int32>();
-		this->teams.first.areaScore = team.value[U"areaPoint"].get<int32>();
-		this->teams.first.score = team.value[U"tilePoint"].get<int32>() + team.value[U"areaPoint"].get<int32>();
-		parseAgentsData(this->teams.first,team.value[U"agents"]);
+		const auto& team = *object.arrayView().begin();
+		this->teams.first.teamID = team[U"teamID"].get<int32>();
+		this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
+		this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
+		this->teams.first.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+		parseAgentsData(this->teams.first,team[U"agents"]);
 	}
 	{
-		const auto& team = *(object.objectView().begin()++);
-		this->teams.second.teamID = team.value[U"teamID"].get<int32>();
-		this->teams.second.tileScore = team.value[U"tilePoint"].get<int32>();
-		this->teams.second.areaScore = team.value[U"areaPoint"].get<int32>();
-		this->teams.second.score = team.value[U"tilePoint"].get<int32>() + team.value[U"areaPoint"].get<int32>();
-		parseAgentsData(this->teams.second,team.value[U"agents"]);
+		const auto& team = *(++object.arrayView().begin());
+		this->teams.second.teamID = team[U"teamID"].get<int32>();
+		this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
+		this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
+		this->teams.second.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+		parseAgentsData(this->teams.second, team[U"agents"]);
 	}
 }
 
@@ -176,13 +177,14 @@ void Procon30::Game::parseJson(String fileName)
 {
 	s3d::JSONReader reader(fileName);
 
-	for (const auto& object : reader.objectView())
+	assert(reader);
+
 	{
-		field.boardSize.y = object.value[U"height"].get<int32>();
-		field.boardSize.x = object.value[U"width"].get<int32>();
+		field.boardSize.y = reader[U"height"].get<int32>();
+		field.boardSize.x = reader[U"width"].get<int32>();
 		{
 			int32 y = 0;
-			for (const auto& row : object.value[U"points"].arrayView()) {
+			for (const auto& row : reader[U"points"].arrayView()) {
 				int32 x = 0;
 				for (const auto& point : row.arrayView()) {
 					field.m_board[y][x].score = point.get<int>();
@@ -191,16 +193,16 @@ void Procon30::Game::parseJson(String fileName)
 				y++;
 			}
 		}
-		this->startedAtUnixTime = object.value[U"startedAtUnixTime"].get<int32>();
+		this->startedAtUnixTime = reader[U"startedAtUnixTime"].get<int32>();
 
-		parseTeamsData(object.value[U"teams"]);
-		parseActionsData(object.value[U"actions"]);
+		parseTeamsData(reader[U"teams"]);
+		parseActionsData(reader[U"actions"]);
 
 
-		this->turn = object.value[U"turn"].get<int32>();
+		this->turn = reader[U"turn"].get<int32>();
 		{
 			int32 y = 0;
-			for (const auto& row : object.value[U"tiled"].arrayView()) {
+			for (const auto& row : reader[U"tiled"].arrayView()) {
 				int32 x = 0;
 				for (const auto& tile : row.arrayView()) {
 					field.m_board[y][x].color = (tile.get<int>() == this->teams.first.teamID) ? (TeamColor::Blue)

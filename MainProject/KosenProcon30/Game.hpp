@@ -45,6 +45,7 @@ namespace Procon30 {
 		void dataUpdate();
 
 		//nasatame
+		//TODO : AgentIDなどを前もって聞いていないので適当実装、後で書き換える必要あり
 		void parseJson(String fileName);
 		void convertToJson(String fileName);
 
