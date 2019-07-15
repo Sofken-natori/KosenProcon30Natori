@@ -6,7 +6,7 @@
 void Main()
 {
 	Window::Resize(Procon30::WindowSize);
-	Graphics::SetBackground(ColorF(0.8, 0.9, 1.0));
+	Scene::SetBackground(ColorF(0.8, 0.9, 1.0));
 
 
 	//(Debug)

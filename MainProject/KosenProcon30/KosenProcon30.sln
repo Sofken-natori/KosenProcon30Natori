@@ -1,31 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.352
+VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KosenProcon30", "KosenProcon30.vcxproj", "{0AE17D5E-A473-404A-9D62-0E6932B802D4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KosenProcon30", "KosenProcon30.vcxproj", "{062E36A6-BF21-4586-942F-8A86A612522B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0AE17D5E-A473-404A-9D62-0E6932B802D4}.Debug|x64.ActiveCfg = Debug|x64
-		{0AE17D5E-A473-404A-9D62-0E6932B802D4}.Debug|x64.Build.0 = Debug|x64
-		{0AE17D5E-A473-404A-9D62-0E6932B802D4}.Debug|x86.ActiveCfg = Debug|Win32
-		{0AE17D5E-A473-404A-9D62-0E6932B802D4}.Debug|x86.Build.0 = Debug|Win32
-		{0AE17D5E-A473-404A-9D62-0E6932B802D4}.Release|x64.ActiveCfg = Release|x64
-		{0AE17D5E-A473-404A-9D62-0E6932B802D4}.Release|x64.Build.0 = Release|x64
-		{0AE17D5E-A473-404A-9D62-0E6932B802D4}.Release|x86.ActiveCfg = Release|Win32
-		{0AE17D5E-A473-404A-9D62-0E6932B802D4}.Release|x86.Build.0 = Release|Win32
+		{062E36A6-BF21-4586-942F-8A86A612522B}.Debug|x64.ActiveCfg = Debug|x64
+		{062E36A6-BF21-4586-942F-8A86A612522B}.Debug|x64.Build.0 = Debug|x64
+		{062E36A6-BF21-4586-942F-8A86A612522B}.Release|x64.ActiveCfg = Release|x64
+		{062E36A6-BF21-4586-942F-8A86A612522B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {CF3363E5-39E8-470B-9362-505EFAD60677}
+		SolutionGuid = {424B9C94-0BA3-416C-9521-A6420659D699}
 	EndGlobalSection
 EndGlobal

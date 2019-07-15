@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Resource Files\example">
-      <UniqueIdentifier>{8b04c3b0-3b5b-4f9a-add9-f54abc0118ed}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\engine">
       <UniqueIdentifier>{972ca6b5-b566-47a1-b6e5-5cd538d7268c}</UniqueIdentifier>
     </Filter>
@@ -66,49 +63,43 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Agent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Field.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameJson.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="GUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HTTPCommunication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Field.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Team.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Agent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Observer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameJson.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VirtualServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SendBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithm.cpp">
+    <ClCompile Include="Team.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VirtualServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="App\example\siv3d-kun.png">
-      <Filter>Resource Files\example</Filter>
-    </Image>
-    <Image Include="App\example\windmill.png">
-      <Filter>Resource Files\example</Filter>
     </Image>
     <Image Include="App\engine\texture\box-shadow\128.png">
       <Filter>Resource Files\engine\texture\box-shadow</Filter>
@@ -135,106 +126,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Media Include="App\example\shot.mp3">
-      <Filter>Resource Files\example</Filter>
-    </Media>
-    <Media Include="App\example\test.mp3">
-      <Filter>Resource Files\example</Filter>
-    </Media>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App\example\test.ini">
-      <Filter>Resource Files\example</Filter>
-    </None>
-    <None Include="App\example\test.json">
-      <Filter>Resource Files\example</Filter>
-    </None>
-    <None Include="App\example\test.toml">
-      <Filter>Resource Files\example</Filter>
-    </None>
-    <None Include="App\example\empty.bin">
-      <Filter>Resource Files\example</Filter>
-    </None>
     <None Include="App\engine\emoji\noto7_dictionary.dat">
       <Filter>Resource Files\engine\emoji</Filter>
-    </None>
-    <None Include="App\engine\font\mplus\mplus-1p-black.ttf.zst">
-      <Filter>Resource Files\engine\font\mplus</Filter>
-    </None>
-    <None Include="App\engine\font\mplus\mplus-1p-bold.ttf.zst">
-      <Filter>Resource Files\engine\font\mplus</Filter>
-    </None>
-    <None Include="App\engine\font\mplus\mplus-1p-heavy.ttf.zst">
-      <Filter>Resource Files\engine\font\mplus</Filter>
-    </None>
-    <None Include="App\engine\font\mplus\mplus-1p-light.ttf.zst">
-      <Filter>Resource Files\engine\font\mplus</Filter>
-    </None>
-    <None Include="App\engine\font\mplus\mplus-1p-medium.ttf.zst">
-      <Filter>Resource Files\engine\font\mplus</Filter>
-    </None>
-    <None Include="App\engine\font\mplus\mplus-1p-regular.ttf.zst">
-      <Filter>Resource Files\engine\font\mplus</Filter>
-    </None>
-    <None Include="App\engine\font\mplus\mplus-1p-thin.ttf.zst">
-      <Filter>Resource Files\engine\font\mplus</Filter>
-    </None>
-    <None Include="App\engine\font\mplus\LICENSE_E">
-      <Filter>Resource Files\engine\font\mplus</Filter>
-    </None>
-    <None Include="App\engine\font\noto\NotoColorEmoji.ttf.zst">
-      <Filter>Resource Files\engine\font\noto</Filter>
-    </None>
-    <None Include="App\engine\font\noto\NotoEmoji-Regular.ttf.zst">
-      <Filter>Resource Files\engine\font\noto</Filter>
-    </None>
-    <None Include="App\engine\shader\line_round_dot.ps">
-      <Filter>Resource Files\engine\shader</Filter>
-    </None>
-    <None Include="App\engine\shader\shape.ps">
-      <Filter>Resource Files\engine\shader</Filter>
-    </None>
-    <None Include="App\engine\shader\sprite.ps">
-      <Filter>Resource Files\engine\shader</Filter>
-    </None>
-    <None Include="App\engine\shader\sprite.vs">
-      <Filter>Resource Files\engine\shader</Filter>
-    </None>
-    <None Include="App\engine\shader\sprite_sdf.ps">
-      <Filter>Resource Files\engine\shader</Filter>
-    </None>
-    <None Include="App\engine\shader\line_dot.ps">
-      <Filter>Resource Files\engine\shader</Filter>
-    </None>
-    <None Include="App\example\a1a_testing">
-      <Filter>Resource Files\example</Filter>
-    </None>
-    <None Include="App\example\a1a_training">
-      <Filter>Resource Files\example</Filter>
-    </None>
-    <None Include="App\engine\font\fontawesome\brands.otf.zst">
-      <Filter>Resource Files\engine\font\fontawesome</Filter>
-    </None>
-    <None Include="App\engine\font\fontawesome\solid.otf.zst">
-      <Filter>Resource Files\engine\font\fontawesome</Filter>
-    </None>
-    <None Include="App\engine\objdetect\haarcascade\eye_eyeglasses.xml.zst">
-      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
-    </None>
-    <None Include="App\engine\objdetect\haarcascade\face_anime.xml.zst">
-      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
-    </None>
-    <None Include="App\engine\objdetect\haarcascade\frontal_catface.xml.zst">
-      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
-    </None>
-    <None Include="App\engine\objdetect\haarcascade\frontal_face_alt2.xml.zst">
-      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
-    </None>
-    <None Include="App\engine\objdetect\haarcascade\eye.xml.zst">
-      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
-    </None>
-    <None Include="App\engine\soundfont\GMGSx.sf2.zst">
-      <Filter>Resource Files\engine\soundfont</Filter>
     </None>
     <None Include="App\nlp\japanese\jumanpp\LICENSE">
       <Filter>Resource Files\nlp\japanese\jumanpp</Filter>
@@ -242,50 +135,122 @@
     <None Include="App\nlp\japanese\jumanpp\README.md">
       <Filter>Resource Files\nlp\japanese\jumanpp</Filter>
     </None>
-    <None Include="packages.config" />
+    <None Include="App\engine\font\fontawesome\fontawesome-brands.otf.zstdcmp">
+      <Filter>Resource Files\engine\font\fontawesome</Filter>
+    </None>
+    <None Include="App\engine\font\fontawesome\fontawesome-solid.otf.zstdcmp">
+      <Filter>Resource Files\engine\font\fontawesome</Filter>
+    </None>
+    <None Include="App\engine\font\mplus\mplus-1p-light.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\mplus</Filter>
+    </None>
+    <None Include="App\engine\font\mplus\mplus-1p-medium.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\mplus</Filter>
+    </None>
+    <None Include="App\engine\font\mplus\mplus-1p-regular.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\mplus</Filter>
+    </None>
+    <None Include="App\engine\font\mplus\mplus-1p-thin.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\mplus</Filter>
+    </None>
+    <None Include="App\engine\font\mplus\LICENSE_E">
+      <Filter>Resource Files\engine\font\mplus</Filter>
+    </None>
+    <None Include="App\engine\font\mplus\mplus-1p-black.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\mplus</Filter>
+    </None>
+    <None Include="App\engine\font\mplus\mplus-1p-bold.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\mplus</Filter>
+    </None>
+    <None Include="App\engine\font\mplus\mplus-1p-heavy.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\mplus</Filter>
+    </None>
+    <None Include="App\engine\font\noto\NotoColorEmoji.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\noto</Filter>
+    </None>
+    <None Include="App\engine\font\noto\NotoEmoji-Regular.ttf.zstdcmp">
+      <Filter>Resource Files\engine\font\noto</Filter>
+    </None>
+    <None Include="App\engine\objdetect\haarcascade\eye_eyeglasses.xml.zstdcmp">
+      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
+    </None>
+    <None Include="App\engine\objdetect\haarcascade\face_anime.xml.zstdcmp">
+      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
+    </None>
+    <None Include="App\engine\objdetect\haarcascade\frontal_catface.xml.zstdcmp">
+      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
+    </None>
+    <None Include="App\engine\objdetect\haarcascade\frontal_face_alt2.xml.zstdcmp">
+      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
+    </None>
+    <None Include="App\engine\objdetect\haarcascade\eye.xml.zstdcmp">
+      <Filter>Resource Files\engine\objdetect\haarcascade</Filter>
+    </None>
+    <None Include="App\engine\shader\shape.ps">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\square_dot.ps">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\texture.ps">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\fullscreen_triangle.vs">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\fullscreen_triangle_draw.vs">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\fullscreen_triangle_resolve.vs">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\sprite.vs">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\fullscreen_triangle_draw.ps">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\fullscreen_triangle_resolve.ps">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\round_dot.ps">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\shader\sdf.ps">
+      <Filter>Resource Files\engine\shader</Filter>
+    </None>
+    <None Include="App\engine\soundfont\GMGSx.sf2.zstdcmp">
+      <Filter>Resource Files\engine\soundfont</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="App\example\test.txt">
-      <Filter>Resource Files\example</Filter>
-    </Text>
-    <Text Include="App\example\LICENSE.txt">
-      <Filter>Resource Files\example</Filter>
-    </Text>
-    <Text Include="App\example\script.txt">
-      <Filter>Resource Files\example</Filter>
+    <Text Include="App\engine\font\fontawesome\LICENSE.txt">
+      <Filter>Resource Files\engine\font\fontawesome</Filter>
     </Text>
     <Text Include="App\engine\font\noto\LICENSE_OFL.txt">
       <Filter>Resource Files\engine\font\noto</Filter>
     </Text>
-    <Text Include="App\engine\font\fontawesome\LICENSE.txt">
-      <Filter>Resource Files\engine\font\fontawesome</Filter>
-    </Text>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="App\example\test.xml">
-      <Filter>Resource Files\example</Filter>
-    </Xml>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="GUI.hpp">
+    <ClInclude Include="Agent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Team.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HTTPCommunication.hpp">
+    <ClInclude Include="Algorithm.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Field.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Agent.hpp">
+    <ClInclude Include="Game.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tile.hpp">
+    <ClInclude Include="GUI.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTPCommunication.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InformatonID.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KosenProcon30.hpp">
@@ -294,16 +259,16 @@
     <ClInclude Include="Observer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithm.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VirtualServer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SendBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InformatonID.hpp">
+    <ClInclude Include="Team.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tile.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VirtualServer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

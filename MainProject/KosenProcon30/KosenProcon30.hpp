@@ -6,6 +6,8 @@
 #include <array>
 #include <utility>
 #include <deque>
+#include <mutex>
+#include <condition_variable>
 
 namespace Procon30 {
 
