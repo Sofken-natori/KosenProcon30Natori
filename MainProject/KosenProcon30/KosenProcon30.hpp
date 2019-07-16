@@ -1,13 +1,9 @@
 #pragma once
 
 #include <Siv3D.hpp>
-#include <memory>
-#include <thread>
-#include <array>
-#include <utility>
-#include <deque>
 #include <mutex>
 #include <condition_variable>
+#include <curl/curl.h>
 
 namespace Procon30 {
 

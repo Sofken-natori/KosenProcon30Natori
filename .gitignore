@@ -1,8 +1,14 @@
 /.vs/
 /.git/
 /MainProject/KosenProcon30/.vs/
-/MainProject/KosenProcon30/Intermediate/
 /MainProject/KosenProcon30/App/AS_DEBUG/
 /MainProject/KosenProcon30/App/example/
 *.exe
 *_log.html
+
+#dll‚ð‚«‚¿‚ñ‚Æˆê’v‚³‚¹‚é‚½‚ß
+/MainProject/KosenProcon30/Intermediate/KosenProcon30/Debug/*
+/MainProject/KosenProcon30/Intermediate/KosenProcon30/Release/*
+!libcurl.dll
+!libcurl-d.dll
+
