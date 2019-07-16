@@ -30,7 +30,7 @@ void Main()
 			return;
 		}
 
-		curl_easy_setopt(curl, CURLOPT_URL, "https://www.google.co.jp/");
+		curl_easy_setopt(curl, CURLOPT_URL, "https://kosyukai2019.azurewebsites.net/kosyukai2019.html");
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, callbackWrite);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &chunk);
 		ret = curl_easy_perform(curl);
@@ -42,7 +42,7 @@ void Main()
 			return;
 		}
 
-		//debugでの表示激重なので注意
+		//debugでの表示まあ軽い
 		Print << Unicode::Widen(chunk);
 	}
 
