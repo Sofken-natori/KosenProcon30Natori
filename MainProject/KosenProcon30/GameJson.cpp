@@ -19,6 +19,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 {
 	{
 		const auto& team = *object.arrayView().begin();
+		//TODO: チームIDと比較して保存する方を変更するように変更。
 		this->teams.first.teamID = team[U"teamID"].get<int32>();
 		this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
 		this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
@@ -28,6 +29,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 	{
 		const auto& team = *(++object.arrayView().begin());
 		this->teams.second.teamID = team[U"teamID"].get<int32>();
+		//TODO: チームIDと比較して保存する方を変更するように変更。
 		this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
 		this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
 		this->teams.second.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
@@ -40,6 +42,7 @@ void Procon30::Game::parseActionsData(JSONValue object)
 	{
 		for (int32 i = 0; i < object.arrayCount(); i++)
 		{
+			//TODO: agentIDに合わせた保存先を選択するように変更この時ターンも確認すること。
 			const JSONValue& action = object.arrayView()[i];
 			const auto agentID = action[U"agentID"].get<int32>();
 			const auto type = action[U"type"].getString();
@@ -48,6 +51,8 @@ void Procon30::Game::parseActionsData(JSONValue object)
 
 			bool changed = false;
 			{
+				//TODO:このタイミングで整合性チェック
+
 				auto& team = this->teams.first;
 				for (auto& agent : team.agents) {
 					if (type == U"move" && agent.agentID == agentID) {
@@ -82,6 +87,9 @@ void Procon30::Game::parseJson(String fileName)
 	assert(reader);
 
 	{
+		this->turn = reader[U"turn"].get<int32>();
+
+		//TODO:このタイミングで整合性チェック
 		field.boardSize.y = reader[U"height"].get<int32>();
 		field.boardSize.x = reader[U"width"].get<int32>();
 		{
@@ -95,13 +103,10 @@ void Procon30::Game::parseJson(String fileName)
 
 		parseTeamsData(reader[U"teams"]);
 		parseActionsData(reader[U"actions"]);
-
-
-		this->turn = reader[U"turn"].get<int32>();
 		{
 			for (int32 y = 0; y < reader[U"tiled"].arrayCount(); y++) {
 				for (int32 x = 0; x < reader[U"tiled"].arrayView()[y].arrayCount(); x++) {
-					int32 tileColor = reader[U"tiled"].arrayView()[y].arrayView()[x].get<int32>();
+					const int32 tileColor = reader[U"tiled"].arrayView()[y].arrayView()[x].get<int32>();
 					field.m_board.at(y, x).color = (tileColor == this->teams.first.teamID) ? (TeamColor::Blue)
 						: tileColor == this->teams.second.teamID ? (TeamColor::Red)
 						: TeamColor::None;
@@ -133,7 +138,6 @@ String encodeString(const Procon30::Team& team)
 }
 	*/
 
-	//これが絶望だ⤴
 	String result;
 
 	result += U"{\n";
