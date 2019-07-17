@@ -121,7 +121,7 @@ int32 Procon30::Game::calculateTileScore(TeamColor color)
 	return result;
 }
 
-void Procon30::Game::dataUpdate()
+void Procon30::Game::updateData()
 {
 	//Wait•”
 	std::unique_lock<std::mutex> lockWait(HTTPWaitMtx);

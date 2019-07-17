@@ -5,7 +5,9 @@
 namespace Procon30 {
 
 	enum class Code {
-		None
+		None,
+		TimeOver,
+		UnknownError
 	};
 
 	struct Order {

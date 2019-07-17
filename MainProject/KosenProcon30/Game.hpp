@@ -13,7 +13,7 @@ namespace Procon30 {
 	{
 	private:
 		static std::mutex HTTPWaitMtx;
-		static std::condition_variable HttpWaitCond;
+		static std::condition_variable HTTPWaitCond;
 		static bool dataReceived;
 		static std::mutex ReceiveMtx;
 
@@ -38,12 +38,12 @@ namespace Procon30 {
 		int32 calculateTileScore(TeamColor color);
 
 		int32 turn;
-		int32 Maxturn;
+		int32 MaxTurn;
 
 		int32 startedAtUnixTime;
 
 		//YASAI
-		void dataUpdate();
+		void updateData();
 		void sendToHTTP(FilePath path);
 
 		//nasatame
