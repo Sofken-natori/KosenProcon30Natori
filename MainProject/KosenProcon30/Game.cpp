@@ -2,7 +2,7 @@
 
 bool Procon30::Game::dataReceived = false;
 std::mutex Procon30::Game::HTTPWaitMtx;
-std::condition_variable Procon30::Game::HttpWaitCond;
+std::condition_variable Procon30::Game::HTTPWaitCond;
 std::mutex Procon30::Game::ReceiveMtx;
 
 void Procon30::Game::HTTPReceived()
@@ -11,7 +11,7 @@ void Procon30::Game::HTTPReceived()
 		std::lock_guard<std::mutex> lock(HTTPWaitMtx);
 		dataReceived = true;
 	}
-	HttpWaitCond.notify_all();
+	HTTPWaitCond.notify_all();
 }
 
 int32 Procon30::Game::calculateScore(TeamColor color)
@@ -126,7 +126,7 @@ void Procon30::Game::updateData()
 	//Wait•”
 	std::unique_lock<std::mutex> lockWait(HTTPWaitMtx);
 	if (!dataReceived) {
-		HttpWaitCond.wait(lockWait);
+		HTTPWaitCond.wait(lockWait);
 	}
 
 	//ˆ—•”
@@ -144,7 +144,7 @@ void Procon30::Game::sendToHTTP(FilePath path)
 Procon30::Game::Game()
 {
 	isSearchFinished = false;
-	Maxturn = 60;
+	MaxTurn = 60;
 	turn = 0;
 	startedAtUnixTime = -1;
 }
@@ -158,7 +158,7 @@ Procon30::Game& Procon30::Game::operator=(const Procon30::Game& right)
 	this->field = right.field;
 	this->gameTimer = right.gameTimer;
 	this->turn = right.turn;
-	this->Maxturn = right.Maxturn;
+	this->MaxTurn = right.MaxTurn;
 	this->turnTimer = right.turnTimer;
 	this->isSearchFinished = right.isSearchFinished;
 
