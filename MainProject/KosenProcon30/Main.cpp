@@ -2,6 +2,7 @@
 # include "KosenProcon30.hpp"
 # include "GUI.hpp"
 # include "Game.hpp"
+# include "VirtualServer.hpp"
 
 //TestCode
 size_t callbackWrite(char* ptr, size_t size, size_t nmemb, std::string* stream) {

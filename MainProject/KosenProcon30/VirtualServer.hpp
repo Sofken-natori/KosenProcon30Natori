@@ -3,10 +3,10 @@
 #include "Field.hpp"
 #include "Team.hpp"
 #include "Agent.hpp"
+
 namespace Procon30 {
 	class VirtualServer
 	{
-	
 		Array<Array<int32>> points;
 		Array<Array<int32>> tiles;
 		Array<Array<int32>> agents1;
@@ -16,8 +16,8 @@ namespace Procon30 {
 		int32 height = 20;
 	public:
 		VirtualServer();
-		void put_point();
-		void put_agent();
-		String write_json();
+		void putPoint();
+		void putAgent();
+		void writeJson(FilePath path);
 	};
 }

@@ -3,16 +3,16 @@
 
 Procon30::VirtualServer::VirtualServer()
 {
-	put_point();
-	put_agent();
+	putPoint();
+	putAgent();
 }
 
-String Procon30::VirtualServer::write_json()
+void Procon30::VirtualServer::writeJson(FilePath path)
 {
 	String s;
 	s += U"{\n";
 	s += U"\t\"width\": " + Format(width) + U",\n";
-	s += U"\t\"width\": " + Format(height) + U",\n";
+	s += U"\t\"height\": " + Format(height) + U",\n";
 	//points
 	s += U"\t\"points\": [\n";
 	for (int i = 0; i < height; i++) {
@@ -56,6 +56,7 @@ String Procon30::VirtualServer::write_json()
 			s += U"\n\t\t],\n";
 		}
 	}
+	s += U"\t],\n";
 	//teams
 	s += U"\t\"teams\": [\n";
 	s += U"\t\t{\n";
@@ -63,8 +64,8 @@ String Procon30::VirtualServer::write_json()
 	s += U"\t\t\t\"agents\": [\n";
 	for (int i = 0; i < agent_count;i++) {
 		s += U"\t\t\t\t{\n";
-		s += U"\t\t\t\t\t\"agentID\": " + Format(agents1[i][3]) + U"\n";
-		s += U"\t\t\t\t\t\"x\": " + Format(agents1[i][1]) + U"\n";
+		s += U"\t\t\t\t\t\"agentID\": " + Format(agents1[i][3]) + U",\n";
+		s += U"\t\t\t\t\t\"x\": " + Format(agents1[i][1]) + U",\n";
 		s += U"\t\t\t\t\t\"y\": " + Format(agents1[i][2]) + U"\n";
 		if (i == agent_count - 1) {
 			s += U"\t\t\t\t}\n";
@@ -87,8 +88,8 @@ String Procon30::VirtualServer::write_json()
 	s += U"\t\t\t\"agents\": [\n";
 	for (int i = 0; i < agent_count; i++) {
 		s += U"\t\t\t\t{\n";
-		s += U"\t\t\t\t\t\"agentID\": " + Format(agents2[i][3]) + U"\n";
-		s += U"\t\t\t\t\t\"x\": " + Format(agents2[i][1]) + U"\n";
+		s += U"\t\t\t\t\t\"agentID\": " + Format(agents2[i][3]) + U",\n";
+		s += U"\t\t\t\t\t\"x\": " + Format(agents2[i][1]) + U",\n";
 		s += U"\t\t\t\t\t\"y\": " + Format(agents2[i][2]) + U"\n";
 		if (i == agent_count - 1) {
 			s += U"\t\t\t\t}\n";
@@ -105,10 +106,12 @@ String Procon30::VirtualServer::write_json()
 	s += U"\t\"actions\": []\n";
 	s += U"}\n";
 
-	return s;
+	TextWriter tw(path);
+	tw << s;
+	tw.close();
 }
 
-void Procon30::VirtualServer::put_point()
+void Procon30::VirtualServer::putPoint()
 {
 	points.resize(height);
 	for (int i = 0; i < height; i++) {
@@ -129,7 +132,7 @@ void Procon30::VirtualServer::put_point()
 	return;
 }
 
-void Procon30::VirtualServer::put_agent()
+void Procon30::VirtualServer::putAgent()
 {
 	agents1.resize(agent_count);
 	agents2.resize(agent_count);
