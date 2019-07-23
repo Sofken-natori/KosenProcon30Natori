@@ -15,15 +15,26 @@ namespace Procon30 {
 	private:
 		//DONT DELETE
 		std::shared_ptr<SendBuffer> buffer;
-
+		//あれ
+		String token;
+		String host;
 	public:
-		
-
 		InformationID MyTeamInformationID;
 		Array<InformationID> EnemyTeamInformationIDs;
 		
-		
 		std::shared_ptr<Observer> observer;
+
+		// gameIDの変換テーブル
+
+		// ping - failedしたらプログラムを落とす。
+		void pingServerConnectionTest();
+
+
+		// host/matchesをgetしてjsonを受け取ります。
+		FilePath getAllMatchesInfomation();
+
+		// 
+		void initilizeFormLoop();
 		
 		//receive
 		
@@ -38,9 +49,6 @@ namespace Procon30 {
 
 		HTTPCommunication();
 		~HTTPCommunication();
-
-		//UNDONE: When member variable changed, You must check this function. 
-		HTTPCommunication& operator=(const Procon30::HTTPCommunication& right);
 
 
 	};

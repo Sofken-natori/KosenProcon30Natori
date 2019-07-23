@@ -31,13 +31,6 @@ Procon30::HTTPCommunication::~HTTPCommunication()
 {
 }
 
-Procon30::HTTPCommunication& Procon30::HTTPCommunication::operator=(const Procon30::HTTPCommunication& right)
-{
-	this->MyTeamInformationID = right.MyTeamInformationID;
-	this->EnemyTeamInformationIDs = right.EnemyTeamInformationIDs;
-	return (*this);
-}
-
 Procon30::InformationID::InformationID()
 {
 }
