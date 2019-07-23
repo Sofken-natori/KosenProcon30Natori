@@ -16,7 +16,6 @@ void Main()
 	Window::Resize(Procon30::WindowSize);
 	Scene::SetBackground(ColorF(0.8, 0.9, 1.0));
 
-
 	//TestCode
 	{
 		CURL* curl;
