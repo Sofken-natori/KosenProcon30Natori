@@ -181,6 +181,7 @@
     <ClInclude Include="GUI.hpp" />
     <ClInclude Include="HTTPCommunication.hpp" />
     <ClInclude Include="InformatonID.hpp" />
+    <ClInclude Include="JsonUtility.hpp" />
     <ClInclude Include="KosenProcon30.hpp" />
     <ClInclude Include="Observer.hpp" />
     <ClInclude Include="SendBuffer.hpp" />
