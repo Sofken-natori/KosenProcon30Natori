@@ -1,6 +1,10 @@
 #include "HTTPCommunication.hpp"
 #include "Observer.hpp"
 #include "Game.hpp"
+
+std::mutex Procon30::HTTPCommunication::receiveRawMtx;
+String Procon30::HTTPCommunication::receiveRawData;
+
 Procon30::CommunicationState Procon30::HTTPCommunication::getState() const
 {
 	if (!this->future.valid())
@@ -10,7 +14,6 @@ Procon30::CommunicationState Procon30::HTTPCommunication::getState() const
 	return CommunicationState::Connecting;
 }
 
-//Needs:getState() == Done
 Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 {
 	assert(this->future.valid());
@@ -79,34 +82,27 @@ inline String Procon30::HTTPCommunication::getPostData(const FilePath& filePath)
 	return send;
 }
 
-void Procon30::HTTPCommunication::pingServerConnectionTest()
+bool Procon30::HTTPCommunication::checkResult()
 {
-	nowConnecting = true;
-	future = std::async(std::launch::async, [&]() {
-		return curl_easy_perform(pingHandle);
-	});
-}
-
-void Procon30::HTTPCommunication::update()
-{
-	ConnectionStatusCode CSC;
 	if (nowConnecting) {
 		switch (getState())
 		{
 		case CommunicationState::Done:
-			switch (CSC)
+			switch (getResult())
 			{
 			case Procon30::ConnectionStatusCode::OK:
 				switch (connectionType)
 				{
 				case Procon30::ConnectionType::Ping:
-					Logger << U"PingTest:OK";
+					Print << U"PingTest:OK";
 					break;
 				case Procon30::ConnectionType::AllMatchesInfo:
 
-					Procon30::Game::HTTPReceived();
+
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
+
+					gotMatchInfomationNum++;
 					break;
 				case Procon30::ConnectionType::PostAction:
 					break;
@@ -129,6 +125,7 @@ void Procon30::HTTPCommunication::update()
 			}
 
 			nowConnecting = false;
+			return true;
 			break;
 		case CommunicationState::Null:
 
@@ -138,6 +135,66 @@ void Procon30::HTTPCommunication::update()
 			break;
 		}
 	}
+	return false;
+}
+
+void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
+{
+	for (size_t i : step(arr.size())) {
+		matchesConversionTable[i] = arr[i];
+	}
+}
+
+void Procon30::HTTPCommunication::initilizeAllMatchHandles()
+{
+}
+
+void Procon30::HTTPCommunication::update()
+{
+	//“Ç‚ÝŽÌ‚Ä‚Ä‚¢‚¢‚ÌH
+	checkResult();
+	if (gotMatchInfomationNum == matchNum) {
+		Procon30::Game::HTTPReceived();
+		gotMatchInfomationNum = 0;
+	}
+	if (gotMatchInfomationNum != 0) {
+		getMatchInfomation();
+	}
+}
+
+bool Procon30::HTTPCommunication::pingServerConnectionTest()
+{
+	if (nowConnecting) return false;
+	nowConnecting = true;
+	connectionType = ConnectionType::Ping;
+	future = std::async(std::launch::async, [&]() {
+		return curl_easy_perform(pingHandle);
+		});
+	return true;
+}
+
+bool Procon30::HTTPCommunication::getAllMatchesInfomation()
+{
+	if (nowConnecting) return false;
+	nowConnecting = true;
+	connectionType = ConnectionType::AllMatchesInfo;
+	future = std::async(std::launch::async, [&]() {
+		return curl_easy_perform(matchesInfoHandle);
+		});
+	return true;
+}
+
+bool Procon30::HTTPCommunication::getMatchInfomation()
+{
+	if (nowConnecting) return false;
+	if (gotMatchInfomationNum >= matchNum) return false;
+	nowConnecting = true;
+	connectionType = ConnectionType::MatchInfomation;
+	connectionMatchNumber = gotMatchInfomationNum;
+	future = std::async(std::launch::async, [&]() {
+		return curl_easy_perform(getMatchHandles[connectionMatchNumber]);
+		});
+	return true;
 }
 
 void Procon30::HTTPCommunication::jsonDistribute()
@@ -149,7 +206,7 @@ void Procon30::HTTPCommunication::getServer()
 {
 
 
-	
+
 }
 
 void Procon30::HTTPCommunication::postServer()
@@ -187,6 +244,12 @@ Procon30::HTTPCommunication::HTTPCommunication()
 
 Procon30::HTTPCommunication::~HTTPCommunication()
 {
+}
+
+Procon30::HTTPCommunication& Procon30::HTTPCommunication::operator=(const Procon30::HTTPCommunication& right)
+{
+	
+	return (*this);
 }
 
 //Procon30::InformationID::InformationID()

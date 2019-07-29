@@ -39,7 +39,7 @@ namespace Procon30 {
 		size_t matchNum;
 
 		// gameIDの変換テーブル
-		std::unordered_map<int, int> matchesConversionTable;
+		std::unordered_map<int32, int32> matchesConversionTable;
 
 		//ハンドル
 		CURL* pingHandle;
@@ -52,10 +52,10 @@ namespace Procon30 {
 		curl_slist* otherList = NULL;
 
 		//receiveRawDataのmutex
-		std::mutex receiveRawMtx;
+		static std::mutex receiveRawMtx;
 
 		//内容がWriteされる変数
-		String receiveRawData;
+		static String receiveRawData;
 
 		//受け取ったJsonのパス
 		FilePath receiveJsonPath;
@@ -70,6 +70,9 @@ namespace Procon30 {
 		//通信中の試合番号(0-indexed)
 		int32 connectionMatchNumber;
 
+		//試合情報を取得した数
+		int32 gotMatchInfomationNum;
+
 		//通信を行った種別
 		ConnectionType connectionType;
 
@@ -80,34 +83,40 @@ namespace Procon30 {
 		ConnectionStatusCode getResult();
 
 		//callback関数
-		size_t callbackWrite(char* ptr, size_t size, size_t nmemb, String* stream);
+		static size_t callbackWrite(char* ptr, size_t size, size_t nmemb, String* stream);
 
 		//filepathから行動情報をコピーします。
 		String getPostData(const FilePath& filePath);
 
+		//asyncで投げた状態をチェックしてResultをとってきます。
+		//true : Done
+		//false: other
+		//未完成
+		bool checkResult();
 	public:
 		//結構頻繁に書き換わるけどnotifyガンガンやっていいの...?
 		std::shared_ptr<Observer> observer;
 
 		//変換テーブルの設定
-		//未定義
-		void setConversionTable(/* 任意の型 */);
+		void setConversionTable(const Array<int>& arr);
 
 		//MatchHandleの初期化をします。
 		//Need:MatchesConversionTable.size() > 0
 		//未定義
 		void initilizeAllMatchHandles();
 
-		// ping - failedしたらプログラムを落とす。
-		void pingServerConnectionTest();
-
 		//Mainからthreadに投げるときはこれ...?
 		//随時更新
 		void update();
 
+		// ping - failedしたらプログラムを落とす。
+		bool pingServerConnectionTest();
+
 		// host/matchesをgetします。
-		//未定義
-		void getAllMatchesInfomation();
+		bool getAllMatchesInfomation();
+
+		// host/matches/Nをgetします
+		bool getMatchInfomation();
 
 		//FormのLoop
 		void initilizeFormLoop();
@@ -126,7 +135,9 @@ namespace Procon30 {
 		HTTPCommunication();
 		~HTTPCommunication();
 
-
+		//TODO: operator=の中身を実装する
+		//DONT USE:This function is not implement
+		HTTPCommunication& operator=(const Procon30::HTTPCommunication& right);
 	};
 
 }
