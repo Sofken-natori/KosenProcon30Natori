@@ -232,25 +232,6 @@ bool Procon30::HTTPCommunication::checkPostAction()
 	return true;
 }
 
-void Procon30::HTTPCommunication::jsonDistribute()
-{
-
-}
-
-void Procon30::HTTPCommunication::getServer()
-{
-
-
-
-}
-
-void Procon30::HTTPCommunication::postServer()
-{
-	FilePath path = buffer->getPath();
-
-
-}
-
 Procon30::HTTPCommunication::HTTPCommunication()
 	:buffer(new SendBuffer())
 {
@@ -286,9 +267,3 @@ Procon30::HTTPCommunication& Procon30::HTTPCommunication::operator=(const Procon
 
 	return (*this);
 }
-
-//Procon30::InformationID::InformationID()
-//{
-//}
-
-//inline Procon30::InformationID::InformationID(int32 teamid, Array<int32> agentids) : teamID(teamid), AgentIDs(agentids) {};

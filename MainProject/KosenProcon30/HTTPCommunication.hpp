@@ -102,7 +102,6 @@ namespace Procon30 {
 
 		//MatchHandle‚Ì‰Šú‰»‚ð‚µ‚Ü‚·B
 		//Need:MatchesConversionTable.size() > 0
-		//–¢’è‹`
 		void initilizeAllMatchHandles();
 
 		//Main‚©‚çthread‚É“Š‚°‚é‚Æ‚«‚Í‚±‚ê...?
@@ -123,15 +122,6 @@ namespace Procon30 {
 
 		// host/matches/N/action‚Épost‚µ‚Ü‚·
 		bool checkPostAction();
-
-		//DONT USE:This function is not implement
-		void jsonDistribute();
-
-		//DONT USE:This function is not implement
-		void getServer();
-
-		//DONT USE:This function is not implement
-		void postServer();
 
 		HTTPCommunication();
 		~HTTPCommunication();
