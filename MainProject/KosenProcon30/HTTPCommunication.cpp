@@ -18,7 +18,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 		CURLcode result = this->future.get();
 		uint32 code;
 		if (result != CURLE_OK) {
-			Logger << "curl_easy_perform() failed.\nUnixTime(Milli):"
+			Logger << U"curl_easy_perform() failed.\nUnixTime(Milli):"
 				<< Time::GetMillisecSinceEpoch();
 			return ConnectionStatusCode::ConnectionLost;
 		}
