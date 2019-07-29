@@ -121,7 +121,8 @@ namespace Procon30 {
 		//Form‚ÌLoop
 		void initilizeFormLoop();
 
-		//receive
+		// host/matches/N/action‚Épost‚µ‚Ü‚·
+		bool checkPostAction();
 
 		//DONT USE:This function is not implement
 		void jsonDistribute();

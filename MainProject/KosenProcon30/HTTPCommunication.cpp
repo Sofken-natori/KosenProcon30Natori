@@ -140,13 +140,29 @@ bool Procon30::HTTPCommunication::checkResult()
 
 void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
 {
-	for (size_t i : step(arr.size())) {
+	for (int32 i = 0; i < matchNum; i++) {
 		matchesConversionTable[i] = arr[i];
 	}
 }
 
 void Procon30::HTTPCommunication::initilizeAllMatchHandles()
 {
+	for (int32 i = 0; i < matchNum; i++) {
+		getMatchHandles[i] = curl_easy_init();
+		curl_easy_setopt(getMatchHandles[i], CURLOPT_URL, (U"http://" + host + U"/matches/"+Format(matchesConversionTable[i])).narrow().c_str());
+		curl_easy_setopt(getMatchHandles[i], CURLOPT_HTTPHEADER, otherList);
+		curl_easy_setopt(getMatchHandles[i], CURLOPT_HEADER, 1L);
+		curl_easy_setopt(getMatchHandles[i], CURLOPT_WRITEFUNCTION, callbackWrite);
+		curl_easy_setopt(getMatchHandles[i], CURLOPT_WRITEDATA, &receiveRawData);
+
+		postActionHandles[i] = curl_easy_init();
+		curl_easy_setopt(postActionHandles[i], CURLOPT_URL, (U"http://" + host + U"/matches/" + Format(matchesConversionTable[i])+U"/action").narrow().c_str());
+		curl_easy_setopt(postActionHandles[i], CURLOPT_HTTPHEADER, postList);
+		curl_easy_setopt(postActionHandles[i], CURLOPT_HEADER, 1L);
+		curl_easy_setopt(postActionHandles[i], CURLOPT_POST, 1L);
+		curl_easy_setopt(postActionHandles[i], CURLOPT_WRITEFUNCTION, callbackWrite);
+		curl_easy_setopt(postActionHandles[i], CURLOPT_WRITEDATA, &receiveRawData);
+	}
 }
 
 void Procon30::HTTPCommunication::update()
@@ -193,6 +209,25 @@ bool Procon30::HTTPCommunication::getMatchInfomation()
 	connectionMatchNumber = gotMatchInfomationNum;
 	future = std::async(std::launch::async, [&]() {
 		return curl_easy_perform(getMatchHandles[connectionMatchNumber]);
+		});
+	return true;
+}
+
+bool Procon30::HTTPCommunication::checkPostAction()
+{
+	if (nowConnecting) return false;
+	if (buffer->size() == 0) return false;
+	nowConnecting = true;
+	connectionType = ConnectionType::PostAction;
+	FilePath path = buffer->getPath();
+	//post_(game[0,1,2])_(turn).json‚ð‘z’è
+	auto splittedPath = path.split('_');
+	int32 gameNum = Parse<int32>(splittedPath[1]);
+	String send = getPostData(path);
+	curl_easy_setopt(postActionHandles[gameNum], CURLOPT_POSTFIELDSIZE, (long)send.size());
+	curl_easy_setopt(postActionHandles[gameNum], CURLOPT_POSTFIELDS, send.c_str());
+	future = std::async(std::launch::async, [&]() {
+		return curl_easy_perform(postActionHandles[gameNum]);
 		});
 	return true;
 }
@@ -248,7 +283,7 @@ Procon30::HTTPCommunication::~HTTPCommunication()
 
 Procon30::HTTPCommunication& Procon30::HTTPCommunication::operator=(const Procon30::HTTPCommunication& right)
 {
-	
+
 	return (*this);
 }
 
