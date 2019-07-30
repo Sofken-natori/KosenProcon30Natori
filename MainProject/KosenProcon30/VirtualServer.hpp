@@ -7,10 +7,14 @@
 namespace Procon30 {
 	class VirtualServer
 	{
-		Array<Array<int32>> points;
+		Field field;
+		Grid<int32> tile{ MaxFieldX,MaxFieldY };
+		std::pair<Team,Team> teams;
+
+		/*Array<Array<int32>> points;
 		Array<Array<int32>> tiles;
 		Array<Array<int32>> agents1;
-		Array<Array<int32>> agents2;
+		Array<Array<int32>> agents2;*/
 		int32 agent_count = 8;
 		int32 width = 20;
 		int32 height = 20;
@@ -19,5 +23,6 @@ namespace Procon30 {
 		void putPoint();
 		void putAgent();
 		void writeJson(FilePath path);
+		int32 calculateScore(TeamColor color);
 	};
 }
