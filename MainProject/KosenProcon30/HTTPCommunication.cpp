@@ -29,7 +29,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 			std::lock_guard<std::mutex> lock(receiveRawMtx);
 			size_t ofset = Min(receiveRawData.indexOf('['), receiveRawData.indexOf('{'));
 			code = Parse<uint32>(receiveRawData.substr(9, 3));
-			TextWriter writer(receiveJsonPath);
+			TextWriter writer(jsonBuffer);
 			writer << receiveRawData.substr(ofset);
 			writer.close();
 		}
@@ -38,7 +38,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 			if (code == 401) {
 				return ConnectionStatusCode::InvaildToken;
 			}
-			JSONReader reader(receiveJsonPath);
+			JSONReader reader(jsonBuffer);
 			String status = reader[U"status"].get<String>();
 			uint64 startAtUnixTime = reader[U"startAtUnixTime"].get<uint64>();
 			Logger << U"status:" << status << U"\nstartAtUnixTime" << startAtUnixTime;
@@ -71,7 +71,7 @@ size_t Procon30::HTTPCommunication::callbackWrite(char* ptr, size_t size, size_t
 	return dataLength;
 }
 
-inline String Procon30::HTTPCommunication::getPostData(const FilePath& filePath) {
+String Procon30::HTTPCommunication::getPostData(const FilePath& filePath) {
 	TextReader reader(filePath);
 	if (!reader) {
 		assert("send_json_file_openError");
@@ -84,27 +84,58 @@ inline String Procon30::HTTPCommunication::getPostData(const FilePath& filePath)
 
 bool Procon30::HTTPCommunication::checkResult()
 {
+	TextReader reader;
+	TextWriter writer;
+	JSONReader jsonReader;
 	if (nowConnecting) {
 		switch (getState())
 		{
 		case CommunicationState::Done:
+			nowConnecting = false;
 			switch (getResult())
 			{
 			case Procon30::ConnectionStatusCode::OK:
 				switch (connectionType)
 				{
 				case Procon30::ConnectionType::Ping:
+					receiveJsonPath = U"json/ping.json";
+					reader.open(jsonBuffer);
+					writer.open(receiveJsonPath);
+					writer << reader.readAll();
+					reader.close();
+					writer.close();
 					Print << U"PingTest:OK";
 					break;
 				case Procon30::ConnectionType::AllMatchesInfo:
-
-
+					receiveJsonPath = U"json/AllMatchesInfo.json";
+					reader.open(jsonBuffer);
+					writer.open(receiveJsonPath);
+					writer << reader.readAll();
+					reader.close();
+					writer.close();
+					Print << U"gotAllInfo";
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
-
+					jsonReader.open(jsonBuffer);
+					receiveJsonPath = U"json/"+Format(gotMatchInfomationNum)+U"/field_"+ Format(gotMatchInfomationNum)+U"_"+Format(jsonReader[U"turn"].get<int32>()) +U".json";
+					jsonReader.close();
+					reader.open(jsonBuffer);
+					writer.open(receiveJsonPath);
+					writer << reader.readAll();
+					reader.close();
+					writer.close();
+					Print << U"gotMatchInfoof:" << gotMatchInfomationNum;
 					gotMatchInfomationNum++;
 					break;
 				case Procon30::ConnectionType::PostAction:
+					jsonReader.open(jsonBuffer);
+					receiveJsonPath = U"json/" + Format(gotMatchInfomationNum) + U"/postReceive_" + Format(gotMatchInfomationNum) + U"_" + Format(jsonReader[U"turn"].get<int32>()) + U".json";
+					jsonReader.close();
+					reader.open(jsonBuffer);
+					writer.open(receiveJsonPath);
+					writer << reader.readAll();
+					reader.close();
+					writer.close();
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
@@ -124,7 +155,7 @@ bool Procon30::HTTPCommunication::checkResult()
 				break;
 			}
 
-			nowConnecting = false;
+			
 			return true;
 			break;
 		case CommunicationState::Null:
@@ -207,6 +238,7 @@ bool Procon30::HTTPCommunication::getMatchInfomation()
 	nowConnecting = true;
 	connectionType = ConnectionType::MatchInfomation;
 	connectionMatchNumber = gotMatchInfomationNum;
+
 	future = std::async(std::launch::async, [&]() {
 		return curl_easy_perform(getMatchHandles[connectionMatchNumber]);
 		});
@@ -223,6 +255,7 @@ bool Procon30::HTTPCommunication::checkPostAction()
 	//post_(game[0,1,2])_(turn).json‚ð‘z’è
 	auto splittedPath = path.split('_');
 	int32 gameNum = Parse<int32>(splittedPath[1]);
+	connectionMatchNumber = gameNum;
 	String send = getPostData(path);
 	curl_easy_setopt(postActionHandles[gameNum], CURLOPT_POSTFIELDSIZE, (long)send.size());
 	curl_easy_setopt(postActionHandles[gameNum], CURLOPT_POSTFIELDS, send.c_str());

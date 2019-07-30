@@ -95,10 +95,12 @@ namespace Procon30 {
 		//filepathから行動情報をコピーします。
 		String getPostData(const FilePath& filePath);
 
+		const FilePath jsonBuffer = U"json/buffer.json";
+
 		//asyncで投げた状態をチェックしてResultをとってきます。
 		//true : Done
 		//false: other
-		//未完成
+		//あとは随時書く
 		bool checkResult();
 	public:
 		//結構頻繁に書き換わるけどnotifyガンガンやっていいの...?
