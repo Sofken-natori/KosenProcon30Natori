@@ -25,6 +25,12 @@ FilePath Procon30::SendBuffer::getPath()
 	return ret;
 }
 
+const size_t Procon30::SendBuffer::size()
+{
+	std::lock_guard<std::mutex> lock(queueMtx);
+	return queueBuffer.size();
+}
+
 Procon30::SendBuffer::SendBuffer()
 {
 }

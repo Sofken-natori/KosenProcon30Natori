@@ -16,6 +16,8 @@ namespace Procon30 {
 
 		FilePath getPath();
 
+		const size_t size();
+
 		SendBuffer();
 		~SendBuffer();
 	};

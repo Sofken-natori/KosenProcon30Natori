@@ -96,6 +96,12 @@
     <ClCompile Include="VirtualServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Form.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonFiles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -271,7 +277,7 @@
     <ClInclude Include="VirtualServer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JsonUtility.hpp">
+    <ClInclude Include="JsonFiles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
