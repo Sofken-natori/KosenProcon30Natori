@@ -14,8 +14,6 @@ namespace Procon30 {
 		static void parseJsonToTeamsData(std::pair<Team,Team>& teams,JSONValue object);
 		static void parseJsonToActionsData();
 
-		static void getJSONValue(s3d::JSONReader reader,Array<String> strs);
-
 	public:
 	};
 }

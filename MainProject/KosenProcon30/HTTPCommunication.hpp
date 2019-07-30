@@ -26,6 +26,13 @@ namespace Procon30 {
 	class HTTPCommunication
 	{
 	private:
+
+		struct Form {
+			void draw() const;
+			void update();
+		};
+
+
 		//DONT DELETE
 		std::shared_ptr<SendBuffer> buffer;
 
@@ -117,7 +124,7 @@ namespace Procon30 {
 		// host/matches/N‚ðget‚µ‚Ü‚·
 		bool getMatchInfomation();
 
-		//Form‚ÌLoop
+		//Form‚ÌLoop ŽÀ‘•‚ÍForm.cpp
 		void initilizeFormLoop();
 
 		// host/matches/N/action‚Épost‚µ‚Ü‚·
