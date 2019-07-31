@@ -28,8 +28,28 @@ namespace Procon30 {
 	private:
 
 		struct Form {
+
+			struct school {
+				//matchInfo
+				String name;
+				int32 teamID;
+				int32 turns;
+				int32 id;
+				//fieldInfo
+				int32 height;
+				int32 width;
+				int32 turn;
+				int32 startedAtUnixTime;
+
+				bool checked;
+			};
+
+			Font infoFont;
+
+			Array<school> schools;
+
 			void draw() const;
-			void update();
+			bool update();
 		};
 
 
@@ -127,6 +147,7 @@ namespace Procon30 {
 		bool getMatchInfomation();
 
 		//FormのLoop 実装はForm.cpp
+		//Turn0のタイミングでのみ呼ばれることを想定して書きます。
 		void initilizeFormLoop();
 
 		// host/matches/N/actionにpostします

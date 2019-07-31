@@ -171,6 +171,7 @@ bool Procon30::HTTPCommunication::checkResult()
 
 void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
 {
+	matchNum = arr.size();
 	for (int32 i = 0; i < matchNum; i++) {
 		matchesConversionTable[i] = arr[i];
 	}
