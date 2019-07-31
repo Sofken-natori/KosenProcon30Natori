@@ -156,6 +156,9 @@ namespace Procon30 {
 		HTTPCommunication();
 		~HTTPCommunication();
 
+		//GUIがobserverからGameを手に入れる際にmatchSizeが必要なのでgeterを追加します。
+		int32 getMatchNum();
+
 		//TODO: operator=の中身を実装する
 		//DONT USE:This function is not implement
 		HTTPCommunication& operator=(const Procon30::HTTPCommunication& right);

@@ -296,6 +296,11 @@ Procon30::HTTPCommunication::~HTTPCommunication()
 {
 }
 
+int32 Procon30::HTTPCommunication::getMatchNum()
+{
+	return this->matchNum;
+}
+
 Procon30::HTTPCommunication& Procon30::HTTPCommunication::operator=(const Procon30::HTTPCommunication& right)
 {
 
