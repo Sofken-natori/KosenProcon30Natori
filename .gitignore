@@ -5,6 +5,7 @@
 /MainProject/KosenProcon30/App/example/
 *.exe
 *_log.html
+*.user
 
 #dll‚ð‚«‚¿‚ñ‚Æˆê’v‚³‚¹‚é‚½‚ß
 /MainProject/KosenProcon30/Intermediate/KosenProcon30/Debug/*
