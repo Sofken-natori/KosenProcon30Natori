@@ -17,12 +17,13 @@ namespace Procon30 {
 		static bool dataReceived;
 		static std::mutex ReceiveMtx;
 
-		void parseAgentsData(Team &team,JSONValue object);
+		void parseAgentsData(Team& team, JSONValue object);
 		void parseTeamsData(JSONValue object);
 		void parseActionsData(JSONValue object);
 
 	public:
 		//NEED:HTTPCommunicationから呼び出す
+		//これ思ったんだけど個別に起こしたほうが死ににくくて良い感じじゃないのか.jp
 		static void HTTPReceived();
 
 		Field field;
@@ -39,12 +40,17 @@ namespace Procon30 {
 
 		int32 turn;
 		int32 MaxTurn;
-
+		//任意に決まるあれ
+		int32 gameID;
+		//0,1,2...
+		int32 gameNum;
 		int32 startedAtUnixTime;
+		String matchTo;
+		int32 turnMillis;
 
 		//YASAI
 		void updateData();
-		void sendToHTTP(FilePath path);
+		void sendToHTTP();
 
 		//nasatame
 		//TODO : AgentIDなどを前もって聞いていないので適当実装、後で書き換える必要あり
@@ -61,7 +67,7 @@ namespace Procon30 {
 
 		Game();
 		~Game();
-		
+
 		//UNDONE: When member variable changed, You must check this function. 
 		Game& operator=(const Procon30::Game& right);
 	};

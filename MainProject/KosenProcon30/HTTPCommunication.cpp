@@ -33,7 +33,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 			writer << receiveRawData.substr(ofset);
 			writer.close();
 		}
-		if (code != 200) {
+		if (code != 200 && code != 201) {
 			Logger << U"Status Error:" << code;
 			if (code == 401) {
 				return ConnectionStatusCode::InvaildToken;
@@ -54,6 +54,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 
 				return ConnectionStatusCode::UnacceptableTime;
 			}
+			return ConnectionStatusCode::UnknownError;
 		}
 		return ConnectionStatusCode::OK;
 	}
@@ -84,8 +85,7 @@ String Procon30::HTTPCommunication::getPostData(const FilePath& filePath) {
 
 bool Procon30::HTTPCommunication::checkResult()
 {
-	TextReader reader;
-	TextWriter writer;
+
 	JSONReader jsonReader;
 	if (nowConnecting) {
 		switch (getState())
@@ -99,43 +99,28 @@ bool Procon30::HTTPCommunication::checkResult()
 				{
 				case Procon30::ConnectionType::Ping:
 					receiveJsonPath = U"json/ping.json";
-					reader.open(jsonBuffer);
-					writer.open(receiveJsonPath);
-					writer << reader.readAll();
-					reader.close();
-					writer.close();
+					copyJsonFromTo(jsonBuffer, receiveJsonPath);
 					Print << U"PingTest:OK";
 					break;
 				case Procon30::ConnectionType::AllMatchesInfo:
 					receiveJsonPath = U"json/AllMatchesInfo.json";
-					reader.open(jsonBuffer);
-					writer.open(receiveJsonPath);
-					writer << reader.readAll();
-					reader.close();
-					writer.close();
+					copyJsonFromTo(jsonBuffer, receiveJsonPath);
 					Print << U"gotAllInfo";
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
 					jsonReader.open(jsonBuffer);
-					receiveJsonPath = U"json/"+Format(gotMatchInfomationNum)+U"/field_"+ Format(gotMatchInfomationNum)+U"_"+Format(jsonReader[U"turn"].get<int32>()) +U".json";
+					receiveJsonPath = Format(U"json/",gotMatchInfomationNum,U"/field_",gotMatchInfomationNum,U"_",jsonReader[U"turn"].get<int32>(), U".json");
 					jsonReader.close();
-					reader.open(jsonBuffer);
-					writer.open(receiveJsonPath);
-					writer << reader.readAll();
-					reader.close();
-					writer.close();
+					copyJsonFromTo(jsonBuffer, receiveJsonPath);
 					Print << U"gotMatchInfoof:" << gotMatchInfomationNum;
 					gotMatchInfomationNum++;
 					break;
 				case Procon30::ConnectionType::PostAction:
 					jsonReader.open(jsonBuffer);
-					receiveJsonPath = U"json/" + Format(gotMatchInfomationNum) + U"/postReceive_" + Format(gotMatchInfomationNum) + U"_" + Format(jsonReader[U"turn"].get<int32>()) + U".json";
+					receiveJsonPath = Format(U"json/", gotMatchInfomationNum, U"/postReceive_", gotMatchInfomationNum, U"_", jsonReader[U"turn"].get<int32>(), U".json");
 					jsonReader.close();
-					reader.open(jsonBuffer);
-					writer.open(receiveJsonPath);
-					writer << reader.readAll();
-					reader.close();
-					writer.close();
+					copyJsonFromTo(jsonBuffer, receiveJsonPath);
+					copyJsonFromTo(jsonBuffer, Format(U"json/", gotMatchInfomationNum, U"/nowField.json"));
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
@@ -151,11 +136,13 @@ bool Procon30::HTTPCommunication::checkResult()
 				break;
 			case Procon30::ConnectionStatusCode::ConnectionLost:
 				break;
+			case Procon30::ConnectionStatusCode::UnknownError:
+				break;
 			case Procon30::ConnectionStatusCode::Null:
 				break;
 			}
 
-			
+
 			return true;
 			break;
 		case CommunicationState::Null:
@@ -167,6 +154,25 @@ bool Procon30::HTTPCommunication::checkResult()
 		}
 	}
 	return false;
+}
+
+void Procon30::HTTPCommunication::copyJsonFromTo(const FilePath& from, const FilePath& to)
+{
+	TextReader reader(from);
+	TextWriter writer(to);
+	if (!reader) {
+		Logger << from << U" can't open";
+		assert("Copy From can't open : copyJsonBufferToReceiveJsonPath()");
+		return;
+	}
+	if (writer) {
+		Logger << to << U" can't open";
+		assert("Copy To can't open : copyJsonBufferToReceiveJsonPath()");
+		return;
+	}
+	writer << reader.readAll();
+	reader.close();
+	writer.close();
 }
 
 void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
@@ -181,14 +187,14 @@ void Procon30::HTTPCommunication::initilizeAllMatchHandles()
 {
 	for (int32 i = 0; i < matchNum; i++) {
 		getMatchHandles[i] = curl_easy_init();
-		curl_easy_setopt(getMatchHandles[i], CURLOPT_URL, (U"http://" + host + U"/matches/"+Format(matchesConversionTable[i])).narrow().c_str());
+		curl_easy_setopt(getMatchHandles[i], CURLOPT_URL, Format(U"http://",host,U"/matches/",matchesConversionTable[i]).narrow().c_str());
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_HTTPHEADER, otherList);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_HEADER, 1L);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_WRITEFUNCTION, callbackWrite);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_WRITEDATA, &receiveRawData);
 
 		postActionHandles[i] = curl_easy_init();
-		curl_easy_setopt(postActionHandles[i], CURLOPT_URL, (U"http://" + host + U"/matches/" + Format(matchesConversionTable[i])+U"/action").narrow().c_str());
+		curl_easy_setopt(postActionHandles[i], CURLOPT_URL, Format(U"http://",host,U"/matches/",matchesConversionTable[i],U"/action").narrow().c_str());
 		curl_easy_setopt(postActionHandles[i], CURLOPT_HTTPHEADER, postList);
 		curl_easy_setopt(postActionHandles[i], CURLOPT_HEADER, 1L);
 		curl_easy_setopt(postActionHandles[i], CURLOPT_POST, 1L);
@@ -253,15 +259,14 @@ bool Procon30::HTTPCommunication::checkPostAction()
 	nowConnecting = true;
 	connectionType = ConnectionType::PostAction;
 	FilePath path = buffer->getPath();
-	//post_(game[0,1,2])_(turn).json‚ð‘z’è
 	auto splittedPath = path.split('_');
 	int32 gameNum = Parse<int32>(splittedPath[1]);
 	connectionMatchNumber = gameNum;
 	String send = getPostData(path);
-	curl_easy_setopt(postActionHandles[gameNum], CURLOPT_POSTFIELDSIZE, (long)send.size());
-	curl_easy_setopt(postActionHandles[gameNum], CURLOPT_POSTFIELDS, send.c_str());
+	curl_easy_setopt(postActionHandles[connectionMatchNumber], CURLOPT_POSTFIELDSIZE, (long)send.size());
+	curl_easy_setopt(postActionHandles[connectionMatchNumber], CURLOPT_POSTFIELDS, send.c_str());
 	future = std::async(std::launch::async, [&]() {
-		return curl_easy_perform(postActionHandles[gameNum]);
+		return curl_easy_perform(postActionHandles[connectionMatchNumber]);
 		});
 	return true;
 }

@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include "Observer.hpp"
 
 bool Procon30::Game::dataReceived = false;
 std::mutex Procon30::Game::HTTPWaitMtx;
@@ -129,15 +130,21 @@ void Procon30::Game::updateData()
 		HTTPWaitCond.wait(lockWait);
 	}
 
-	//ˆ—•”
+	//ˆ—•”@¢ŠEˆêG.obj
+	FilePath path = Format(U"json/", gameNum, U"/nowField.json");
+	parseJson(path);
 
 	//–¢óM•ÏX•”
 	std::lock_guard<std::mutex> lockFlag(ReceiveMtx);
 	dataReceived = false;
+
+	observer->notify(gameNum, *this);
 }
 
-void Procon30::Game::sendToHTTP(FilePath path)
+void Procon30::Game::sendToHTTP()
 {
+	FilePath path = Format(U"json/", gameNum, U"/post_", gameNum, U"_", turn, U".json");
+	convertToJson(path);
 	buffer->pushPath(path);
 }
 
