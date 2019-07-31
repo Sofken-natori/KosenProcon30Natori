@@ -39,11 +39,12 @@ void Main()
 	//5:Game2
 	//6:VirtualServer
 
+	Procon30::GUI gui;
+
 	Procon30::HTTPCommunication http;
 
 	http.initilizeFormLoop();
 
-	Procon30::GUI gui;
 	std::array<Procon30::Game,Procon30::MaxGameNumber> games;
 
 	games[0].parseJson(U"example.json");
