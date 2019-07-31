@@ -122,9 +122,6 @@ namespace Procon30 {
 		//false: other
 		//‚ ‚Æ‚Í‘‚­
 		bool checkResult();
-
-		//‚½‚Ô‚ñ‚à‚Á‚Æ‚¢‚¢À‘•‚ª‚ ‚é
-		void copyJsonFromTo(const FilePath& from, const FilePath& to);
 	public:
 		//Œ‹\•p”É‚É‘‚«Š·‚í‚é‚¯‚ÇnotifyƒKƒ“ƒKƒ“‚â‚Á‚Ä‚¢‚¢‚Ì...?
 		std::shared_ptr<Observer> observer;

@@ -23,7 +23,6 @@ namespace Procon30 {
 
 	public:
 		//NEED:HTTPCommunicationから呼び出す
-		//これ思ったんだけど個別に起こしたほうが死ににくくて良い感じじゃないのか.jp
 		static void HTTPReceived();
 
 		Field field;
@@ -40,17 +39,12 @@ namespace Procon30 {
 
 		int32 turn;
 		int32 MaxTurn;
-		//任意に決まるあれ
-		int32 gameID;
-		//0,1,2...
-		int32 gameNum;
+
 		int32 startedAtUnixTime;
-		String matchTo;
-		int32 turnMillis;
 
 		//YASAI
 		void updateData();
-		void sendToHTTP();
+		void sendToHTTP(FilePath path);
 
 		//nasatame
 		//TODO : AgentIDなどを前もって聞いていないので適当実装、後で書き換える必要あり
