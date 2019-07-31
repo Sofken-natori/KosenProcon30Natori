@@ -47,6 +47,7 @@ void Main()
 	std::array<Procon30::Game,Procon30::MaxGameNumber> games;
 
 	games[0].parseJson(U"example.json");
+	Scene::SetBackground(Color(128));
 
 	while (System::Update())
 	{

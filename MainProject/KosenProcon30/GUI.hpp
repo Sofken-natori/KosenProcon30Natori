@@ -9,6 +9,11 @@ namespace Procon30 {
 	private:
 		//DON'T DELETE
 		std::shared_ptr<Observer> observer;
+		Rect teamTile;
+		Color myTeamColor;
+		Color enemyTeamColor;
+		Color noneTeamColor;
+		Color backGroundColor;
 	public:
 
 		void draw();
