@@ -31,7 +31,7 @@ namespace Procon30 {
 		//何でもない状態
 		Null,
 
-		//Code:200
+		//Code:200,201(post)
 		//正常
 		OK,
 
@@ -58,6 +58,13 @@ namespace Procon30 {
 
 		//curl_easy_perform() is failed.
 		//たぶん鯖落ちかタイムアウト、再送して連続するようだったら強制終了をお勧めする。
-		ConnectionLost
+		ConnectionLost,
+
+		//Unknown Error
+		//Codeが200,201,400,401以外の時
+		//これ出たらだいたい受け取ったjsonになんかしら書いてある
+		//json/buffer.jsonを読め
+		//深刻なエラー、強制終了をお勧めする。
+		UnknownError
 	};
 }

@@ -33,7 +33,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 			writer << receiveRawData.substr(ofset);
 			writer.close();
 		}
-		if (code != 200) {
+		if (code != 200 && code != 201) {
 			Logger << U"Status Error:" << code;
 			if (code == 401) {
 				return ConnectionStatusCode::InvaildToken;
@@ -54,6 +54,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 
 				return ConnectionStatusCode::UnacceptableTime;
 			}
+			return ConnectionStatusCode::UnknownError;
 		}
 		return ConnectionStatusCode::OK;
 	}
@@ -84,8 +85,7 @@ String Procon30::HTTPCommunication::getPostData(const FilePath& filePath) {
 
 bool Procon30::HTTPCommunication::checkResult()
 {
-	TextReader reader;
-	TextWriter writer;
+
 	JSONReader jsonReader;
 	if (nowConnecting) {
 		switch (getState())
@@ -99,31 +99,19 @@ bool Procon30::HTTPCommunication::checkResult()
 				{
 				case Procon30::ConnectionType::Ping:
 					receiveJsonPath = U"json/ping.json";
-					reader.open(jsonBuffer);
-					writer.open(receiveJsonPath);
-					writer << reader.readAll();
-					reader.close();
-					writer.close();
+					copyJsonFromTo(jsonBuffer,receiveJsonPath);
 					Print << U"PingTest:OK";
 					break;
 				case Procon30::ConnectionType::AllMatchesInfo:
 					receiveJsonPath = U"json/AllMatchesInfo.json";
-					reader.open(jsonBuffer);
-					writer.open(receiveJsonPath);
-					writer << reader.readAll();
-					reader.close();
-					writer.close();
+					copyJsonFromTo(jsonBuffer,receiveJsonPath);
 					Print << U"gotAllInfo";
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
 					jsonReader.open(jsonBuffer);
 					receiveJsonPath = U"json/"+Format(gotMatchInfomationNum)+U"/field_"+ Format(gotMatchInfomationNum)+U"_"+Format(jsonReader[U"turn"].get<int32>()) +U".json";
 					jsonReader.close();
-					reader.open(jsonBuffer);
-					writer.open(receiveJsonPath);
-					writer << reader.readAll();
-					reader.close();
-					writer.close();
+					copyJsonFromTo(jsonBuffer,receiveJsonPath);
 					Print << U"gotMatchInfoof:" << gotMatchInfomationNum;
 					gotMatchInfomationNum++;
 					break;
@@ -131,11 +119,7 @@ bool Procon30::HTTPCommunication::checkResult()
 					jsonReader.open(jsonBuffer);
 					receiveJsonPath = U"json/" + Format(gotMatchInfomationNum) + U"/postReceive_" + Format(gotMatchInfomationNum) + U"_" + Format(jsonReader[U"turn"].get<int32>()) + U".json";
 					jsonReader.close();
-					reader.open(jsonBuffer);
-					writer.open(receiveJsonPath);
-					writer << reader.readAll();
-					reader.close();
-					writer.close();
+					copyJsonFromTo(jsonBuffer,receiveJsonPath);
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
@@ -167,6 +151,25 @@ bool Procon30::HTTPCommunication::checkResult()
 		}
 	}
 	return false;
+}
+
+void Procon30::HTTPCommunication::copyJsonFromTo(const FilePath & from, const FilePath& to)
+{
+	TextReader reader(from);
+	TextWriter writer(to);
+	if (!reader) {
+		Logger << from << U" can't open";
+		assert("Copy From can't open : copyJsonBufferToReceiveJsonPath()");
+		return;
+	}
+	if (writer) {
+		Logger << to << U" can't open";
+		assert("Copy To can't open : copyJsonBufferToReceiveJsonPath()");
+		return;
+	}
+	writer << reader.readAll();
+	reader.close();
+	writer.close();
 }
 
 void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
@@ -253,7 +256,6 @@ bool Procon30::HTTPCommunication::checkPostAction()
 	nowConnecting = true;
 	connectionType = ConnectionType::PostAction;
 	FilePath path = buffer->getPath();
-	//post_(game[0,1,2])_(turn).json‚ð‘z’è
 	auto splittedPath = path.split('_');
 	int32 gameNum = Parse<int32>(splittedPath[1]);
 	connectionMatchNumber = gameNum;
