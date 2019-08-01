@@ -99,19 +99,19 @@ bool Procon30::HTTPCommunication::checkResult()
 				{
 				case Procon30::ConnectionType::Ping:
 					receiveJsonPath = U"json/ping.json";
-					copyJsonFromTo(jsonBuffer, receiveJsonPath);
+					FileSystem::Copy(jsonBuffer, receiveJsonPath, CopyOption::OverwriteExisting);
 					Print << U"PingTest:OK";
 					break;
 				case Procon30::ConnectionType::AllMatchesInfo:
 					receiveJsonPath = U"json/AllMatchesInfo.json";
-					copyJsonFromTo(jsonBuffer, receiveJsonPath);
+					FileSystem::Copy(jsonBuffer, receiveJsonPath, CopyOption::OverwriteExisting);
 					Print << U"gotAllInfo";
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
 					jsonReader.open(jsonBuffer);
 					receiveJsonPath = Format(U"json/",gotMatchInfomationNum,U"/field_",gotMatchInfomationNum,U"_",jsonReader[U"turn"].get<int32>(), U".json");
 					jsonReader.close();
-					copyJsonFromTo(jsonBuffer, receiveJsonPath);
+					FileSystem::Copy(jsonBuffer, receiveJsonPath, CopyOption::OverwriteExisting);
 					Print << U"gotMatchInfoof:" << gotMatchInfomationNum;
 					gotMatchInfomationNum++;
 					break;
@@ -119,8 +119,8 @@ bool Procon30::HTTPCommunication::checkResult()
 					jsonReader.open(jsonBuffer);
 					receiveJsonPath = Format(U"json/", gotMatchInfomationNum, U"/postReceive_", gotMatchInfomationNum, U"_", jsonReader[U"turn"].get<int32>(), U".json");
 					jsonReader.close();
-					copyJsonFromTo(jsonBuffer, receiveJsonPath);
-					copyJsonFromTo(jsonBuffer, Format(U"json/", gotMatchInfomationNum, U"/nowField.json"));
+					FileSystem::Copy(jsonBuffer, receiveJsonPath, CopyOption::OverwriteExisting);
+					FileSystem::Copy(jsonBuffer, Format(U"json/", gotMatchInfomationNum, U"/nowField.json"), CopyOption::OverwriteExisting);
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
@@ -154,25 +154,6 @@ bool Procon30::HTTPCommunication::checkResult()
 		}
 	}
 	return false;
-}
-
-void Procon30::HTTPCommunication::copyJsonFromTo(const FilePath& from, const FilePath& to)
-{
-	TextReader reader(from);
-	TextWriter writer(to);
-	if (!reader) {
-		Logger << from << U" can't open";
-		assert("Copy From can't open : copyJsonBufferToReceiveJsonPath()");
-		return;
-	}
-	if (writer) {
-		Logger << to << U" can't open";
-		assert("Copy To can't open : copyJsonBufferToReceiveJsonPath()");
-		return;
-	}
-	writer << reader.readAll();
-	reader.close();
-	writer.close();
 }
 
 void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
@@ -301,7 +282,7 @@ Procon30::HTTPCommunication::~HTTPCommunication()
 {
 }
 
-int32 Procon30::HTTPCommunication::getMatchNum()
+size_t Procon30::HTTPCommunication::getMatchNum()
 {
 	return this->matchNum;
 }
