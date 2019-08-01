@@ -18,10 +18,10 @@ inline const Procon30::HTTPCommunication& Procon30::Observer::getStock()
 	return http;
 }
 
- const Procon30::Game& Procon30::Observer::getStock(int32 gameID)
+ const Procon30::Game& Procon30::Observer::getStock(int32 gameNum)
 {
 	std::lock_guard<std::mutex> lock(this->resourceMtx);
-	return this->games.at(gameID);
+	return this->games.at(gameNum);
 }
 
 Procon30::Observer::Observer()

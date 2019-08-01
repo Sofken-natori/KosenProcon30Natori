@@ -22,7 +22,7 @@ namespace Procon30 {
 		void notify(const HTTPCommunication &stock);
 
 		const HTTPCommunication& getStock();
-		const Game& getStock(int32 gameID);
+		const Game& getStock(int32 gameNum);
 
 		Observer();
 	};
