@@ -54,10 +54,10 @@ namespace Procon30 {
 
 		//nasatame
 		//TODO : AgentIDなどを前もって聞いていないので適当実装、後で書き換える必要あり
-		void parseJson(String fileName);
+		void parseJson(FilePath fileName);
 
 		//actionデータをjsonにパースするだけの機能しか持たない。
-		void convertToJson(String fileName);
+		void convertToJson(FilePath fileName);
 
 		Stopwatch turnTimer;
 		Stopwatch gameTimer;

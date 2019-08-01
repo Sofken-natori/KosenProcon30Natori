@@ -80,7 +80,7 @@ void Procon30::Game::parseActionsData(JSONValue object)
 	}
 }
 
-void Procon30::Game::parseJson(String fileName)
+void Procon30::Game::parseJson(FilePath fileName)
 {
 	s3d::JSONReader reader(fileName);
 
@@ -162,7 +162,7 @@ String encodeString(const Procon30::Team& team)
 
 
 
-void Procon30::Game::convertToJson(String fileName)
+void Procon30::Game::convertToJson(FilePath fileName)
 {
 
 	TextWriter tw(fileName);

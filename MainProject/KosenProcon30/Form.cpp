@@ -3,6 +3,13 @@
 void Procon30::HTTPCommunication::Form::draw() const
 {
 
+	for (int i = 0; i < this->schools.size(); i++) {
+		auto& school = schools[i];
+
+		//Infos
+		infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}"_fmt(school.teamID, school.turns, school.id,
+			school.startedAtUnixTime, school.height, school.width)).draw(400, i * 200 + 100);
+	}
 
 }
 
@@ -10,14 +17,10 @@ bool Procon30::HTTPCommunication::Form::update()
 {
 
 	for (int i = 0; i < this->schools.size(); i++) {
+		auto& school = schools[i];
 
 		//Selector
-		auto& school = schools[i];
-		SimpleGUI::CheckBox(school.checked, school.name, Vec2(100, i * 200 + 100));
-
-		//Infos
-		infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}"_fmt(school.teamID, school.turns, school.id,
-			school.startedAtUnixTime, school.height, school.width)).draw(300, i * 200 + 100);
+		SimpleGUI::CheckBox(school.checked, school.matchTo, Vec2(100, i * 200 + 100));
 	}
 
 	//Start Button
@@ -42,7 +45,7 @@ void Procon30::HTTPCommunication::initilizeFormLoop()
 
 		for (const auto& itr : jsonReader.arrayView()) {
 			form.schools.push_back({});
-			form.schools.back().name = itr[U"matchTo"].getString();
+			form.schools.back().matchTo = itr[U"matchTo"].getString();
 			form.schools.back().turns = itr[U"turns"].get<int32>();
 			form.schools.back().teamID = itr[U"teamID"].get<int32>();
 			form.schools.back().id = itr[U"id"].get<int32>();

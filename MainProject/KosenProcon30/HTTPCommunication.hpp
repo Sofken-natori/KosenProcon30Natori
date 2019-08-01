@@ -31,7 +31,7 @@ namespace Procon30 {
 
 			struct school {
 				//matchInfo
-				String name;
+				String matchTo;
 				int32 teamID;
 				int32 turns;
 				int32 id;
