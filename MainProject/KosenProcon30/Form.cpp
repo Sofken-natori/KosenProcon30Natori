@@ -74,14 +74,16 @@ void Procon30::HTTPCommunication::initilizeFormLoop()
 	while (System::Update() && loop) {
 		loop = form.update();
 		form.draw();
-		if (loop) {
-			Array<int> arr;
-			for (int i = 0; i < gotMatchInfomationNum; i++) {
-				if (form.schools[i].checked)
-					arr << i;
-			}
-			setConversionTable(arr);
+	}
+
+	{
+		Array<int> arr;
+		for (int i = 0; i < gotMatchInfomationNum; i++) {
+			if (form.schools[i].checked)
+				arr << i;
+
 		}
+		setConversionTable(arr);
 	}
 
 	return;
