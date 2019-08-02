@@ -123,8 +123,6 @@ namespace Procon30 {
 		//あとは随時書く
 		bool checkResult();
 
-		//たぶんもっといい実装がある
-		void copyJsonFromTo(const FilePath& from, const FilePath& to);
 	public:
 		//結構頻繁に書き換わるけどnotifyガンガンやっていいの...?
 		std::shared_ptr<Observer> observer;
@@ -160,7 +158,7 @@ namespace Procon30 {
 		~HTTPCommunication();
 
 		//GUIがobserverからGameを手に入れる際にmatchSizeが必要なのでgeterを追加します。
-		int32 getMatchNum();
+		size_t getMatchNum();
 
 		//TODO: operator=の中身を実装する
 		//DONT USE:This function is not implement
