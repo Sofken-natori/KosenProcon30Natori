@@ -23,6 +23,7 @@ namespace Procon30 {
 		void putPoint();
 		void putAgent();
 		void writeJson(FilePath path);
+		void negativePercent(int32 percent);
 		int32 calculateScore(TeamColor color);
 	};
 }
