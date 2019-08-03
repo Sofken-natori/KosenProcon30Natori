@@ -177,6 +177,7 @@
   <ItemGroup>
     <ClInclude Include="Agent.hpp" />
     <ClInclude Include="Algorithm.hpp" />
+    <ClInclude Include="CommunicationData.hpp" />
     <ClInclude Include="Field.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="GUI.hpp" />

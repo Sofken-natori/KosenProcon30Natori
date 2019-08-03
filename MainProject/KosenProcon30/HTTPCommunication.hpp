@@ -3,25 +3,12 @@
 #include "Team.hpp"
 #include "Field.hpp"
 #include "SendBuffer.hpp"
+#include "CommunicationData.hpp"
 
 namespace Procon30 {
 
 	class Observer;
 	class Game;
-
-	enum class CommunicationState {
-		Null,
-		Done,
-		Connecting,
-	};
-
-	enum class ConnectionType {
-		Null,
-		Ping,
-		AllMatchesInfo,
-		MatchInfomation,
-		PostAction,
-	};
 
 	class HTTPCommunication
 	{
@@ -52,21 +39,10 @@ namespace Procon30 {
 			bool update();
 		};
 
+		CommunicationData comData;
 
 		//DONT DELETE
 		std::shared_ptr<SendBuffer> buffer;
-
-		//token
-		String token;
-
-		//URL
-		String host;
-
-		//試合の数
-		size_t matchNum;
-
-		// gameIDの変換テーブル
-		std::unordered_map<int32, int32> matchesConversionTable;
 
 		//ハンドル
 		CURL* pingHandle;
@@ -84,24 +60,8 @@ namespace Procon30 {
 		//内容がWriteされる変数
 		static String receiveRawData;
 
-		//受け取ったJsonのパス
-		FilePath receiveJsonPath;
-
 		//codeが入る
 		std::future<CURLcode> future;
-
-		//通信中かを判別
-		//performしたらtrue,Updateで受け取ったらfalse
-		bool nowConnecting;
-
-		//通信中の試合番号(0-indexed)
-		int32 connectionMatchNumber;
-
-		//試合情報を取得した数
-		int32 gotMatchInfomationNum;
-
-		//通信を行った種別
-		ConnectionType connectionType;
 
 		//asyncのステータスを読み取ります
 		CommunicationState getState() const;
@@ -115,14 +75,13 @@ namespace Procon30 {
 		//filepathから行動情報をコピーします。
 		String getPostData(const FilePath& filePath);
 
-		const FilePath jsonBuffer = U"json/buffer.json";
-
 		//asyncで投げた状態をチェックしてResultをとってきます。
 		//true : Done
 		//false: other
 		//あとは随時書く
 		bool checkResult();
 
+		const FilePath jsonBuffer = U"json/buffer.json";
 	public:
 		//結構頻繁に書き換わるけどnotifyガンガンやっていいの...?
 		std::shared_ptr<Observer> observer;

@@ -54,9 +54,9 @@ void Procon30::HTTPCommunication::initilizeFormLoop()
 
 	}
 
-	assert(gotMatchInfomationNum == form.schools.size());
+	assert(comData.gotMatchInfomationNum == form.schools.size());
 
-	for (int i = 0; i < gotMatchInfomationNum; i++) {
+	for (int i = 0; i < comData.gotMatchInfomationNum; i++) {
 		JSONReader jsonReader;
 
 		jsonReader.open(U"json/" + Format(i) + U"/field_" + Format(i) + U"_" + Format(0) + U".json");
@@ -81,7 +81,7 @@ void Procon30::HTTPCommunication::initilizeFormLoop()
 
 	{
 		Array<int> arr;
-		for (int i = 0; i < gotMatchInfomationNum; i++) {
+		for (int i = 0; i < comData.gotMatchInfomationNum; i++) {
 			if (form.schools[i].checked)
 				arr << i;
 

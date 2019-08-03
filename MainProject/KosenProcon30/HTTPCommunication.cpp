@@ -87,40 +87,40 @@ bool Procon30::HTTPCommunication::checkResult()
 {
 
 	JSONReader jsonReader;
-	if (nowConnecting) {
+	if (comData.nowConnecting) {
 		switch (getState())
 		{
 		case CommunicationState::Done:
-			nowConnecting = false;
+			comData.nowConnecting = false;
 			switch (getResult())
 			{
 			case Procon30::ConnectionStatusCode::OK:
-				switch (connectionType)
+				switch (comData.connectionType)
 				{
 				case Procon30::ConnectionType::Ping:
-					receiveJsonPath = U"json/ping.json";
-					FileSystem::Copy(jsonBuffer, receiveJsonPath, CopyOption::OverwriteExisting);
+					comData.receiveJsonPath = U"json/ping.json";
+					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
 					Print << U"PingTest:OK";
 					break;
 				case Procon30::ConnectionType::AllMatchesInfo:
-					receiveJsonPath = U"json/AllMatchesInfo.json";
-					FileSystem::Copy(jsonBuffer, receiveJsonPath, CopyOption::OverwriteExisting);
+					comData.receiveJsonPath = U"json/AllMatchesInfo.json";
+					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
 					Print << U"gotAllInfo";
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
 					jsonReader.open(jsonBuffer);
-					receiveJsonPath = Format(U"json/",gotMatchInfomationNum,U"/field_",gotMatchInfomationNum,U"_",jsonReader[U"turn"].get<int32>(), U".json");
+					comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum,U"/field_", comData.gotMatchInfomationNum,U"_",jsonReader[U"turn"].get<int32>(), U".json");
 					jsonReader.close();
-					FileSystem::Copy(jsonBuffer, receiveJsonPath, CopyOption::OverwriteExisting);
-					Print << U"gotMatchInfoof:" << gotMatchInfomationNum;
-					gotMatchInfomationNum++;
+					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
+					Print << U"gotMatchInfoof:" << comData.gotMatchInfomationNum;
+					comData.gotMatchInfomationNum++;
 					break;
 				case Procon30::ConnectionType::PostAction:
 					jsonReader.open(jsonBuffer);
-					receiveJsonPath = Format(U"json/", gotMatchInfomationNum, U"/postReceive_", gotMatchInfomationNum, U"_", jsonReader[U"turn"].get<int32>(), U".json");
+					comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum, U"/postReceive_", comData.gotMatchInfomationNum, U"_", jsonReader[U"turn"].get<int32>(), U".json");
 					jsonReader.close();
-					FileSystem::Copy(jsonBuffer, receiveJsonPath, CopyOption::OverwriteExisting);
-					FileSystem::Copy(jsonBuffer, Format(U"json/", gotMatchInfomationNum, U"/nowField.json"), CopyOption::OverwriteExisting);
+					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
+					FileSystem::Copy(jsonBuffer, Format(U"json/", comData.gotMatchInfomationNum, U"/nowField.json"), CopyOption::OverwriteExisting);
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
@@ -158,24 +158,24 @@ bool Procon30::HTTPCommunication::checkResult()
 
 void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
 {
-	matchNum = arr.size();
-	for (int32 i = 0; i < matchNum; i++) {
-		matchesConversionTable[i] = arr[i];
+	comData.matchNum = arr.size();
+	for (int32 i = 0; i < comData.matchNum; i++) {
+		comData.matchesConversionTable[i] = arr[i];
 	}
 }
 
 void Procon30::HTTPCommunication::initilizeAllMatchHandles()
 {
-	for (int32 i = 0; i < matchNum; i++) {
+	for (int32 i = 0; i < comData.matchNum; i++) {
 		getMatchHandles[i] = curl_easy_init();
-		curl_easy_setopt(getMatchHandles[i], CURLOPT_URL, Format(U"http://",host,U"/matches/",matchesConversionTable[i]).narrow().c_str());
+		curl_easy_setopt(getMatchHandles[i], CURLOPT_URL, Format(U"http://", comData.host,U"/matches/", comData.matchesConversionTable[i]).narrow().c_str());
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_HTTPHEADER, otherList);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_HEADER, 1L);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_WRITEFUNCTION, callbackWrite);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_WRITEDATA, &receiveRawData);
 
 		postActionHandles[i] = curl_easy_init();
-		curl_easy_setopt(postActionHandles[i], CURLOPT_URL, Format(U"http://",host,U"/matches/",matchesConversionTable[i],U"/action").narrow().c_str());
+		curl_easy_setopt(postActionHandles[i], CURLOPT_URL, Format(U"http://", comData.host,U"/matches/", comData.matchesConversionTable[i],U"/action").narrow().c_str());
 		curl_easy_setopt(postActionHandles[i], CURLOPT_HTTPHEADER, postList);
 		curl_easy_setopt(postActionHandles[i], CURLOPT_HEADER, 1L);
 		curl_easy_setopt(postActionHandles[i], CURLOPT_POST, 1L);
@@ -188,20 +188,20 @@ void Procon30::HTTPCommunication::update()
 {
 	//“Ç‚ÝŽÌ‚Ä‚Ä‚¢‚¢‚ÌH
 	checkResult();
-	if (gotMatchInfomationNum == matchNum) {
+	if (comData.gotMatchInfomationNum == comData.matchNum) {
 		Procon30::Game::HTTPReceived();
-		gotMatchInfomationNum = 0;
+		comData.gotMatchInfomationNum = 0;
 	}
-	if (gotMatchInfomationNum != 0) {
+	if (comData.gotMatchInfomationNum != 0) {
 		getMatchInfomation();
 	}
 }
 
 bool Procon30::HTTPCommunication::pingServerConnectionTest()
 {
-	if (nowConnecting) return false;
-	nowConnecting = true;
-	connectionType = ConnectionType::Ping;
+	if (comData.nowConnecting) return false;
+	comData.nowConnecting = true;
+	comData.connectionType = ConnectionType::Ping;
 	future = std::async(std::launch::async, [&]() {
 		return curl_easy_perform(pingHandle);
 		});
@@ -210,9 +210,9 @@ bool Procon30::HTTPCommunication::pingServerConnectionTest()
 
 bool Procon30::HTTPCommunication::getAllMatchesInfomation()
 {
-	if (nowConnecting) return false;
-	nowConnecting = true;
-	connectionType = ConnectionType::AllMatchesInfo;
+	if (comData.nowConnecting) return false;
+	comData.nowConnecting = true;
+	comData.connectionType = ConnectionType::AllMatchesInfo;
 	future = std::async(std::launch::async, [&]() {
 		return curl_easy_perform(matchesInfoHandle);
 		});
@@ -221,33 +221,33 @@ bool Procon30::HTTPCommunication::getAllMatchesInfomation()
 
 bool Procon30::HTTPCommunication::getMatchInfomation()
 {
-	if (nowConnecting) return false;
-	if (gotMatchInfomationNum >= matchNum) return false;
-	nowConnecting = true;
-	connectionType = ConnectionType::MatchInfomation;
-	connectionMatchNumber = gotMatchInfomationNum;
+	if (comData.nowConnecting) return false;
+	if (comData.gotMatchInfomationNum >= comData.matchNum) return false;
+	comData.nowConnecting = true;
+	comData.connectionType = ConnectionType::MatchInfomation;
+	comData.connectionMatchNumber = comData.gotMatchInfomationNum;
 
 	future = std::async(std::launch::async, [&]() {
-		return curl_easy_perform(getMatchHandles[connectionMatchNumber]);
+		return curl_easy_perform(getMatchHandles[comData.connectionMatchNumber]);
 		});
 	return true;
 }
 
 bool Procon30::HTTPCommunication::checkPostAction()
 {
-	if (nowConnecting) return false;
+	if (comData.nowConnecting) return false;
 	if (buffer->size() == 0) return false;
-	nowConnecting = true;
-	connectionType = ConnectionType::PostAction;
+	comData.nowConnecting = true;
+	comData.connectionType = ConnectionType::PostAction;
 	FilePath path = buffer->getPath();
 	auto splittedPath = path.split('_');
 	int32 gameNum = Parse<int32>(splittedPath[1]);
-	connectionMatchNumber = gameNum;
+	comData.connectionMatchNumber = gameNum;
 	String send = getPostData(path);
-	curl_easy_setopt(postActionHandles[connectionMatchNumber], CURLOPT_POSTFIELDSIZE, (long)send.size());
-	curl_easy_setopt(postActionHandles[connectionMatchNumber], CURLOPT_POSTFIELDS, send.c_str());
+	curl_easy_setopt(postActionHandles[comData.connectionMatchNumber], CURLOPT_POSTFIELDSIZE, (long)send.size());
+	curl_easy_setopt(postActionHandles[comData.connectionMatchNumber], CURLOPT_POSTFIELDS, send.c_str());
 	future = std::async(std::launch::async, [&]() {
-		return curl_easy_perform(postActionHandles[connectionMatchNumber]);
+		return curl_easy_perform(postActionHandles[comData.connectionMatchNumber]);
 		});
 	return true;
 }
@@ -258,20 +258,20 @@ Procon30::HTTPCommunication::HTTPCommunication()
 	//Setting Header
 	postList = NULL;
 	otherList = NULL;
-	otherList = curl_slist_append(otherList, (U"Authorization:" + token).narrow().c_str());
+	otherList = curl_slist_append(otherList, (U"Authorization:" + comData.token).narrow().c_str());
 	postList = curl_slist_append(postList, "Authorization:procon30_example_token");
 	postList = curl_slist_append(postList, "Content-Type: application/json");
 
 	//Handle-initilize
 	pingHandle = curl_easy_init();
-	curl_easy_setopt(pingHandle, CURLOPT_URL, (U"http://" + host + U"/ping").narrow().c_str());
+	curl_easy_setopt(pingHandle, CURLOPT_URL, (U"http://" + comData.host + U"/ping").narrow().c_str());
 	curl_easy_setopt(pingHandle, CURLOPT_HTTPHEADER, otherList);
 	curl_easy_setopt(pingHandle, CURLOPT_HEADER, 1L);
 	curl_easy_setopt(pingHandle, CURLOPT_WRITEFUNCTION, callbackWrite);
 	curl_easy_setopt(pingHandle, CURLOPT_WRITEDATA, &receiveRawData);
 
 	matchesInfoHandle = curl_easy_init();
-	curl_easy_setopt(matchesInfoHandle, CURLOPT_URL, (U"http://" + host + U"/matches").narrow().c_str());
+	curl_easy_setopt(matchesInfoHandle, CURLOPT_URL, (U"http://" + comData.host + U"/matches").narrow().c_str());
 	curl_easy_setopt(matchesInfoHandle, CURLOPT_HTTPHEADER, otherList);
 	curl_easy_setopt(matchesInfoHandle, CURLOPT_HEADER, 1L);
 	curl_easy_setopt(matchesInfoHandle, CURLOPT_WRITEFUNCTION, callbackWrite);
@@ -284,11 +284,11 @@ Procon30::HTTPCommunication::~HTTPCommunication()
 
 size_t Procon30::HTTPCommunication::getMatchNum() const
 {
-	return this->matchNum;
+	return this->comData.matchNum;
 }
 
 Procon30::HTTPCommunication& Procon30::HTTPCommunication::operator=(const Procon30::HTTPCommunication& right)
 {
-
+	this->comData = right.comData;
 	return (*this);
 }
