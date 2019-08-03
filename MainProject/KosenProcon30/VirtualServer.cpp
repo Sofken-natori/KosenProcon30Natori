@@ -290,21 +290,8 @@ int32 Procon30::VirtualServer::calculateScore(TeamColor color)
 
 	Array<Point> q;
 
-	int fieldSizeX = 19;
-	int fieldSizeY = 19;
-
-	for (auto y : step(MaxFieldY)) {
-		if (field.m_board.at(y, 0).exist == false) {
-			fieldSizeY = y + 1;
-			break;
-		}
-	}
-	for (auto x : step(MaxFieldX)) {
-		if (field.m_board.at(0, x).exist == false) {
-			fieldSizeX = x + 1;
-			break;
-		}
-	}
+	int fieldSizeX = field.boardSize.x;
+	int fieldSizeY = field.boardSize.y;
 
 	assert(fieldSizeX > 0);
 	assert(fieldSizeY > 0);

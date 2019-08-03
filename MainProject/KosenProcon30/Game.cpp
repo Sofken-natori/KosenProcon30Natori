@@ -17,25 +17,12 @@ void Procon30::Game::HTTPReceived()
 
 int32 Procon30::Game::calculateScore(TeamColor color)
 {
-	Array<Array<bool>> visit(MaxFieldY, Array<bool>(MaxFieldX, false));
+	Array<Array<bool>> visit(field.boardSize.y, Array<bool>(field.boardSize.x, false));
 
 	Array<Point> q;
 
-	int fieldSizeX = -1;
-	int fieldSizeY = -1;
-
-	for (auto y : step(MaxFieldY)) {
-		if (field.m_board.at(y, 0).exist == false) {
-			fieldSizeY = y + 1;
-			break;
-		}
-	}
-	for (auto x : step(MaxFieldX)) {
-		if (field.m_board.at(0, x).exist == false) {
-			fieldSizeX = x + 1;
-			break;
-		}
-	}
+	const int& fieldSizeX = field.boardSize.x;
+	const int& fieldSizeY = field.boardSize.y;
 
 	assert(fieldSizeX > 0);
 	assert(fieldSizeY > 0);
