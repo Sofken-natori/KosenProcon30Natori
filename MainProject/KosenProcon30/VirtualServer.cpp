@@ -111,6 +111,34 @@ void Procon30::VirtualServer::writeJson(FilePath path)
 	tw.close();
 }
 
+void Procon30::VirtualServer::negativePercent(int32 percent)
+{
+	bool isNegativeBorad = false;
+	if (percent > 50) {
+		isNegativeBorad = true;
+		percent = 100 - percent;
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				field.m_board[i][j].score *= -1;
+			}
+		}
+	}
+	int32 posX = 0, posY = 0;
+	int32 cnt = (((height * width) * percent) / 100) / 4;
+	while (cnt > 0) {
+		posX = Random(0, width / 2);
+		posY = Random(0, height / 2);
+		if (isNegativeBorad == false && field.m_board[posY][posX].score < 0) {
+			field.m_board[posY][posX].score *= -1;
+			cnt--;
+		}
+		if (isNegativeBorad == true && field.m_board[posY][posX].score > 0) {
+			field.m_board[posY][posX].score *= -1;
+			cnt--;
+		}
+	}
+}
+
 void Procon30::VirtualServer::putPoint()
 {
 
@@ -119,10 +147,12 @@ void Procon30::VirtualServer::putPoint()
 
 	for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
 		for (int j = 0; j < (field.boardSize.x + 1) / 2; j++) {
-			field.m_board[i][j].score = Random(-16, 16);
+			field.m_board[i][j].score = abs(Random(-16, 16));
 			field.m_board[i][j].exist = true;
 		}
 	}
+
+	negativePercent(20);
 
 	for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
 		for (int j = 0; j < (width + 1) / 2; j++) {
@@ -197,7 +227,7 @@ void Procon30::VirtualServer::putAgent()
 				}
 			}
 		}
-		teams.second.agents[i].nowPosition.x = width - teams.first.agents[i].nowPosition.y - 1;
+		teams.second.agents[i].nowPosition.x = width - teams.first.agents[i].nowPosition.x - 1;
 		tile[teams.first.agents[i].nowPosition.y][teams.first.agents[i].nowPosition.x] = teams.first.teamID;
 		tile[teams.second.agents[i].nowPosition.y][teams.second.agents[i].nowPosition.x] = teams.second.teamID;
 		//	tiles[agents1[i][2]][agents1[i][1]] = agents1[i][0];
