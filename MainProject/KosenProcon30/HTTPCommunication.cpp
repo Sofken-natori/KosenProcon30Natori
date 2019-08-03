@@ -282,7 +282,7 @@ Procon30::HTTPCommunication::~HTTPCommunication()
 {
 }
 
-size_t Procon30::HTTPCommunication::getMatchNum()
+size_t Procon30::HTTPCommunication::getMatchNum() const
 {
 	return this->matchNum;
 }

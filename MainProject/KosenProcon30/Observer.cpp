@@ -12,13 +12,13 @@ void Procon30::Observer::notify(const HTTPCommunication& stock)
 	this->http = stock;
 }
 
-inline const Procon30::HTTPCommunication& Procon30::Observer::getStock()
+const Procon30::HTTPCommunication& Procon30::Observer::getStock()
 {
 	std::lock_guard<std::mutex> lock(this->resourceMtx);
 	return http;
 }
 
- const Procon30::Game& Procon30::Observer::getStock(int32 gameNum)
+const Procon30::Game& Procon30::Observer::getStock(int32 gameNum)
 {
 	std::lock_guard<std::mutex> lock(this->resourceMtx);
 	return this->games.at(gameNum);

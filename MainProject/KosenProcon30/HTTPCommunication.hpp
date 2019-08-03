@@ -158,7 +158,7 @@ namespace Procon30 {
 		~HTTPCommunication();
 
 		//GUIがobserverからGameを手に入れる際にmatchSizeが必要なのでgeterを追加します。
-		size_t getMatchNum();
+		size_t getMatchNum() const;
 
 		//TODO: operator=の中身を実装する
 		//DONT USE:This function is not implement
