@@ -50,6 +50,9 @@ void Main()
 	games[0].parseJson(U"example.json");
 	Scene::SetBackground(Color(128));
 
+	//これがここでいいのかわかんないです
+	gui.dataUpdate();
+
 	while (System::Update())
 	{
 		gui.draw();
