@@ -18,8 +18,8 @@ namespace Procon30 {
 		std::array<Game, observerStockMAX> games;
 
 	public:
-		void notify(int32 gameID,const Game &stock);
-		void notify(const HTTPCommunication &stock);
+		void notify(int32 gameID, const Game& stock);
+		void notify(const HTTPCommunication& stock);
 
 		const HTTPCommunication& getStock();
 		const Game& getStock(int32 gameNum);

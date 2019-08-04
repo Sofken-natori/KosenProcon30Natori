@@ -274,5 +274,8 @@
     <ClInclude Include="VirtualServer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommunicationData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

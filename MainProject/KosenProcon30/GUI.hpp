@@ -9,14 +9,37 @@ namespace Procon30 {
 	private:
 		//DON'T DELETE
 		std::shared_ptr<Observer> observer;
-		Rect teamTile;
+
+		//試合ごとにサイズが変わったりする変数達
+		std::array<RectF, MaxGameNumber> teamTile;
+		std::array<double, MaxGameNumber> correctedTileSize;
+		std::array<Font, MaxGameNumber>  scoreFont;
+		Array<String> viewerStrings;
+
+		//以下全試合を通して共通のもの
+
+		//主にタイルの色で使用
 		Color myTeamColor;
 		Color enemyTeamColor;
 		Color noneTeamColor;
-		Color backGroundColor;
+
+		//表示時に選別するための変数
+		size_t match;
+		size_t drawType;
+
+		//文字描画に必要な変数
+		Font font;
+
+		//表示の際にいい感じになる箱
+		Rect viewerBox;
+
+
+		Font test;
 	public:
 
 		void draw();
+		//開催中の試合が変更されたとき
+		//新規に試合が開始した際に初期データを生成したいので呼んであげてください
 		void dataUpdate();
 
 		GUI();

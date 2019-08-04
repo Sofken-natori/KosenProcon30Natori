@@ -4,22 +4,12 @@
 # include "Game.hpp"
 # include "VirtualServer.hpp"
 
-//TestCode
-size_t callbackWrite(char* ptr, size_t size, size_t nmemb, std::string* stream) {
-	size_t dataLength = size * nmemb;
-	stream->append(ptr, dataLength);
-	return dataLength;
-}
-
 void Main()
 {
 	Window::Resize(Procon30::WindowSize);
 	Scene::SetBackground(ColorF(0.8, 0.9, 1.0));
 	//(Debug)
 	//VirtualServer
-
-	//feature
-	//Initilize Form
 
 	//incetance genarate order
 	//1st GUI
@@ -43,12 +33,29 @@ void Main()
 
 	Procon30::HTTPCommunication http;
 
-	http.initilizeFormLoop();
+	http.observer = gui.getObserver();
+
+	auto schools = http.initilizeFormLoop();
 
 	std::array<Procon30::Game,Procon30::MaxGameNumber> games;
 
+	for (size_t i = 0; i < http.getMatchNum(); i++) {
+		games[i].observer = gui.getObserver();
+		games[i].buffer = http.getBufferPtr();
+		games[i].gameNum = i;
+		games[i].gameID = schools[http.getGameIDfromGameNum(i)].id;
+		games[i].startedAtUnixTime = schools[http.getGameIDfromGameNum(i)].startedAtUnixTime;
+		games[i].matchTo = schools[http.getGameIDfromGameNum(i)].matchTo;
+		games[i].MaxTurn = schools[http.getGameIDfromGameNum(i)].turns;
+		games[i].turnMillis = schools[http.getGameIDfromGameNum(i)].turnMillis;
+		games[i].intervalMillis = schools[http.getGameIDfromGameNum(i)].intervalMillis;
+	}
+
 	games[0].parseJson(U"example.json");
 	Scene::SetBackground(Color(128));
+
+	//これがここでいいのかわかんないです
+	gui.dataUpdate();
 
 	while (System::Update())
 	{
