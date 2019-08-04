@@ -47,6 +47,7 @@ namespace Procon30 {
 		int32 startedAtUnixTime;
 		String matchTo;
 		int32 turnMillis;
+		int32 intervalMillis;
 
 		//YASAI
 		void updateData();
@@ -65,6 +66,7 @@ namespace Procon30 {
 		std::shared_ptr<Observer> observer;
 		std::shared_ptr<SendBuffer> buffer;
 
+		//TODO:‰Šú‰»‚ÉteamIDİ’è‚µ‚Ä‚¨‚­B
 		Game();
 		~Game();
 

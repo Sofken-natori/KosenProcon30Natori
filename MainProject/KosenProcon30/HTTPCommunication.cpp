@@ -186,14 +186,16 @@ void Procon30::HTTPCommunication::initilizeAllMatchHandles()
 
 void Procon30::HTTPCommunication::update()
 {
-	//“Ç‚ÝŽÌ‚Ä‚Ä‚¢‚¢‚ÌH
-	checkResult();
+	bool dataChanged = checkResult();
 	if (comData.gotMatchInfomationNum == comData.matchNum) {
 		Procon30::Game::HTTPReceived();
 		comData.gotMatchInfomationNum = 0;
 	}
 	if (comData.gotMatchInfomationNum != 0) {
 		getMatchInfomation();
+	}
+	if (dataChanged) {
+		observer->notify(*this);
 	}
 }
 
@@ -255,6 +257,11 @@ bool Procon30::HTTPCommunication::checkPostAction()
 Procon30::HTTPCommunication::HTTPCommunication()
 	:buffer(new SendBuffer())
 {
+	comData.connectionMatchNumber = -1;
+	comData.connectionType = ConnectionType::Null;
+	comData.gotMatchInfomationNum = 0;
+	comData.nowConnecting = false;
+	
 	//Setting Header
 	postList = NULL;
 	otherList = NULL;
@@ -285,6 +292,22 @@ Procon30::HTTPCommunication::~HTTPCommunication()
 size_t Procon30::HTTPCommunication::getMatchNum() const
 {
 	return this->comData.matchNum;
+}
+
+Procon30::CommunicationData Procon30::HTTPCommunication::getComData() const
+{
+	return comData;
+}
+
+std::shared_ptr<Procon30::SendBuffer> Procon30::HTTPCommunication::getBufferPtr()
+{
+	return buffer;
+}
+
+int32 Procon30::HTTPCommunication::getGameIDfromGameNum(const int32& num)
+{
+	if (num < 0 || comData.matchesConversionTable.count(num) == 0)return -1;
+	return (*comData.matchesConversionTable.find(num)).first;
 }
 
 Procon30::HTTPCommunication& Procon30::HTTPCommunication::operator=(const Procon30::HTTPCommunication& right)
