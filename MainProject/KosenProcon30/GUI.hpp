@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "KosenProcon30.hpp"
 #include "Observer.hpp"
 
@@ -10,36 +10,47 @@ namespace Procon30 {
 		//DON'T DELETE
 		std::shared_ptr<Observer> observer;
 
-		//‡‚²‚Æ‚ÉƒTƒCƒY‚ª•Ï‚í‚Á‚½‚è‚·‚é•Ï”’B
+		//è©¦åˆã”ã¨ã«ã‚µã‚¤ã‚ºãŒå¤‰ã‚ã£ãŸã‚Šã™ã‚‹å¤‰æ•°é”
 		std::array<RectF, MaxGameNumber> teamTile;
 		std::array<double, MaxGameNumber> correctedTileSize;
 		std::array<Font, MaxGameNumber>  scoreFont;
+		std::array<std::pair<Array<String>, Array<String>>, MaxGameNumber>  agentInfo;
 		Array<String> viewerStrings;
 
-		//ˆÈ‰º‘S‡‚ğ’Ê‚µ‚Ä‹¤’Ê‚Ì‚à‚Ì
 
-		//å‚Éƒ^ƒCƒ‹‚ÌF‚Åg—p
+		//ä»¥ä¸‹å…¨è©¦åˆã‚’é€šã—ã¦å…±é€šã®ã‚‚ã®
+
+		//ä¸»ã«ã‚¿ã‚¤ãƒ«ã®è‰²ã§ä½¿ç”¨
 		Color myTeamColor;
 		Color enemyTeamColor;
 		Color noneTeamColor;
 
-		//•\¦‚É‘I•Ê‚·‚é‚½‚ß‚Ì•Ï”
+		//è¡¨ç¤ºæ™‚ã«é¸åˆ¥ã™ã‚‹ãŸã‚ã®å¤‰æ•°
 		size_t match;
 		size_t drawType;
 
-		//•¶š•`‰æ‚É•K—v‚È•Ï”
-		Font font;
+		//æ–‡å­—æç”»ã«å¿…è¦ãªå¤‰æ•°
+		Font bigFont;
+		Font smallFont;
 
-		//•\¦‚ÌÛ‚É‚¢‚¢Š´‚¶‚É‚È‚é” 
-		Rect viewerBox;
+		//è¡¨ç¤ºã®éš›ã«ã„ã„æ„Ÿã˜ã«ãªã‚‹ç®±
+		RectF viewerBox;
 
+		Texture texLoser;
+		Texture texEven;
+		Texture texWinner;
 
+		const double myInfoX = MaxFieldX * TileSize * 1.04;
+		const double enemyInfoX = MaxFieldX * TileSize * 1.43;
+
+		//ãƒ‡ãƒãƒƒã‚°ç”¨
 		Font test;
 	public:
 
 		void draw();
-		//ŠJÃ’†‚Ì‡‚ª•ÏX‚³‚ê‚½‚Æ‚«
-		//V‹K‚É‡‚ªŠJn‚µ‚½Û‚É‰Šúƒf[ƒ^‚ğ¶¬‚µ‚½‚¢‚Ì‚ÅŒÄ‚ñ‚Å‚ ‚°‚Ä‚­‚¾‚³‚¢
+
+		//é–‹å‚¬ä¸­ã®è©¦åˆãŒå¤‰æ›´ã•ã‚ŒãŸã¨ã
+		//æ–°è¦ã«è©¦åˆãŒé–‹å§‹ã—ãŸéš›ã«åˆæœŸãƒ‡ãƒ¼ã‚¿ã‚’ç”Ÿæˆã—ãŸã„ã®ã§å‘¼ã‚“ã§ã‚ã’ã¦ãã ã•ã„
 		void dataUpdate();
 
 		GUI();

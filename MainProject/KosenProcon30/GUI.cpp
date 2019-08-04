@@ -4,56 +4,109 @@
 
 void Procon30::GUI::draw() {
 	//ゲームが信仰していなときに死ぬ or 初期状態で0番目のゲーム参照になる
-	SimpleGUI::RadioButtons(match, viewerStrings, Vec2(MaxFieldX * TileSize + 10, 10));
-	SimpleGUI::RadioButtons(drawType, { U"タイル + エージェント",U"タイル + 点数" }, Vec2(MaxFieldX * TileSize + 200, 10));
+	SimpleGUI::RadioButtons(match, viewerStrings, Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.01));
+	SimpleGUI::RadioButtons(drawType, { U"タイル + エージェント",U"タイル + 点数" }, Vec2(MaxFieldX * TileSize * 1.2, MaxFieldY * TileSize * 0.01));
 
-	//要テスト
 	//ここで盤面描画する
 	for (size_t y : step(observer->getStock((int32)match).field.boardSize.y)) {
 		for (size_t x : step(observer->getStock((int32)match).field.boardSize.x)) {
-			Procon30::TeamColor ID = observer->getStock((int32)match).field.m_board[y][x].color;
-			if (ID == observer->getStock((int32)match).teams.first.color) {
-				teamTile[match].movedBy(x * correctedTileSize[match] + 1, y * correctedTileSize[match] + 1).draw(myTeamColor);
+			Procon30::TeamColor tileColor = observer->getStock((int32)match).field.m_board[y][x].color;
+			Vec2 pos = { (x + 0.02) * correctedTileSize[match] ,(y + 0.02) * correctedTileSize[match] };
+			if (tileColor == observer->getStock((int32)match).teams.first.color) {
+				teamTile[match].movedBy(pos).draw(myTeamColor);
 			}
-			else if (ID == observer->getStock((int32)match).teams.second.color) {
-				teamTile[match].movedBy(x * correctedTileSize[match] + 1, y * correctedTileSize[match] + 1).draw(enemyTeamColor);
+			else if (tileColor == observer->getStock((int32)match).teams.second.color) {
+				teamTile[match].movedBy(pos).draw(enemyTeamColor);
 			}
 			else {
-				teamTile[match].movedBy(x * correctedTileSize[match] + 1, y * correctedTileSize[match] + 1).draw(noneTeamColor);
+				teamTile[match].movedBy(pos).draw(noneTeamColor);
 			}
 			//点数描画が必要ならする
 			if (drawType == 1) {
-				font(observer->getStock((int32)match).field.m_board[y][x].score).draw(x * correctedTileSize[match] + 1, y * correctedTileSize[match] + 1);
-
+				//文字色切り離したほうがよさげかも
+				scoreFont[match](observer->getStock((int32)match).field.m_board[y][x].score).drawAt(Vec2((x + 0.5) * correctedTileSize[match], (y + 0.5) * correctedTileSize[match]), Palette::Black);
 			}
 		}
 	}
 
 	//エージェントの描画
 	if (drawType == 0) {
+		//自分
 		for (Agent agent : observer->getStock((int32)match).teams.first.agents) {
-			
+			//ポリゴン生成めんどいしShape2D::NStarでいいですか
+			//その場生成しかできない代わりに軽いらしいので
+			Vec2 pos = { (agent.nowPosition.x + 0.5) * correctedTileSize[match],(agent.nowPosition.y + 0.5) * correctedTileSize[match] };
+			Shape2D::NStar(8, correctedTileSize[match] * 0.45, correctedTileSize[match] * 0.35, pos).draw();
+			Shape2D::NStar(8, correctedTileSize[match] * 0.375, correctedTileSize[match] * 0.275, pos).draw(myTeamColor);
+		}
+		//相手
+		for (Agent agent : observer->getStock((int32)match).teams.second.agents) {
+			Vec2 pos = { (agent.nowPosition.x + 0.5) * correctedTileSize[match],(agent.nowPosition.y + 0.5) * correctedTileSize[match] };
+			Shape2D::NStar(8, correctedTileSize[match] * 0.45, correctedTileSize[match] * 0.35, pos).draw();
+			Shape2D::NStar(8, correctedTileSize[match] * 0.375, correctedTileSize[match] * 0.275, pos).draw(enemyTeamColor);
 		}
 	}
 
 
-	//あとでけす
-	font(match).draw(Vec2(10, 10));
-	font(drawType).draw(Vec2(50, 10));
+	bigFont(U"現在のターン : " + observer->getStock((int32)match).turn).draw(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.15), Palette::White);
 
-	//場所は本当にここでええんか
-	font(U"現在のターン : " + observer->getStock((int32)match).turn).draw(Vec2(MaxFieldX * TileSize + 20, 150), Palette::White);
+	//絵文字表示
+	if (observer->getStock((int32)match).teams.first.score > observer->getStock((int32)match).teams.second.score + 50) {
+		texWinner.resized(90).draw(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.19);
+	}
+	else if (observer->getStock((int32)match).teams.first.score + 50 < observer->getStock((int32)match).teams.second.score) {
+		texLoser.resized(90).draw(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.19);
+	}
+	else {
+		texEven.resized(90).draw(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.19);
+	}
 
 
-	//ここから各情報について載せていきたい所存
+	//左側情報欄
+	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.28)).draw();
+	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.28)).drawFrame(10, 0, myTeamColor);
+
+	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.405, MaxFieldY * TileSize * 0.28)).draw();
+	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.405, MaxFieldY * TileSize * 0.28)).drawFrame(10, 0, enemyTeamColor);
+
+	//自チーム情報
+	bigFont(U"MyTeam").draw(Vec2(myInfoX, MaxFieldY * TileSize * 0.30), myTeamColor);
+	bigFont(U"Score : " + observer->getStock((int32)match).teams.first.score).draw(Vec2(myInfoX, MaxFieldY * TileSize * 0.34), myTeamColor);
+	smallFont(U"  TileScore  : " + observer->getStock((int32)match).teams.first.tileScore).draw(Vec2(myInfoX, MaxFieldY * TileSize * 0.385), myTeamColor);
+	smallFont(U"  AreaScore : " + observer->getStock((int32)match).teams.first.areaScore).draw(Vec2(myInfoX, MaxFieldY * TileSize * 0.425), myTeamColor);
+
+	bigFont(U"Agents").draw(Vec2(myInfoX, MaxFieldY * TileSize * 0.48), myTeamColor);
+
+	for (int i : step(observer->getStock((int32)match).teams.first.agentNum)) {
+		smallFont(agentInfo[match].first[i]).draw(Vec2(myInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), myTeamColor);
+	}
+
+	//相手チーム情報
+	bigFont(U"EnemyTeam").draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.30), enemyTeamColor);
+	bigFont(U"Score : " + observer->getStock((int32)match).teams.second.score).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.34), enemyTeamColor);
+	smallFont(U"  TileScore  : " + observer->getStock((int32)match).teams.second.tileScore).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.385), enemyTeamColor);
+	smallFont(U"  AreaScore : " + observer->getStock((int32)match).teams.second.areaScore).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.425), enemyTeamColor);
+
+	bigFont(U"Agents").draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.48), enemyTeamColor);
+
+	for (int i : step(observer->getStock((int32)match).teams.second.agentNum)) {
+		smallFont(agentInfo[match].second[i]).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), enemyTeamColor);
+	}
+
+
+
+
+
 
 	//本当にこれでいいのかテストします
+	//後で全部消す
 	const int height = 20;
 	const int width = 20;
 
 	std::array<std::array<int, width>, height> tiles;
 	for (int i : step(height))
 		for (int j : step(width))tiles[i][j] = 0;
+	for (int i : step(height))tiles[i][(i + 2) % 20] = 1;
 
 	double cts = (TileSize * MaxFieldX + .0) / (Max(width, height) * TileSize + .0) * TileSize;
 
@@ -61,8 +114,7 @@ void Procon30::GUI::draw() {
 
 	for (int i : step(height))
 		for (int j : step(width)) {
-
-			dtile.movedBy(i * cts + cts * 0.02, j * cts + cts * 0.02).draw(myTeamColor);
+			dtile.movedBy(i * cts + cts * 0.02, j * cts + cts * 0.02).draw((i + j) % 2 == 0 ? myTeamColor : enemyTeamColor);
 			if (drawType == 1) {
 				test(U"-16").drawAt(Vec2((i + 0.5) * cts, (j + 0.5) * cts), Palette::Black);
 			}
@@ -77,6 +129,18 @@ void Procon30::GUI::draw() {
 			Shape2D::NStar(8, cts * 0.375, cts * 0.275, Vec2((agents[i].x + 0.5) * cts, (agents[i].y + 0.5) * cts)).draw(myTeamColor);
 		}
 	}
+
+
+	Array<String> testS;
+	for (int i = 0; i < 8; i++) {
+		testS.push_back(U"  ID : 10 ( 20 , 20 )");
+	}
+
+	for (int i = 0; i < 8; i++) {
+		smallFont(testS[i]).draw(Vec2(MaxFieldX * TileSize * 1.04, MaxFieldY * TileSize * (0.53 + i * 0.04)), myTeamColor);
+	}
+
+
 }
 
 void Procon30::GUI::dataUpdate()
@@ -94,6 +158,25 @@ void Procon30::GUI::dataUpdate()
 
 		scoreFont[i] = Font(correctedTileSize[i] * 0.46);
 
+		agentInfo[i].first.clear();
+		agentInfo[i].second.clear();
+
+		for (int j : step(observer->getStock((int32)i).teams.first.agentNum)) {
+			agentInfo[i].first.push_back(U"  ID : {0} ( {1} , {2} )"_fmt(
+				observer->getStock((int32)i).teams.first.agents[j].agentID,
+				observer->getStock((int32)i).teams.first.agents[j].nowPosition.x,
+				observer->getStock((int32)i).teams.first.agents[j].nowPosition.y
+			));
+		}
+
+		for (int j : step(observer->getStock((int32)i).teams.second.agentNum)) {
+			agentInfo[i].second.push_back(U"  ID : {0} ( {1} , {2} )"_fmt(
+				observer->getStock((int32)i).teams.second.agents[j].agentID,
+				observer->getStock((int32)i).teams.second.agents[j].nowPosition.x,
+				observer->getStock((int32)i).teams.second.agents[j].nowPosition.y
+			));
+		}
+
 		viewerStrings.push_back(U"match_{}"_fmt(i));
 	}
 }
@@ -104,18 +187,25 @@ Procon30::GUI::GUI()
 {
 	//色変えたい場合はここ
 	myTeamColor = Color(64, 191, 191);
-	enemyTeamColor = Color(192, 128, 128);
+	//enemyTeamColor = Color(192, 128, 128);
+	enemyTeamColor = Color(201, 110, 100);
 	noneTeamColor = Color(227);
 
 	match = 0;
 	drawType = 0;
 
-	font = Font(30, Typeface::Bold);
+	bigFont = Font(30, Typeface::Bold);
+	smallFont = Font(24, Typeface::Bold);
 
-	viewerBox = Rect();
+	viewerBox = RectF(SideAreaX * 0.96, MaxFieldY * TileSize * 0.70);
 
-	test = Font(50 * 0.46);
+	test = Font((int32)(50 * 0.46));
+	texLoser = Texture(Emoji(U"😵"));
+	texEven = Texture(Emoji(U"🤔"));
+	texWinner = Texture(Emoji(U"🙂"));
+
 }
+
 
 
 Procon30::GUI::~GUI()
