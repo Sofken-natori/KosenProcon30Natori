@@ -65,6 +65,7 @@ namespace Procon30 {
 		std::shared_ptr<Observer> observer;
 		std::shared_ptr<SendBuffer> buffer;
 
+		//TODO:‰Šú‰»‚ÉteamIDİ’è‚µ‚Ä‚¨‚­B
 		Game();
 		~Game();
 
