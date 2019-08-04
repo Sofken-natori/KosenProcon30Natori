@@ -49,8 +49,8 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 			form.schools.back().turns = itr[U"turns"].get<int32>();
 			form.schools.back().teamID = itr[U"teamID"].get<int32>();
 			form.schools.back().id = itr[U"id"].get<int32>();
-			form.schools.back().teamID = itr[U"intervalMillis"].get<int32>();
-			form.schools.back().id = itr[U"turnMillis"].get<int32>();
+			form.schools.back().intervalMillis = itr[U"intervalMillis"].get<int32>();
+			form.schools.back().turnMillis = itr[U"turnMillis"].get<int32>();
 		}
 
 	}
