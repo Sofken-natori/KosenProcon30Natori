@@ -22,6 +22,8 @@ namespace Procon30 {
 				int32 teamID;
 				int32 turns;
 				int32 id;
+				int32 intervalMillis;
+				int32 turnMillis;
 				//fieldInfo
 				int32 height;
 				int32 width;
@@ -64,10 +66,10 @@ namespace Procon30 {
 		std::future<CURLcode> future;
 
 		//asyncのステータスを読み取ります
-		CommunicationState getState() const;
+		[[nodiscard]] CommunicationState getState() const;
 
 		//Needs:getState() == Done
-		ConnectionStatusCode getResult();
+		[[nodiscard]] ConnectionStatusCode getResult();
 
 		//callback関数
 		static size_t callbackWrite(char* ptr, size_t size, size_t nmemb, String* stream);
@@ -79,7 +81,7 @@ namespace Procon30 {
 		//true : Done
 		//false: other
 		//あとは随時書く
-		bool checkResult();
+		[[nodiscard]] bool checkResult();
 
 		const FilePath jsonBuffer = U"json/buffer.json";
 	public:
@@ -108,7 +110,7 @@ namespace Procon30 {
 
 		//FormのLoop 実装はForm.cpp
 		//Turn0のタイミングでのみ呼ばれることを想定して書きます。
-		void initilizeFormLoop();
+		[[nodiscard]] Array<Form::school> initilizeFormLoop();
 
 		// host/matches/N/actionにpostします
 		bool checkPostAction();
@@ -117,7 +119,13 @@ namespace Procon30 {
 		~HTTPCommunication();
 
 		//GUIがobserverからGameを手に入れる際にmatchSizeが必要なのでgeterを追加します。
-		size_t getMatchNum() const;
+		[[nodiscard]] size_t getMatchNum() const;
+
+		[[nodiscard]] CommunicationData getComData() const;
+
+		[[nodiscard]] std::shared_ptr<SendBuffer> getBufferPtr();
+
+		[[nodiscard]] int32 getGameIDfromGameNum(const int32& num);
 
 		//TODO: operator=の中身を実装する
 		//DONT USE:This function is not implement

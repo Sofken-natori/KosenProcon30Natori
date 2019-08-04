@@ -32,7 +32,7 @@ bool Procon30::HTTPCommunication::Form::update()
 	return true;
 }
 
-void Procon30::HTTPCommunication::initilizeFormLoop()
+Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::initilizeFormLoop()
 {
 
 	Form form;
@@ -49,7 +49,8 @@ void Procon30::HTTPCommunication::initilizeFormLoop()
 			form.schools.back().turns = itr[U"turns"].get<int32>();
 			form.schools.back().teamID = itr[U"teamID"].get<int32>();
 			form.schools.back().id = itr[U"id"].get<int32>();
-
+			form.schools.back().teamID = itr[U"intervalMillis"].get<int32>();
+			form.schools.back().id = itr[U"turnMillis"].get<int32>();
 		}
 
 	}
@@ -67,9 +68,10 @@ void Procon30::HTTPCommunication::initilizeFormLoop()
 
 
 		form.schools.back().startedAtUnixTime = jsonReader[U"startedAtUnixTime"].get<int32>();
-		form.schools.back().width = jsonReader[U"width"].get<int32>();
-		form.schools.back().height = jsonReader[U"height"].get<int32>();
-		form.schools.back().turn = jsonReader[U"turn"].get<int32>();
+		//おそらくTooEarlyでアクセスするため
+		//form.schools.back().width = jsonReader[U"width"].get<int32>();
+		//form.schools.back().height = jsonReader[U"height"].get<int32>();
+		//form.schools.back().turn = jsonReader[U"turn"].get<int32>();
 	}
 
 	bool loop = true;
@@ -88,6 +90,6 @@ void Procon30::HTTPCommunication::initilizeFormLoop()
 		}
 		setConversionTable(arr);
 	}
-
-	return;
+	initilizeAllMatchHandles();
+	return form.schools;
 }

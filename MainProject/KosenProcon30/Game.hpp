@@ -47,6 +47,7 @@ namespace Procon30 {
 		int32 startedAtUnixTime;
 		String matchTo;
 		int32 turnMillis;
+		int32 intervalMillis;
 
 		//YASAI
 		void updateData();
