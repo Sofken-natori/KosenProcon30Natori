@@ -49,6 +49,7 @@ void Main()
 		games[i].MaxTurn = schools[http.getGameIDfromGameNum(i)].turns;
 		games[i].turnMillis = schools[http.getGameIDfromGameNum(i)].turnMillis;
 		games[i].intervalMillis = schools[http.getGameIDfromGameNum(i)].intervalMillis;
+		games[i].teams.first.teamID = schools[http.getGameIDfromGameNum(i)].teamID;
 	}
 
 	games[0].parseJson(U"example.json");

@@ -4,6 +4,7 @@
 
 Procon30::Agent::Agent()
 {
+	agentID = -1;
 }
 
 

@@ -17,6 +17,7 @@ namespace Procon30 {
 		static bool dataReceived;
 		static std::mutex ReceiveMtx;
 
+		//下の3つ整合性チェックが必要か議論あり
 		void parseAgentsData(Team& team, JSONValue object);
 		void parseTeamsData(JSONValue object);
 		void parseActionsData(JSONValue object);
