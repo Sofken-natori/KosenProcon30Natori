@@ -20,10 +20,10 @@ namespace Procon30 {
 		int32 height = 20;
 	public:
 		VirtualServer();
-		void putPoint();
+		void putPoint(int32 fieldType);
 		void putAgent();
 		void writeJson(FilePath path);
-		void negativePercent(int32 percent);
+		void negativePercent(int32 percent,int32 fieldType);
 		int32 calculateScore(TeamColor color);
 	};
 }

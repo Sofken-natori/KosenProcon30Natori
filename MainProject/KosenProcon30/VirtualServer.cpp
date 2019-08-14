@@ -3,7 +3,10 @@
 
 Procon30::VirtualServer::VirtualServer()
 {
-	putPoint();
+	width = Random(10, MaxFieldX);
+	height = Random(10, MaxFieldY);
+	agent_count = (width * height + 39) / 50;
+	putPoint(0);
 	putAgent();
 }
 
@@ -111,7 +114,7 @@ void Procon30::VirtualServer::writeJson(FilePath path)
 	tw.close();
 }
 
-void Procon30::VirtualServer::negativePercent(int32 percent)
+void Procon30::VirtualServer::negativePercent(int32 percent, int32 fieldType)
 {
 	bool isNegativeBorad = false;
 	if (percent > 50) {
@@ -124,43 +127,112 @@ void Procon30::VirtualServer::negativePercent(int32 percent)
 		}
 	}
 	int32 posX = 0, posY = 0;
-	int32 cnt = (((height * width) * percent) / 100) / 4;
-	while (cnt > 0) {
-		posX = Random(0, width / 2);
-		posY = Random(0, height / 2);
-		if (isNegativeBorad == false && field.m_board[posY][posX].score < 0) {
-			field.m_board[posY][posX].score *= -1;
-			cnt--;
-		}
-		if (isNegativeBorad == true && field.m_board[posY][posX].score > 0) {
-			field.m_board[posY][posX].score *= -1;
-			cnt--;
+	if (fieldType == 0) {
+		int32 cnt = (((height * width) * percent) / 100) / 4;
+		while (cnt > 0) {
+			posX = Random(0, (width - 1) / 2);
+			posY = Random(0, (height - 1) / 2);
+			if (isNegativeBorad == false && field.m_board[posY][posX].score < 0) {
+				field.m_board[posY][posX].score *= -1;
+				cnt--;
+			}
+			if (isNegativeBorad == true && field.m_board[posY][posX].score > 0) {
+				field.m_board[posY][posX].score *= -1;
+				cnt--;
+			}
 		}
 	}
+	else if (fieldType == 1) {
+		int32 cnt = (((height * width) * percent) / 100) / 2;
+		while (cnt > 0) {
+			posX = Random(0, (width - 1) / 2);
+			posY = Random(0, height - 1);
+			if (isNegativeBorad == false && field.m_board[posY][posX].score < 0) {
+				field.m_board[posY][posX].score *= -1;
+				cnt--;
+			}
+			if (isNegativeBorad == true && field.m_board[posY][posX].score > 0) {
+				field.m_board[posY][posX].score *= -1;
+				cnt--;
+			}
+		}
+	}
+	else if (fieldType == 2) {
+		int32 cnt = (((height * width) * percent) / 100) / 2;
+		while (cnt > 0) {
+			posX = Random(0, width - 1);
+			posY = Random(0, (height - 1) / 2);
+			if (isNegativeBorad == false && field.m_board[posY][posX].score < 0) {
+				field.m_board[posY][posX].score *= -1;
+				cnt--;
+			}
+			if (isNegativeBorad == true && field.m_board[posY][posX].score > 0) {
+				field.m_board[posY][posX].score *= -1;
+				cnt--;
+			}
+		}
+	}
+
 }
 
-void Procon30::VirtualServer::putPoint()
+void Procon30::VirtualServer::putPoint(int32 fieldType)
 {
-
 	field.boardSize.y = height;
 	field.boardSize.x = width;
+	if (fieldType == 0) {
+		//è„â∫ç∂âEëŒèÃ
+		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
+			for (int j = 0; j < (field.boardSize.x + 1) / 2; j++) {
+				field.m_board[i][j].score = abs(Random(-16, 16));
+				field.m_board[i][j].exist = true;
+			}
+		}
 
-	for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
-		for (int j = 0; j < (field.boardSize.x + 1) / 2; j++) {
-			field.m_board[i][j].score = abs(Random(-16, 16));
-			field.m_board[i][j].exist = true;
+		negativePercent(20, 0);
+
+		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
+			for (int j = 0; j < (width + 1) / 2; j++) {
+				field.m_board[i][field.boardSize.x - j - 1] = field.m_board[i][j];
+				field.m_board[field.boardSize.y - i - 1][j] = field.m_board[i][j];
+				field.m_board[field.boardSize.y - i - 1][field.boardSize.x - j - 1] = field.m_board[i][j];
+			}
+		}
+	}
+	else if (fieldType == 1) {
+		//ç∂âEëŒèÃ
+		for (int i = 0; i < field.boardSize.y; i++) {
+			for (int j = 0; j < (field.boardSize.x + 1) / 2; j++) {
+				field.m_board[i][j].score = abs(Random(-16, 16));
+				field.m_board[i][j].exist = true;
+			}
+		}
+
+		negativePercent(20, 0);
+
+		for (int i = 0; i < field.boardSize.y; i++) {
+			for (int j = 0; j < (width + 1) / 2; j++) {
+				field.m_board[i][field.boardSize.x - j - 1] = field.m_board[i][j];
+			}
+		}
+	}
+	else if (fieldType == 2) {
+		//è„â∫ëŒèÃ
+		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
+			for (int j = 0; j < field.boardSize.x; j++) {
+				field.m_board[i][j].score = abs(Random(-16, 16));
+				field.m_board[i][j].exist = true;
+			}
+		}
+
+		negativePercent(20, 2);
+
+		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
+			for (int j = 0; j < (width + 1) / 2; j++) {
+				field.m_board[field.boardSize.y - i - 1][j] = field.m_board[i][j];
+			}
 		}
 	}
 
-	negativePercent(20);
-
-	for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
-		for (int j = 0; j < (width + 1) / 2; j++) {
-			field.m_board[i][field.boardSize.x - j - 1] = field.m_board[i][j];
-			field.m_board[field.boardSize.y - i - 1][j] = field.m_board[i][j];
-			field.m_board[field.boardSize.y - i - 1][field.boardSize.x - j - 1] = field.m_board[i][j];
-		}
-	}
 
 	/*points.resize(height);
 	for (int i = 0; i < height; i++) {
