@@ -22,6 +22,7 @@ namespace Procon30 {
 		void parseTeamsData(JSONValue object);
 		void parseActionsData(JSONValue object);
 
+		
 	public:
 		//NEED:HTTPCommunicationから呼び出す
 		//これ思ったんだけど個別に起こしたほうが死ににくくて良い感じじゃないのか.jp
@@ -53,6 +54,11 @@ namespace Procon30 {
 		//YASAI
 		void updateData();
 		void sendToHTTP();
+		//threadに投げるもの
+		void Loop();
+
+		//Mainから呼び出すもの
+		void ThreadRun(std::thread& Holder);
 
 		//nasatame
 		//TODO : AgentIDなどを前もって聞いていないので適当実装、後で書き換える必要あり
