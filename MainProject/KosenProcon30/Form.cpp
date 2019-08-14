@@ -39,9 +39,16 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 
 	form.infoFont = Font(30);
 
+	this->getAllMatchesInfomation();
+	while (!checkResult()) {
+	}
+
 
 	{
+		//これは通ることを想定しています。
 		JSONReader jsonReader(U"json/AllMatchesInfo.json");
+
+		comData.gotMatchInfomationNum = jsonReader.arrayCount();
 
 		for (const auto& itr : jsonReader.arrayView()) {
 			form.schools.push_back({});
@@ -58,16 +65,25 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 	assert(comData.gotMatchInfomationNum == form.schools.size());
 
 	for (int i = 0; i < comData.gotMatchInfomationNum; i++) {
+
+		comData.connectionMatchNumber = i;
+
+		this->getMatchInfomation();
+		while (!checkResult()) {
+
+		}
+
 		JSONReader jsonReader;
 
+		//これは通ることを想定しています。
 		jsonReader.open(U"json/" + Format(i) + U"/field_" + Format(i) + U"_" + Format(0) + U".json");
 
 		if (!jsonReader) {
 			assert("Error : Can't open field json file in form");
 		}
-
-
-		form.schools.back().startedAtUnixTime = jsonReader[U"startedAtUnixTime"].get<int32>();
+		else {
+			form.schools.back().startedAtUnixTime = jsonReader[U"startedAtUnixTime"].get<int32>();
+		}
 		//おそらくTooEarlyでアクセスするため
 		//form.schools.back().width = jsonReader[U"width"].get<int32>();
 		//form.schools.back().height = jsonReader[U"height"].get<int32>();
