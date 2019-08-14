@@ -283,6 +283,8 @@ Procon30::HTTPCommunication::HTTPCommunication()
 	comData.connectionType = ConnectionType::Null;
 	comData.gotMatchInfomationNum = 0;
 	comData.nowConnecting = false;
+	comData.token = U"procon30_example_token";
+	comData.host = U"127.0.0.1:63583";
 	
 	//Setting Header
 	postList = NULL;
