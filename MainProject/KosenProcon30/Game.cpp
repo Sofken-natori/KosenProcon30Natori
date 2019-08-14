@@ -139,6 +139,20 @@ void Procon30::Game::Loop()
 		updateData();
 		observer->notify(gameNum,*this);
 		//AlgoŽÀs
+		{
+			assert(algorithm);
+
+			auto result = algorithm->execute(*this);
+
+			assert(result.code == Procon30::AlgorithmStateCode::None);
+
+			const int32 selectedOrder = Random(result.orders.size() - 1);
+
+			for (int32 i = 0; i < this->teams.first.agentNum; i++) {
+				this->teams.first.agents[i].nextPosition = this->teams.first.agents[i].nowPosition + result.orders[selectedOrder][i].dir;
+				this->teams.first.agents[i].action = result.orders[selectedOrder][i].action;
+			}
+		}
 		observer->notify(gameNum, *this);
 		sendToHTTP();
 		observer->notify(gameNum, *this);
@@ -162,6 +176,8 @@ Procon30::Game::Game()
 	MaxTurn = 60;
 	turn = 0;
 	startedAtUnixTime = -1;
+
+	algorithm.reset(new RandAlgorithm());
 }
 
 Procon30::Game::~Game()

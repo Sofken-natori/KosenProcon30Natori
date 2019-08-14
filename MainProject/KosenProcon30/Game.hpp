@@ -4,10 +4,12 @@
 #include "Field.hpp"
 #include "HTTPCommunication.hpp"
 #include "SendBuffer.hpp"
+#include "Algorithm.hpp"
 
 namespace Procon30 {
 
 	class Observer;
+	class Algorithm;
 
 	class Game
 	{
@@ -79,6 +81,9 @@ namespace Procon30 {
 
 		//UNDONE: When member variable changed, You must check this function. 
 		Game& operator=(const Procon30::Game& right);
+
+
+		std::unique_ptr<Algorithm> algorithm;
 	};
 
 }
