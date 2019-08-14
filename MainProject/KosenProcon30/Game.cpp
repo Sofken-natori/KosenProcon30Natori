@@ -113,9 +113,7 @@ void Procon30::Game::updateData()
 {
 	//Wait•”
 	std::unique_lock<std::mutex> lockWait(HTTPWaitMtx);
-	if (!dataReceived) {
-		HTTPWaitCond.wait(lockWait);
-	}
+	HTTPWaitCond.wait(lockWait, [this]() {return dataReceived; });
 
 	//ˆ—•”@¢ŠEˆêŽG.obj
 	FilePath path = Format(U"json/", gameNum, U"/nowField.json");
@@ -133,6 +131,29 @@ void Procon30::Game::sendToHTTP()
 	FilePath path = Format(U"json/", gameNum, U"/post_", gameNum, U"_", turn, U".json");
 	convertToJson(path);
 	buffer->pushPath(path);
+}
+
+void Procon30::Game::Loop()
+{
+	while (true) {
+		updateData();
+		observer->notify(gameNum,*this);
+		//AlgoŽÀs
+		observer->notify(gameNum, *this);
+		sendToHTTP();
+		observer->notify(gameNum, *this);
+		if (ProglamEnd.load())
+			break;
+	}
+	Logger << U"Game Thread End";
+	return;
+}
+
+void Procon30::Game::ThreadRun(std::thread& Holder)
+{
+	std::thread th(&Game::Loop, this);
+	Holder = std::move(th);
+	return;
 }
 
 Procon30::Game::Game()

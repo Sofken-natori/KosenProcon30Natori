@@ -95,9 +95,14 @@ namespace Procon30 {
 		//Need:MatchesConversionTable.size() > 0
 		void initilizeAllMatchHandles();
 
-		//Mainからthreadに投げるときはこれ...?
 		//随時更新
 		void update();
+
+		//threadに投げるもの
+		void Loop();
+
+		//Mainから呼び出すもの
+		void ThreadRun(std::thread& Holder);
 
 		// ping - failedしたらプログラムを落とす。
 		bool pingServerConnectionTest();

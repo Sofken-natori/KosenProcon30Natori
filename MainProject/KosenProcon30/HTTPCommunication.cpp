@@ -186,7 +186,9 @@ void Procon30::HTTPCommunication::initilizeAllMatchHandles()
 
 void Procon30::HTTPCommunication::update()
 {
-	bool dataChanged = checkResult();
+	bool gotResult = checkResult();
+	//postˆ—‚Í‰½‚æ‚è‚à—Dæ‚³‚ê‚é‚×‚«
+	bool postNow = checkPostAction();
 	if (comData.gotMatchInfomationNum == comData.matchNum) {
 		Procon30::Game::HTTPReceived();
 		comData.gotMatchInfomationNum = 0;
@@ -194,9 +196,29 @@ void Procon30::HTTPCommunication::update()
 	if (comData.gotMatchInfomationNum != 0) {
 		getMatchInfomation();
 	}
-	if (dataChanged) {
+
+
+	if (gotResult || postNow) {
 		observer->notify(*this);
 	}
+}
+
+void Procon30::HTTPCommunication::Loop()
+{
+	while (true) {
+		update();
+		if (ProglamEnd.load())
+			break;
+	}
+	Logger << U"HTTPCommunication Thread End";
+	return;
+}
+
+void Procon30::HTTPCommunication::ThreadRun(std::thread & Holder)
+{
+	std::thread th(&HTTPCommunication::Loop, this);
+	Holder = std::move(th);
+	return;
 }
 
 bool Procon30::HTTPCommunication::pingServerConnectionTest()

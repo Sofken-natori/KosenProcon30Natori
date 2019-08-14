@@ -31,6 +31,8 @@ void Main()
 	//5:Game2
 	//6:VirtualServer
 
+	Procon30::ProglamEnd.store(false);
+
 	Procon30::GUI gui;
 
 	Procon30::HTTPCommunication http;
@@ -40,6 +42,9 @@ void Main()
 	auto schools = http.initilizeFormLoop();
 
 	std::array<Procon30::Game,Procon30::MaxGameNumber> games;
+	std::array<std::thread, Procon30::MaxGameNumber> gameThreads;
+	std::thread HTTPThread;
+
 
 	for (size_t i = 0; i < http.getMatchNum(); i++) {
 		games[i].observer = gui.getObserver();
@@ -54,17 +59,31 @@ void Main()
 		games[i].teams.first.teamID = schools[http.getGameIDfromGameNum(i)].teamID;
 	}
 
-	games[0].parseJson(U"example.json");
+	//games[0].parseJson(U"example.json");
 	Scene::SetBackground(Color(128));
 
 	//これがここでいいのかわかんないです
 	gui.dataUpdate();
 
-	while (System::Update())
+	http.ThreadRun(HTTPThread);
+	for (size_t i = 0; i < http.getMatchNum(); i++) {
+		games[i].ThreadRun(gameThreads[i]);
+	}
+
+	//あとでthreadGuardにします。
+	while (System::Update() || Procon30::ProglamEnd.load())
 	{
 		gui.draw();
 
 		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
+	}
+
+	//std::terminateが出ます。許して
+	return;
+	Procon30::ProglamEnd.store(true);
+	HTTPThread.join();
+	for (size_t i = 0; i < http.getMatchNum(); i++) {
+		gameThreads[i].join();
 	}
 }
 
