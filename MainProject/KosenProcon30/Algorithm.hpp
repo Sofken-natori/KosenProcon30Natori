@@ -4,7 +4,7 @@
 
 namespace Procon30 {
 
-	enum class Code {
+	enum class AlgorithmStateCode : uint32 {
 		None,
 		TimeOver,
 		UnknownError
@@ -18,7 +18,7 @@ namespace Procon30 {
 	using agentsOrder = std::array<Order, 8>;
 
 	struct SearchResult {
-		Code code;
+		AlgorithmStateCode code;
 		Array<agentsOrder> orders;
 	};
 
@@ -28,7 +28,7 @@ namespace Procon30 {
 		virtual SearchResult execute(const Game& game) = 0;
 	};
 
-	class RandAlgorithm : Algorithm {
+	class RandAlgorithm : public Algorithm {
 		SearchResult execute(const Game& game);
 	};
 

@@ -30,6 +30,8 @@ Procon30::SearchResult Procon30::RandAlgorithm::execute(const Game& game)
 
 	SearchResult result;
 
+	result.code = AlgorithmStateCode::None;
+
 	result.orders << order;
 
 	return result;
