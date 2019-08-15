@@ -30,8 +30,10 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 			size_t ofset = Min(receiveRawData.indexOf('['), receiveRawData.indexOf('{'));
 			code = Parse<uint32>(receiveRawData.substr(9, 3));
 			TextWriter writer(jsonBuffer);
+			writer.clear();
 			writer << receiveRawData.substr(ofset);
 			writer.close();
+			receiveRawData.clear();
 		}
 		if (code != 200 && code != 201) {
 			Logger << U"Status Error:" << code;
@@ -67,7 +69,7 @@ size_t Procon30::HTTPCommunication::callbackWrite(char* ptr, size_t size, size_t
 	buf.append(ptr, dataLength);
 	{
 		std::lock_guard<std::mutex> lock(receiveRawMtx);
-		stream->append(Unicode::Widen(buf));
+		stream->append(Unicode::FromUTF8(buf));
 	}
 	return dataLength;
 }
@@ -92,7 +94,11 @@ bool Procon30::HTTPCommunication::checkResult()
 		{
 		case CommunicationState::Done:
 			comData.nowConnecting = false;
-			switch (getResult())
+			if (!FileSystem::Exists(Format(U"json/", comData.gotMatchInfomationNum, U"/"))) {
+				FileSystem::CreateDirectories(Format(U"json/", comData.gotMatchInfomationNum, U"/"));
+			}
+			comData.connectionCode = getResult();
+			switch (comData.connectionCode)
 			{
 			case Procon30::ConnectionStatusCode::OK:
 				switch (comData.connectionType)
@@ -109,7 +115,7 @@ bool Procon30::HTTPCommunication::checkResult()
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
 					jsonReader.open(jsonBuffer);
-					comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum,U"/field_", comData.gotMatchInfomationNum,U"_",jsonReader[U"turn"].get<int32>(), U".json");
+					comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum, U"/field_", comData.gotMatchInfomationNum, U"_", jsonReader[U"turn"].get<int32>(), U".json");
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
 					Print << U"gotMatchInfoof:" << comData.gotMatchInfomationNum;
@@ -127,6 +133,15 @@ bool Procon30::HTTPCommunication::checkResult()
 				}
 				break;
 			case Procon30::ConnectionStatusCode::TooEarly:
+				jsonReader.open(jsonBuffer);
+				comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum, U"/field_", comData.gotMatchInfomationNum, U"_TE.json");
+				jsonReader.close();
+				FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
+				Print << U"gotMatchInfoof:" << comData.gotMatchInfomationNum << U"::TooEarly";
+				if (isFormLoop) {
+					comData.gotMatchInfomationNum++;
+				}
+
 				break;
 			case Procon30::ConnectionStatusCode::UnacceptableTime:
 				break;
@@ -166,16 +181,18 @@ void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
 
 void Procon30::HTTPCommunication::initilizeAllMatchHandles()
 {
+	getMatchHandles.resize(comData.matchNum);
+	postActionHandles.resize(comData.matchNum);
 	for (int32 i = 0; i < comData.matchNum; i++) {
 		getMatchHandles[i] = curl_easy_init();
-		curl_easy_setopt(getMatchHandles[i], CURLOPT_URL, Format(U"http://", comData.host,U"/matches/", comData.matchesConversionTable[i]).narrow().c_str());
+		curl_easy_setopt(getMatchHandles[i], CURLOPT_URL, Format(U"http://", comData.host, U"/matches/", comData.matchesConversionTable[i]).narrow().c_str());
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_HTTPHEADER, otherList);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_HEADER, 1L);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_WRITEFUNCTION, callbackWrite);
 		curl_easy_setopt(getMatchHandles[i], CURLOPT_WRITEDATA, &receiveRawData);
 
 		postActionHandles[i] = curl_easy_init();
-		curl_easy_setopt(postActionHandles[i], CURLOPT_URL, Format(U"http://", comData.host,U"/matches/", comData.matchesConversionTable[i],U"/action").narrow().c_str());
+		curl_easy_setopt(postActionHandles[i], CURLOPT_URL, Format(U"http://", comData.host, U"/matches/", comData.matchesConversionTable[i], U"/action").narrow().c_str());
 		curl_easy_setopt(postActionHandles[i], CURLOPT_HTTPHEADER, postList);
 		curl_easy_setopt(postActionHandles[i], CURLOPT_HEADER, 1L);
 		curl_easy_setopt(postActionHandles[i], CURLOPT_POST, 1L);
@@ -214,7 +231,7 @@ void Procon30::HTTPCommunication::Loop()
 	return;
 }
 
-void Procon30::HTTPCommunication::ThreadRun(std::thread & Holder)
+void Procon30::HTTPCommunication::ThreadRun(std::thread& Holder)
 {
 	std::thread th(&HTTPCommunication::Loop, this);
 	Holder = std::move(th);
@@ -246,7 +263,7 @@ bool Procon30::HTTPCommunication::getAllMatchesInfomation()
 bool Procon30::HTTPCommunication::getMatchInfomation()
 {
 	if (comData.nowConnecting) return false;
-	if (comData.gotMatchInfomationNum >= comData.matchNum) return false;
+	if (comData.gotMatchInfomationNum >= comData.matchNum && !isFormLoop) return false;
 	comData.nowConnecting = true;
 	comData.connectionType = ConnectionType::MatchInfomation;
 	comData.connectionMatchNumber = comData.gotMatchInfomationNum;
@@ -283,9 +300,11 @@ Procon30::HTTPCommunication::HTTPCommunication()
 	comData.connectionType = ConnectionType::Null;
 	comData.gotMatchInfomationNum = 0;
 	comData.nowConnecting = false;
+	isFormLoop = true;
+
 	comData.token = U"procon30_example_token";
-	comData.host = U"127.0.0.1:63583";
-	
+	comData.host = U"127.0.0.1:8081";
+
 	//Setting Header
 	postList = NULL;
 	otherList = NULL;

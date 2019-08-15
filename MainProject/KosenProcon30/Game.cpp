@@ -175,7 +175,7 @@ Procon30::Game::Game()
 	isSearchFinished = false;
 	MaxTurn = 60;
 	turn = 0;
-	startedAtUnixTime = -1;
+	startedAtUnixTime = 0;
 
 	algorithm.reset(new RandAlgorithm());
 }

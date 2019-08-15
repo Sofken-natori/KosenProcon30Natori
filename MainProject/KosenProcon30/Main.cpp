@@ -4,7 +4,7 @@
 # include "Game.hpp"
 # include "VirtualServer.hpp"
 
-void Main()
+void Main() try
 {
 	Window::Resize(Procon30::WindowSize);
 	Scene::SetBackground(ColorF(0.8, 0.9, 1.0));
@@ -86,6 +86,10 @@ void Main()
 		gameThreads[i].join();
 	}
 }
+catch (const std::exception& e) {
+	Logger << Unicode::Widen(std::string(e.what()));
+}
+
 
 
 

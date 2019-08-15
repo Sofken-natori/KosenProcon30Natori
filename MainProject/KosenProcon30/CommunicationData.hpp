@@ -44,5 +44,8 @@ namespace Procon30 {
 
 		//’ÊM‚ğs‚Á‚½í•Ê
 		ConnectionType connectionType;
+
+		//’ÊMŒ‹‰Ê
+		ConnectionStatusCode connectionCode;
 	};
 }

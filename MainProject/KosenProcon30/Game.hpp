@@ -48,7 +48,7 @@ namespace Procon30 {
 		int32 gameID;
 		//0,1,2...
 		int32 gameNum;
-		int32 startedAtUnixTime;
+		uint64 startedAtUnixTime;
 		String matchTo;
 		int32 turnMillis;
 		int32 intervalMillis;

@@ -28,7 +28,7 @@ namespace Procon30 {
 				int32 height;
 				int32 width;
 				int32 turn;
-				int32 startedAtUnixTime;
+				uint64 startedAtUnixTime;
 
 				bool checked;
 			};
@@ -84,6 +84,8 @@ namespace Procon30 {
 		[[nodiscard]] bool checkResult();
 
 		const FilePath jsonBuffer = U"json/buffer.json";
+
+		bool isFormLoop;
 	public:
 		//Œ‹\•p”É‚É‘‚«Š·‚í‚é‚¯‚ÇnotifyƒKƒ“ƒKƒ“‚â‚Á‚Ä‚¢‚¢‚Ì...?
 		std::shared_ptr<Observer> observer;

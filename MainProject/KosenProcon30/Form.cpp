@@ -40,15 +40,14 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 	form.infoFont = Font(30);
 
 	this->getAllMatchesInfomation();
-	while (!checkResult()) {
+	while (System::Update()) {
+		if (checkResult())break;
 	}
 
 
 	{
 		//これは通ることを想定しています。
 		JSONReader jsonReader(U"json/AllMatchesInfo.json");
-
-		comData.gotMatchInfomationNum = jsonReader.arrayCount();
 
 		for (const auto& itr : jsonReader.arrayView()) {
 			form.schools.push_back({});
@@ -62,34 +61,51 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 
 	}
 
-	assert(comData.gotMatchInfomationNum == form.schools.size());
-
-	for (int i = 0; i < comData.gotMatchInfomationNum; i++) {
-
+	//assert(comData.gotMatchInfomationNum == form.schools.size());
+	CURL* TempHandle;
+	TempHandle = curl_easy_init();
+	curl_easy_setopt(TempHandle, CURLOPT_HTTPHEADER, otherList);
+	curl_easy_setopt(TempHandle, CURLOPT_HEADER, 1L);
+	curl_easy_setopt(TempHandle, CURLOPT_WRITEFUNCTION, callbackWrite);
+	curl_easy_setopt(TempHandle, CURLOPT_WRITEDATA, &receiveRawData);
+	for (int i = 0; i < form.schools.size(); i++) {
+		curl_easy_setopt(TempHandle, CURLOPT_URL, Format(U"http://", comData.host, U"/matches/", form.schools[i].id).narrow().c_str());
+		comData.nowConnecting = true;
+		comData.connectionType = ConnectionType::MatchInfomation;
 		comData.connectionMatchNumber = i;
 
-		this->getMatchInfomation();
-		while (!checkResult()) {
-
+		future = std::async(std::launch::async, [&]() {
+			return curl_easy_perform(TempHandle);
+			});
+		while (System::Update()) {
+			if (checkResult())break;
 		}
 
 		JSONReader jsonReader;
 
 		//これは通ることを想定しています。
-		jsonReader.open(U"json/" + Format(i) + U"/field_" + Format(i) + U"_" + Format(0) + U".json");
+		jsonReader.open(comData.receiveJsonPath);
 
 		if (!jsonReader) {
 			assert("Error : Can't open field json file in form");
 		}
 		else {
-			form.schools.back().startedAtUnixTime = jsonReader[U"startedAtUnixTime"].get<int32>();
+			switch (comData.connectionCode)
+			{
+			case ConnectionStatusCode::TooEarly:
+				form.schools[i].startedAtUnixTime = jsonReader[U"startAtUnixTime"].get<uint64>();
+				break;
+			default:
+				form.schools[i].startedAtUnixTime = jsonReader[U"startedAtUnixTime"].get<uint64>();
+				break;
+			}
 		}
 		//おそらくTooEarlyでアクセスするため
 		//form.schools.back().width = jsonReader[U"width"].get<int32>();
 		//form.schools.back().height = jsonReader[U"height"].get<int32>();
 		//form.schools.back().turn = jsonReader[U"turn"].get<int32>();
 	}
-
+	curl_easy_cleanup(TempHandle);
 	bool loop = true;
 
 	while (System::Update() && loop) {
@@ -99,13 +115,14 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 
 	{
 		Array<int> arr;
-		for (int i = 0; i < comData.gotMatchInfomationNum; i++) {
+		for (int i = 0; i < form.schools.size(); i++) {
 			if (form.schools[i].checked)
-				arr << i;
+				arr << form.schools[i].id;
 
 		}
 		setConversionTable(arr);
 	}
 	initilizeAllMatchHandles();
+	comData.gotMatchInfomationNum = 0;
 	return form.schools;
 }
