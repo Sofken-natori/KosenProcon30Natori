@@ -1,14 +1,20 @@
+#include <ctime>
 #include "HTTPCommunication.hpp"
 
 void Procon30::HTTPCommunication::Form::draw() const
 {
 
+	const std::time_t t = std::time(0);
+	infoFont(U"now time:{}"_fmt(t)).draw(Vec2(1200, 900),Palette::Red);
+
 	for (int i = 0; i < this->schools.size(); i++) {
 		auto& school = schools[i];
 
 		//Infos
-		infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}"_fmt(school.teamID, school.turns, school.id,
-			school.startedAtUnixTime, school.height, school.width)).draw(400, i * 200 + 100);
+
+		infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}\n now time - startedAtUnixTime:{}"_fmt(school.teamID, school.turns, school.id,
+			school.startedAtUnixTime, school.height, school.width, t - (int64)school.startedAtUnixTime)).draw(400, i * 200 + 100);
+
 	}
 
 }
@@ -44,7 +50,7 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 		if (checkResult())break;
 	}
 
-
+	
 	{
 		//Ç±ÇÍÇÕí ÇÈÇ±Ç∆ÇëzíËÇµÇƒÇ¢Ç‹Ç∑ÅB
 		JSONReader jsonReader(U"json/AllMatchesInfo.json");
