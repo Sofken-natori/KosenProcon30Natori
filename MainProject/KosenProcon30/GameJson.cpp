@@ -36,9 +36,9 @@ void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
 void Procon30::Game::parseTeamsData(JSONValue object)
 {
 	{
-		const auto& team = *object.arrayView().begin();
+		const auto& jsonFirstTeamID = (*object.arrayView().begin())[U"teamID"].get<int32>();
 
-		if (team[U"teamID"].get<int32>() == this->teams.first.teamID) {
+		if (jsonFirstTeamID == this->teams.first.teamID) {
 			{
 				const auto& team = *object.arrayView().begin();
 				//this->teams.first.teamID = team[U"teamID"].get<int32>();
@@ -57,7 +57,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 				parseAgentsData(this->teams.second, team[U"agents"]);
 			}
 		}
-		else if (team[U"teamID"].get<int32>() == this->teams.second.teamID) {
+		else if (jsonFirstTeamID == this->teams.second.teamID) {
 			{
 				const auto& team = *object.arrayView().begin();
 				//this->teams.second.teamID = team[U"teamID"].get<int32>();
@@ -97,7 +97,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 			}
 		}
 		else {
-			assert(team[U"teamID"].get<int32>() == this->teams.first.teamID);
+			assert(jsonFirstTeamID == this->teams.first.teamID);
 		}
 
 	}
