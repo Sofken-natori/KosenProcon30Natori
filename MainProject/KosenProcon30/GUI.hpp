@@ -14,7 +14,6 @@ namespace Procon30 {
 		std::array<RectF, MaxGameNumber> teamTile;
 		std::array<double, MaxGameNumber> correctedTileSize;
 		std::array<Font, MaxGameNumber>  scoreFont;
-		std::array<std::pair<Array<String>, Array<String>>, MaxGameNumber>  agentInfo;
 		Array<String> viewerStrings;
 
 
