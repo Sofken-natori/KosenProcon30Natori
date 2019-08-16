@@ -4,6 +4,8 @@
 /MainProject/KosenProcon30/App/AS_DEBUG/
 /MainProject/KosenProcon30/App/example/
 /MainProject/KosenProcon30/App/json/
+/MainProject/KosenProcon30/App/json/buffer.json
+/MainProject/KosenProcon30/App/json/AllMatchesInfo.json
 *.exe
 *_log.html
 *.user

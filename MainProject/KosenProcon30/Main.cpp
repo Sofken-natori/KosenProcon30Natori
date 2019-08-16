@@ -61,13 +61,13 @@ void Main()
 	Scene::SetBackground(Color(128));
 
 	//これがここでいいのかわかんないです
-	gui.dataUpdate();
+	
 
 	http.ThreadRun();
 	for (size_t i = 0; i < http.getMatchNum(); i++) {
 		games[i].ThreadRun();
 	}
-
+	gui.dataUpdate();
 	//あとでthreadGuardにします。
 	while (System::Update() || Procon30::ProglamEnd.load())
 	{

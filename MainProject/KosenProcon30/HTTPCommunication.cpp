@@ -253,6 +253,7 @@ void Procon30::HTTPCommunication::Loop()
 
 void Procon30::HTTPCommunication::ThreadRun()
 {
+	observer->notify(*this);
 	std::thread th(&HTTPCommunication::Loop, this);
 	this->thisThread = std::move(th);
 	return;
