@@ -156,17 +156,17 @@ void Procon30::Game::Loop()
 		observer->notify(gameNum, *this);
 		sendToHTTP();
 		observer->notify(gameNum, *this);
-		if (ProglamEnd.load())
+		if (ProglamEnd.load() == true)
 			break;
 	}
 	Logger << U"Game Thread End";
 	return;
 }
 
-void Procon30::Game::ThreadRun(std::thread& Holder)
+void Procon30::Game::ThreadRun()
 {
 	std::thread th(&Game::Loop, this);
-	Holder = std::move(th);
+	this->thisThread = std::move(th);
 	return;
 }
 
@@ -182,15 +182,25 @@ Procon30::Game::Game()
 
 Procon30::Game::~Game()
 {
+	if (thisThread.joinable()) {
+		//thisThread.detach();
+	}
 }
 
 Procon30::Game& Procon30::Game::operator=(const Procon30::Game& right)
 {
 	this->field = right.field;
 	this->gameTimer = right.gameTimer;
+	this->turnTimer = right.turnTimer;
 	this->turn = right.turn;
 	this->MaxTurn = right.MaxTurn;
-	this->turnTimer = right.turnTimer;
+	this->gameID = right.gameID;
+	this->gameNum = right.gameNum;
+	this->matchTo = right.matchTo;
+	this->turnMillis = right.turnMillis;
+	this->intervalMillis = right.intervalMillis;
+	this->startedAtUnixTime = right.startedAtUnixTime;
+	this->teams = right.teams;
 	this->isSearchFinished = right.isSearchFinished;
 
 	return (*this);

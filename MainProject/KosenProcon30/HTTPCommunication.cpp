@@ -23,6 +23,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 		if (result != CURLE_OK) {
 			Logger << U"curl_easy_perform() failed.\nUnixTime(Milli):"
 				<< Time::GetMillisecSinceEpoch();
+			Print << U"curl_easy_perform() failed.";
 			return ConnectionStatusCode::ConnectionLost;
 		}
 		{
@@ -89,6 +90,7 @@ bool Procon30::HTTPCommunication::checkResult()
 {
 
 	JSONReader jsonReader;
+	int32 thisTurn;
 	if (comData.nowConnecting) {
 		switch (getState())
 		{
@@ -115,11 +117,19 @@ bool Procon30::HTTPCommunication::checkResult()
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
 					jsonReader.open(jsonBuffer);
-					comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum, U"/field_", comData.gotMatchInfomationNum, U"_", jsonReader[U"turn"].get<int32>(), U".json");
+					thisTurn = jsonReader[U"turn"].get<int32>();
+					comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum, U"/field_", comData.gotMatchInfomationNum, U"_", thisTurn, U".json");
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
+					FileSystem::Copy(jsonBuffer, Format(U"json/",comData.gotMatchInfomationNum, U"/nowfield.json"), CopyOption::OverwriteExisting);
 					Print << U"gotMatchInfoof:" << comData.gotMatchInfomationNum;
-					comData.gotMatchInfomationNum++;
+					if (thisTurn > comData.gotMatchInfoOfTurn[comData.gotMatchInfomationNum] && !isFormLoop) {
+						comData.gotMatchInfoOfTurn[comData.gotMatchInfomationNum] = thisTurn;
+						comData.gotMatchInfomationNum++;
+					}
+					else if (isFormLoop) {
+						comData.gotMatchInfomationNum++;
+					}
 					break;
 				case Procon30::ConnectionType::PostAction:
 					jsonReader.open(jsonBuffer);
@@ -213,7 +223,7 @@ void Procon30::HTTPCommunication::update()
 	if (comData.gotMatchInfomationNum != 0) {
 		getMatchInfomation();
 	}
-
+	//ŽžŠÔ‚É‡‚í‚¹‚ÄŽæ“¾ˆ—‚ð‘‚«‚Ü‚·‚ª...(¡‚Í‚©‚¯‚È‚¢(ŒöŽ®‚Ì‰ñ“š‘Ò‚¿))
 
 	if (gotResult || postNow) {
 		observer->notify(*this);
@@ -222,19 +232,29 @@ void Procon30::HTTPCommunication::update()
 
 void Procon30::HTTPCommunication::Loop()
 {
+	while (comData.gotMatchInfomationNum != comData.matchNum) {
+		getMatchInfomation();
+		while (true)
+		{
+			if (checkResult())break;
+		}
+		std::this_thread::sleep_for(500ms);
+	}
+	Procon30::Game::HTTPReceived();
+	observer->notify(*this);
 	while (true) {
 		update();
-		if (ProglamEnd.load())
+		if (ProglamEnd.load() == true)
 			break;
 	}
 	Logger << U"HTTPCommunication Thread End";
 	return;
 }
 
-void Procon30::HTTPCommunication::ThreadRun(std::thread& Holder)
+void Procon30::HTTPCommunication::ThreadRun()
 {
 	std::thread th(&HTTPCommunication::Loop, this);
-	Holder = std::move(th);
+	this->thisThread = std::move(th);
 	return;
 }
 
@@ -301,15 +321,23 @@ Procon30::HTTPCommunication::HTTPCommunication()
 	comData.gotMatchInfomationNum = 0;
 	comData.nowConnecting = false;
 	isFormLoop = true;
+	{
+		JSONReader reader(U"AccessInfo.json");
+		comData.token = reader[U"Token"].getString();
+		comData.host = reader[U"Host"].getString();
+	}
+	//comData.host = U"127.0.0.1:8081";
+	//comData.token = U"procon30_example_token";
+	for (int32& i : comData.gotMatchInfoOfTurn) {
+		i = -1;
+	}
 
-	comData.token = U"procon30_example_token";
-	comData.host = U"127.0.0.1:8081";
 
 	//Setting Header
 	postList = NULL;
 	otherList = NULL;
 	otherList = curl_slist_append(otherList, (U"Authorization:" + comData.token).narrow().c_str());
-	postList = curl_slist_append(postList, "Authorization:procon30_example_token");
+	postList = curl_slist_append(postList, (U"Authorization:" + comData.token).narrow().c_str());
 	postList = curl_slist_append(postList, "Content-Type: application/json");
 
 	//Handle-initilize
@@ -330,6 +358,9 @@ Procon30::HTTPCommunication::HTTPCommunication()
 
 Procon30::HTTPCommunication::~HTTPCommunication()
 {
+	if (thisThread.joinable()) {
+		//thisThread.detach();
+	}
 }
 
 size_t Procon30::HTTPCommunication::getMatchNum() const

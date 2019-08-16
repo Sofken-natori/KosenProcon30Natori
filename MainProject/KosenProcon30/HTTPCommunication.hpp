@@ -86,6 +86,8 @@ namespace Procon30 {
 		const FilePath jsonBuffer = U"json/buffer.json";
 
 		bool isFormLoop;
+
+		std::thread thisThread;
 	public:
 		//結構頻繁に書き換わるけどnotifyガンガンやっていいの...?
 		std::shared_ptr<Observer> observer;
@@ -104,7 +106,7 @@ namespace Procon30 {
 		void Loop();
 
 		//Mainから呼び出すもの
-		void ThreadRun(std::thread& Holder);
+		void ThreadRun();
 
 		// ping - failedしたらプログラムを落とす。
 		bool pingServerConnectionTest();
