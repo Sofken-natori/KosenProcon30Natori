@@ -4,7 +4,7 @@
 # include "Game.hpp"
 # include "VirtualServer.hpp"
 
-void Main() try
+void Main()
 {
 	Window::Resize(Procon30::WindowSize);
 	Scene::SetBackground(ColorF(0.8, 0.9, 1.0));
@@ -42,8 +42,6 @@ void Main() try
 	auto schools = http.initilizeFormLoop();
 
 	std::array<Procon30::Game,Procon30::MaxGameNumber> games;
-	std::array<std::thread, Procon30::MaxGameNumber> gameThreads;
-	std::thread HTTPThread;
 
 
 	for (size_t i = 0; i < http.getMatchNum(); i++) {
@@ -63,31 +61,26 @@ void Main() try
 	Scene::SetBackground(Color(128));
 
 	//これがここでいいのかわかんないです
-	gui.dataUpdate();
+	
 
-	http.ThreadRun(HTTPThread);
+	http.ThreadRun();
 	for (size_t i = 0; i < http.getMatchNum(); i++) {
-		games[i].ThreadRun(gameThreads[i]);
+		games[i].ThreadRun();
 	}
-
+	gui.dataUpdate();
 	//あとでthreadGuardにします。
 	while (System::Update() || Procon30::ProglamEnd.load())
 	{
+		
 		gui.draw();
 
 		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
 	}
 
 	//std::terminateが出ます。許して
-	return;
+	
 	Procon30::ProglamEnd.store(true);
-	HTTPThread.join();
-	for (size_t i = 0; i < http.getMatchNum(); i++) {
-		gameThreads[i].join();
-	}
-}
-catch (const std::exception& e) {
-	Logger << Unicode::Widen(std::string(e.what()));
+	return;
 }
 
 

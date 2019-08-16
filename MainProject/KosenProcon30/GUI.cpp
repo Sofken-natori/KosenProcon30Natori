@@ -48,7 +48,7 @@ void Procon30::GUI::draw() {
 	}
 
 
-	bigFont(U"現在のターン : " + observer->getStock((int32)match).turn).draw(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.15), Palette::White);
+	bigFont(U"現在のターン : " , observer->getStock((int32)match).turn).draw(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.15), Palette::White);
 
 	//絵文字表示
 	if (observer->getStock((int32)match).teams.first.score > observer->getStock((int32)match).teams.second.score + 50) {
@@ -77,9 +77,9 @@ void Procon30::GUI::draw() {
 
 	bigFont(U"Agents").draw(Vec2(myInfoX, MaxFieldY * TileSize * 0.48), myTeamColor);
 
-	for (int i : step(observer->getStock((int32)match).teams.first.agentNum)) {
-		smallFont(agentInfo[match].first[i]).draw(Vec2(myInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), myTeamColor);
-	}
+	//for (int i : step(observer->getStock((int32)match).teams.first.agentNum)) {
+	//	smallFont(agentInfo[match].first[i]).draw(Vec2(myInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), myTeamColor);
+	//}
 
 	//相手チーム情報
 	bigFont(U"EnemyTeam").draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.30), enemyTeamColor);
@@ -89,9 +89,9 @@ void Procon30::GUI::draw() {
 
 	bigFont(U"Agents").draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.48), enemyTeamColor);
 
-	for (int i : step(observer->getStock((int32)match).teams.second.agentNum)) {
-		smallFont(agentInfo[match].second[i]).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), enemyTeamColor);
-	}
+	//for (int i : step(observer->getStock((int32)match).teams.second.agentNum)) {
+	//	smallFont(agentInfo[match].second[i]).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), enemyTeamColor);
+	//}
 
 
 

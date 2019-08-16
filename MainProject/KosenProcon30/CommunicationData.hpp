@@ -42,6 +42,9 @@ namespace Procon30 {
 		//試合情報を取得した数
 		int32 gotMatchInfomationNum;
 
+		//取得したターン数
+		std::array<int32, MaxGameNumber> gotMatchInfoOfTurn;
+
 		//通信を行った種別
 		ConnectionType connectionType;
 
