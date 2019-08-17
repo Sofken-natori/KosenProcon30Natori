@@ -38,7 +38,47 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 	{
 		const auto& jsonFirstTeamID = (*object.arrayView().begin())[U"teamID"].get<int32>();
 
-		if (jsonFirstTeamID == this->teams.first.teamID) {
+		if (this->teams.second.teamID == -1) {
+			if (jsonFirstTeamID == this->teams.first.teamID) {
+				{
+					const auto& team = *object.arrayView().begin();
+					//this->teams.first.teamID = team[U"teamID"].get<int32>();
+					this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
+					this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
+					this->teams.first.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+					parseAgentsData(this->teams.first, team[U"agents"]);
+				}
+				{
+					const auto& team = *(++object.arrayView().begin());
+					this->teams.second.teamID = team[U"teamID"].get<int32>();
+					this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
+					this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
+					this->teams.second.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+					parseAgentsData(this->teams.second, team[U"agents"]);
+				}
+			}
+			else {
+				{
+					const auto& team = *object.arrayView().begin();
+					this->teams.second.teamID = team[U"teamID"].get<int32>();
+					this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
+					this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
+					this->teams.second.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+					parseAgentsData(this->teams.second, team[U"agents"]);
+				}
+				{
+					const auto& team = *(++object.arrayView().begin());
+					//UNDONE:本番環境では入れること
+					assert(this->teams.first.teamID == team[U"teamID"].get<int32>());
+					this->teams.first.teamID = team[U"teamID"].get<int32>();
+					this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
+					this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
+					this->teams.first.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+					parseAgentsData(this->teams.first, team[U"agents"]);
+				}
+			}
+		}
+		else if (jsonFirstTeamID == this->teams.first.teamID) {
 			{
 				const auto& team = *object.arrayView().begin();
 				//this->teams.first.teamID = team[U"teamID"].get<int32>();
@@ -49,7 +89,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 			}
 			{
 				const auto& team = *(++object.arrayView().begin());
-				//assert(this->teams.second.teamID == team[U"teamID"].get<int32>());
+				assert(this->teams.second.teamID == team[U"teamID"].get<int32>());
 				this->teams.second.teamID = team[U"teamID"].get<int32>();
 				this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
 				this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
@@ -69,26 +109,6 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 			{
 				const auto& team = *(++object.arrayView().begin());
 				assert(this->teams.first.teamID == team[U"teamID"].get<int32>());
-				this->teams.first.teamID = team[U"teamID"].get<int32>();
-				this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
-				this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
-				this->teams.first.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
-				parseAgentsData(this->teams.first, team[U"agents"]);
-			}
-		}
-		else if (this->teams.second.teamID == -1) {
-			{
-				const auto& team = *object.arrayView().begin();
-				this->teams.second.teamID = team[U"teamID"].get<int32>();
-				this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
-				this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
-				this->teams.second.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
-				parseAgentsData(this->teams.second, team[U"agents"]);
-			}
-			{
-				const auto& team = *(++object.arrayView().begin());
-				//UNDONE:本番環境では入れること
-				//assert(this->teams.first.teamID == team[U"teamID"].get<int32>());
 				this->teams.first.teamID = team[U"teamID"].get<int32>();
 				this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
 				this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
