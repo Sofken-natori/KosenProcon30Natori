@@ -133,10 +133,11 @@ bool Procon30::HTTPCommunication::checkResult()
 					break;
 				case Procon30::ConnectionType::PostAction:
 					jsonReader.open(jsonBuffer);
-					comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum, U"/postReceive_", comData.gotMatchInfomationNum, U"_", jsonReader[U"turn"].get<int32>(), U".json");
+					comData.receiveJsonPath = Format(U"json/", comData.connectionMatchNumber, U"/postReceive_", comData.connectionMatchNumber, U"_", jsonReader[U"turn"].get<int32>(), U".json");
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
-					FileSystem::Copy(jsonBuffer, Format(U"json/", comData.gotMatchInfomationNum, U"/nowField.json"), CopyOption::OverwriteExisting);
+					FileSystem::Copy(jsonBuffer, Format(U"json/", comData.connectionMatchNumber, U"/nowField.json"), CopyOption::OverwriteExisting);
+					Print << U"postActionof:" << comData.connectionMatchNumber;
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
