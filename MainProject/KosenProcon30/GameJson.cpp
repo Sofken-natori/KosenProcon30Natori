@@ -264,14 +264,14 @@ String encodeString(const Procon30::Team& team)
 	result += U"\t\"actions\": [\n";
 	for (int32 i = 0; i < team.agentNum; i++) {
 		result += U"\t\t{\n";
-		result += U"\t\t\t\"agentID\":" + Format(team.agents.at(i).agentID) + U"\n";
+		result += U"\t\t\t\"agentID\":" + Format(team.agents.at(i).agentID) + U",\n";
 
-		const String type = (Array<String>{ U"stay", U"move", U"remove" })[(int32)team.agents.at(i).action];
-		result += U"\t\t\t\"type\":" + type + U"\n";
-		result += U"\t\t\t\"dx\":" + Format(team.agents.at(i).nextPosition.x - team.agents.at(i).nowPosition.x) + U"\n";
+		const String type = (Array<String>{ U"\"stay\"", U"\"move\"", U"\"remove\"" })[(int32)team.agents.at(i).action];
+		result += U"\t\t\t\"type\":" + type + U",\n";
+		result += U"\t\t\t\"dx\":" + Format(team.agents.at(i).nextPosition.x - team.agents.at(i).nowPosition.x) + U",\n";
 		result += U"\t\t\t\"dy\":" + Format(team.agents.at(i).nextPosition.y - team.agents.at(i).nowPosition.y) + U"\n";
 
-		result += U"\t\t}" + (i == team.agentNum - 1) ? U"\n" : U",\n";
+		result += U"\t\t}" + Format((i == team.agentNum - 1) ? U"\n" : U",\n");
 	}
 
 	result += U"\t]\n";
