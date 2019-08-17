@@ -10,8 +10,8 @@ void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
 		{
 			const JSONValue& agent = object.arrayView()[i];
 			team.agents.at(i).agentID = agent[U"agentID"].get<int32>();
-			team.agents.at(i).nowPosition.x = agent[U"x"].get<int32>();
-			team.agents.at(i).nowPosition.y = agent[U"y"].get<int32>();
+			team.agents.at(i).nowPosition.x = agent[U"x"].get<int32>() - 1;
+			team.agents.at(i).nowPosition.y = agent[U"y"].get<int32>() - 1;
 		}
 	}
 	else
@@ -22,8 +22,8 @@ void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
 			bool ok = false;
 			for (size_t k = 0; k < team.agentNum; k++) {
 				if (team.agents.at(k).agentID == agent[U"agentID"].get<int32>()) {
-					team.agents.at(k).nowPosition.x = agent[U"x"].get<int32>();
-					team.agents.at(k).nowPosition.y = agent[U"y"].get<int32>();
+					team.agents.at(k).nowPosition.x = agent[U"x"].get<int32>() - 1;
+					team.agents.at(k).nowPosition.y = agent[U"y"].get<int32>() - 1;
 					ok = true;
 					break;
 				}
@@ -46,6 +46,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 					this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
 					this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
 					this->teams.first.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+					this->teams.first.color = TeamColor::Blue;
 					parseAgentsData(this->teams.first, team[U"agents"]);
 				}
 				{
@@ -54,6 +55,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 					this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
 					this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
 					this->teams.second.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+					this->teams.second.color = TeamColor::Red;
 					parseAgentsData(this->teams.second, team[U"agents"]);
 				}
 			}
@@ -64,6 +66,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 					this->teams.second.tileScore = team[U"tilePoint"].get<int32>();
 					this->teams.second.areaScore = team[U"areaPoint"].get<int32>();
 					this->teams.second.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+					this->teams.second.color = TeamColor::Red;
 					parseAgentsData(this->teams.second, team[U"agents"]);
 				}
 				{
@@ -74,6 +77,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 					this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
 					this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
 					this->teams.first.score = team[U"tilePoint"].get<int32>() + team[U"areaPoint"].get<int32>();
+					this->teams.first.color = TeamColor::Blue;
 					parseAgentsData(this->teams.first, team[U"agents"]);
 				}
 			}
@@ -180,6 +184,7 @@ void Procon30::Game::parseJson(FilePath fileName)
 				for (int32 y = 0; y < reader[U"points"].arrayCount(); y++) {
 					for (int32 x = 0; x < reader[U"points"].arrayView()[y].arrayCount(); x++) {
 						field.m_board.at(y, x).score = reader[U"points"].arrayView()[y].arrayView()[x].get<int32>();
+						field.m_board.at(y, x).exist = true;
 					}
 				}
 			}

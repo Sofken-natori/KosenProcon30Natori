@@ -7,6 +7,10 @@ void Procon30::GUI::draw() {
 	SimpleGUI::RadioButtons(match, viewerStrings, Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.01));
 	SimpleGUI::RadioButtons(drawType, { U"タイル + エージェント",U"タイル + 点数" }, Vec2(MaxFieldX * TileSize * 1.2, MaxFieldY * TileSize * 0.01));
 
+	if (observer->getUpdateFlag((int32)match)) {
+		dataUpdate();
+	}
+
 	//ここで盤面描画する
 	for (size_t y : step(observer->getStock((int32)match).field.boardSize.y)) {
 		for (size_t x : step(observer->getStock((int32)match).field.boardSize.x)) {
@@ -166,7 +170,7 @@ void Procon30::GUI::dataUpdate()
 
 		teamTile[i] = RectF(correctedTileSize[i] * 0.96, correctedTileSize[i] * 0.96);
 
-		scoreFont[i] = Font(correctedTileSize[i] * 0.46);
+		scoreFont[i] = Font((int32)(correctedTileSize[i] * 0.46));
 
 		viewerStrings.push_back(U"match_{}"_fmt(i));
 	}
