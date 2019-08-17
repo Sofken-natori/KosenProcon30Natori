@@ -5,9 +5,9 @@ void Procon30::HTTPCommunication::Form::draw() const
 {
 
 	const std::time_t t = std::time(0);
-	infoFont(U"now time:{}"_fmt(t)).draw(Vec2(1200, 900), Palette::Red);
+	infoFont(U"now time:{}"_fmt(t)).draw(Vec2(1200.0, 900.0), Palette::Red);
 
-	for (int i = 0; i < this->schools.size(); i++) {
+	for (size_t i = 0; i < this->schools.size(); i++) {
 		auto& school = schools[i];
 
 		//Infos
@@ -18,11 +18,11 @@ void Procon30::HTTPCommunication::Form::draw() const
 			const int sec = abs(t - (int64)school.startedAtUnixTime) % 60;
 			const int min = (abs(t - (int64)school.startedAtUnixTime) / 60) % 60;
 			const int hour = (abs(t - (int64)school.startedAtUnixTime) / (60 * 60)) % 24;
-			const int day = (abs(t - (int64)school.startedAtUnixTime) / (60 * 60 * 24));
+			const int64 day = (abs(t - (int64)school.startedAtUnixTime) / ((int64)60 * 60 * 24));
 
 			infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}"_fmt(school.teamID, school.turns, school.id,
-				school.startedAtUnixTime, school.height, school.width)).draw(400, i * 200 + 100);
-			infoFont(U"開始前：開始まで{}日{}時間{}分{}秒"_fmt(day, hour, min, sec)).draw(400, i * 200 + 200);
+				school.startedAtUnixTime, school.height, school.width)).draw(400.0, i * 200.0 + 100);
+			infoFont(U"開始前：開始まで{}日{}時間{}分{}秒"_fmt(day, hour, min, sec)).draw(400.0, i * 200.0 + 200);
 		}
 		else {
 			//開始後
@@ -30,11 +30,11 @@ void Procon30::HTTPCommunication::Form::draw() const
 			const int sec = abs(t - (int64)school.startedAtUnixTime) % 60;
 			const int min = (abs(t - (int64)school.startedAtUnixTime) / 60) % 60;
 			const int hour = (abs(t - (int64)school.startedAtUnixTime) / (60 * 60)) % 24;
-			const int day = (abs(t - (int64)school.startedAtUnixTime) / (60 * 60 * 24));
+			const int64 day = (abs(t - (int64)school.startedAtUnixTime) / ((int64)60 * 60 * 24));
 
 			infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}"_fmt(school.teamID, school.turns, school.id,
-				school.startedAtUnixTime, school.height, school.width)).draw(400, i * 200 + 100);
-			infoFont(U"開始後：開始してから{}日{}時間{}分{}秒"_fmt(day, hour, min, sec)).draw(400, i * 200 + 200);
+				school.startedAtUnixTime, school.height, school.width)).draw(400.0, i * 200.0 + 100);
+			infoFont(U"開始後：開始してから{}日{}時間{}分{}秒"_fmt(day, hour, min, sec)).draw(400.0, i * 200.0 + 200);
 		}
 
 	}
@@ -44,15 +44,22 @@ void Procon30::HTTPCommunication::Form::draw() const
 bool Procon30::HTTPCommunication::Form::update()
 {
 
-	for (int i = 0; i < this->schools.size(); i++) {
+	bool canStart = false;
+
+	for (size_t i = 0; i < this->schools.size(); i++) {
 		auto& school = schools[i];
 
 		//Selector
 		SimpleGUI::CheckBox(school.checked, school.matchTo, Vec2(100, i * 200 + 100));
+
+		if (school.checked == true) {
+			canStart = true;
+		}
+
 	}
 
 	//Start Button
-	if (SimpleGUI::Button(U"Start", Vec2(1700, 900)))
+	if (SimpleGUI::Button(U"Start", Vec2(1600, 900),Optional<double>(150),canStart))
 	{
 		return false;
 	}
@@ -96,7 +103,7 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 	curl_easy_setopt(TempHandle, CURLOPT_HEADER, 1L);
 	curl_easy_setopt(TempHandle, CURLOPT_WRITEFUNCTION, callbackWrite);
 	curl_easy_setopt(TempHandle, CURLOPT_WRITEDATA, &receiveRawData);
-	for (int i = 0; i < form.schools.size(); i++) {
+	for (size_t i = 0; i < form.schools.size(); i++) {
 		curl_easy_setopt(TempHandle, CURLOPT_URL, Format(U"http://", comData.host, U"/matches/", form.schools[i].id).narrow().c_str());
 		comData.nowConnecting = true;
 		comData.connectionType = ConnectionType::MatchInfomation;
@@ -144,7 +151,7 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 
 	{
 		Array<int> arr;
-		for (int i = 0; i < form.schools.size(); i++) {
+		for (size_t i = 0; i < form.schools.size(); i++) {
 			if (form.schools[i].checked)
 				arr << form.schools[i].id;
 
