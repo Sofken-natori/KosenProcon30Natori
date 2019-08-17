@@ -5,15 +5,37 @@ void Procon30::HTTPCommunication::Form::draw() const
 {
 
 	const std::time_t t = std::time(0);
-	infoFont(U"now time:{}"_fmt(t)).draw(Vec2(1200, 900),Palette::Red);
+	infoFont(U"now time:{}"_fmt(t)).draw(Vec2(1200, 900), Palette::Red);
 
 	for (int i = 0; i < this->schools.size(); i++) {
 		auto& school = schools[i];
 
 		//Infos
 
-		infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}\n now time - startedAtUnixTime:{}"_fmt(school.teamID, school.turns, school.id,
-			school.startedAtUnixTime, school.height, school.width, t - (int64)school.startedAtUnixTime)).draw(400, i * 200 + 100);
+		if (t - (int64)school.startedAtUnixTime < 0) {
+			//開始前
+
+			const int sec = abs(t - (int64)school.startedAtUnixTime) % 60;
+			const int min = (abs(t - (int64)school.startedAtUnixTime) / 60) % 60;
+			const int hour = (abs(t - (int64)school.startedAtUnixTime) / (60 * 60)) % 24;
+			const int day = (abs(t - (int64)school.startedAtUnixTime) / (60 * 60 * 24));
+
+			infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}"_fmt(school.teamID, school.turns, school.id,
+				school.startedAtUnixTime, school.height, school.width)).draw(400, i * 200 + 100);
+			infoFont(U"開始前：開始まで{}日{}時間{}分{}秒"_fmt(day, hour, min, sec)).draw(400, i * 200 + 200);
+		}
+		else {
+			//開始後
+
+			const int sec = abs(t - (int64)school.startedAtUnixTime) % 60;
+			const int min = (abs(t - (int64)school.startedAtUnixTime) / 60) % 60;
+			const int hour = (abs(t - (int64)school.startedAtUnixTime) / (60 * 60)) % 24;
+			const int day = (abs(t - (int64)school.startedAtUnixTime) / (60 * 60 * 24));
+
+			infoFont(U"teamID:{},turns:{},id:{}\nstartedAtUnixTime:{},height:{},width:{}"_fmt(school.teamID, school.turns, school.id,
+				school.startedAtUnixTime, school.height, school.width)).draw(400, i * 200 + 100);
+			infoFont(U"開始後：開始してから{}日{}時間{}分{}秒"_fmt(day, hour, min, sec)).draw(400, i * 200 + 200);
+		}
 
 	}
 
@@ -50,7 +72,7 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 		if (checkResult())break;
 	}
 
-	
+
 	{
 		//これは通ることを想定しています。
 		JSONReader jsonReader(U"json/AllMatchesInfo.json");
@@ -99,17 +121,18 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 			switch (comData.connectionCode)
 			{
 			case ConnectionStatusCode::TooEarly:
+				//おそらくTooEarlyでアクセスするため
 				form.schools[i].startedAtUnixTime = jsonReader[U"startAtUnixTime"].get<uint64>();
 				break;
 			default:
+				//TooEarlyではないので
 				form.schools[i].startedAtUnixTime = jsonReader[U"startedAtUnixTime"].get<uint64>();
+				form.schools[i].width = jsonReader[U"width"].get<int32>();
+				form.schools[i].height = jsonReader[U"height"].get<int32>();
+				form.schools[i].turn = jsonReader[U"turn"].get<int32>();
 				break;
 			}
 		}
-		//おそらくTooEarlyでアクセスするため
-		//form.schools.back().width = jsonReader[U"width"].get<int32>();
-		//form.schools.back().height = jsonReader[U"height"].get<int32>();
-		//form.schools.back().turn = jsonReader[U"turn"].get<int32>();
 	}
 	curl_easy_cleanup(TempHandle);
 	bool loop = true;
