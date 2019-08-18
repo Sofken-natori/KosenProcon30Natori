@@ -307,8 +307,9 @@ bool Procon30::HTTPCommunication::checkPostAction()
 	int32 gameNum = Parse<int32>(splittedPath[1]);
 	comData.connectionMatchNumber = gameNum;
 	String send = getPostData(path);
-	curl_easy_setopt(postActionHandles[comData.connectionMatchNumber], CURLOPT_POSTFIELDSIZE, (long)send.size());
-	curl_easy_setopt(postActionHandles[comData.connectionMatchNumber], CURLOPT_POSTFIELDS, send.c_str());
+	tempPostString = send.toUTF8();
+	curl_easy_setopt(postActionHandles[comData.connectionMatchNumber], CURLOPT_POSTFIELDSIZE, (long)tempPostString.size());
+	curl_easy_setopt(postActionHandles[comData.connectionMatchNumber], CURLOPT_POSTFIELDS, tempPostString.c_str());
 	future = std::async(std::launch::async, [&]() {
 		return curl_easy_perform(postActionHandles[comData.connectionMatchNumber]);
 		});

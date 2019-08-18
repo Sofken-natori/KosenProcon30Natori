@@ -56,6 +56,9 @@ namespace Procon30 {
 		curl_slist* postList = NULL;
 		curl_slist* otherList = NULL;
 
+		//Postデータ保持用
+		std::string tempPostString;
+
 		//receiveRawDataのmutex
 		static std::mutex receiveRawMtx;
 
