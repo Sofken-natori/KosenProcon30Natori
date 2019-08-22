@@ -72,7 +72,7 @@ void Main()
 	while (System::Update() || Procon30::ProglamEnd.load())
 	{
 		
-		//gui.draw();
+		gui.draw();
 
 		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
 	}
