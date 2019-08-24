@@ -134,11 +134,11 @@ void Procon30::VirtualServer::negativePercent(int32 percent, int32 fieldType)
 		while (cnt > 0) {
 			posX = Random(0, (width - 1) / 2);
 			posY = Random(0, (height - 1) / 2);
-			if (isNegativeBorad == false && field.m_board[posY][posX].score < 0) {
+			if (isNegativeBorad == false && field.m_board[posY][posX].score >= 0) {
 				field.m_board[posY][posX].score *= -1;
 				cnt--;
 			}
-			if (isNegativeBorad == true && field.m_board[posY][posX].score > 0) {
+			if (isNegativeBorad == true && field.m_board[posY][posX].score <= 0) {
 				field.m_board[posY][posX].score *= -1;
 				cnt--;
 			}
@@ -149,11 +149,11 @@ void Procon30::VirtualServer::negativePercent(int32 percent, int32 fieldType)
 		while (cnt > 0) {
 			posX = Random(0, (width - 1) / 2);
 			posY = Random(0, height - 1);
-			if (isNegativeBorad == false && field.m_board[posY][posX].score < 0) {
+			if (isNegativeBorad == false && field.m_board[posY][posX].score >= 0) {
 				field.m_board[posY][posX].score *= -1;
 				cnt--;
 			}
-			if (isNegativeBorad == true && field.m_board[posY][posX].score > 0) {
+			if (isNegativeBorad == true && field.m_board[posY][posX].score <= 0) {
 				field.m_board[posY][posX].score *= -1;
 				cnt--;
 			}
@@ -164,11 +164,11 @@ void Procon30::VirtualServer::negativePercent(int32 percent, int32 fieldType)
 		while (cnt > 0) {
 			posX = Random(0, width - 1);
 			posY = Random(0, (height - 1) / 2);
-			if (isNegativeBorad == false && field.m_board[posY][posX].score < 0) {
+			if (isNegativeBorad == false && field.m_board[posY][posX].score >= 0) {
 				field.m_board[posY][posX].score *= -1;
 				cnt--;
 			}
-			if (isNegativeBorad == true && field.m_board[posY][posX].score > 0) {
+			if (isNegativeBorad == true && field.m_board[posY][posX].score <= 0) {
 				field.m_board[posY][posX].score *= -1;
 				cnt--;
 			}
