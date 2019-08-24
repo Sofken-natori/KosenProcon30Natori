@@ -112,8 +112,10 @@ int32 Procon30::Game::calculateTileScore(TeamColor color)
 void Procon30::Game::updateData()
 {
 	//Wait•”
-	std::unique_lock<std::mutex> lockWait(HTTPWaitMtx);
-	HTTPWaitCond.wait(lockWait, [this]() {return dataReceived; });
+	{
+		std::unique_lock<std::mutex> lockWait(HTTPWaitMtx);
+		HTTPWaitCond.wait(lockWait, [this]() {return dataReceived; });
+	}
 
 	//ˆ—•”@¢ŠEˆêG.obj
 	FilePath path = Format(U"json/", gameNum, U"/nowField.json");
