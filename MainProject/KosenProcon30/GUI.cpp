@@ -167,7 +167,9 @@ void Procon30::GUI::dataUpdate()
 
 	viewerStrings.clear();
 
-	for (size_t i = 0; i < observer->getStock().getMatchNum(); i++) {
+	//CATION:ごめんちょっとだけ許して。
+	const size_t matchNum = (virtualServerMode ? 2 : observer->getStock().getMatchNum());
+	for (size_t i = 0; i < matchNum; i++) {
 		size_t width = observer->getStock((int32)i).field.boardSize.x;
 		size_t height = observer->getStock((int32)i).field.boardSize.y;
 		correctedTileSize[i] = (TileSize * MaxFieldX + .0) / (Max(width, height) * TileSize + .0) * TileSize;
