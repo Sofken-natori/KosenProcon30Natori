@@ -6,6 +6,12 @@
 
 void Main()
 {
+	if (Procon30::virtualServerMode) {
+		//VirtualServerMode
+		Procon30::VirtualServer::VirtualServerMain();
+		return;
+	}
+
 	Window::Resize(Procon30::WindowSize);
 	Scene::SetBackground(ColorF(0.8, 0.9, 1.0));
 	Scene::SetScaleMode(ScaleMode::AspectFit);
@@ -68,7 +74,7 @@ void Main()
 		games[i].ThreadRun();
 	}
 	gui.dataUpdate();
-	//あとでthreadGuardにします。
+	//TODO:あとでthreadGuardにします。
 	while (System::Update() || Procon30::ProglamEnd.load())
 	{
 		

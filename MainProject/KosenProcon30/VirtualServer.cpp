@@ -1,5 +1,7 @@
 #include "VirtualServer.hpp"
-
+#include "GUI.hpp"
+#include "SendBuffer.hpp"
+#include "Observer.hpp"
 
 Procon30::VirtualServer::VirtualServer()
 {
@@ -188,7 +190,7 @@ void Procon30::VirtualServer::putPoint(int32 fieldType)
 			}
 		}
 
-		negativePercent(20, 0);
+		//negativePercent(20, 0);
 
 		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
 			for (int j = 0; j < (width + 1) / 2; j++) {
@@ -415,4 +417,176 @@ int32 Procon30::VirtualServer::calculateScore(TeamColor color)
 	}
 
 	return result;
+}
+
+void Procon30::VirtualServer::VirtualServerMain()
+{
+
+	Window::Resize(Procon30::WindowSize);
+	Scene::SetBackground(ColorF(0.8, 0.9, 1.0));
+	Scene::SetScaleMode(ScaleMode::AspectFit);
+	Window::SetStyle(WindowStyle::Sizable);
+
+
+	//incetance genarate order
+	//1st GUI
+	//- Observer instance
+	//2nd HTTPCommunication
+	//- SendBuffer instance
+	//- Observer shared_ptr Substitution
+	//3rd Game
+	//- Observer shared_ptr Substitution
+	//- SendBuffer shared_ptr Substitution
+
+	//thread
+	//1:GUI - main,Observer
+	//2:HTTPCommunication　-sendBuffer
+	//3:Game0
+	//4:Game1
+	//5:Game2
+	//6:VirtualServer
+
+	Procon30::ProglamEnd.store(false);
+
+	Procon30::GUI gui;
+
+	Procon30::VirtualServer server;
+
+	server.buffer.reset(new SendBuffer());
+
+	std::array<Procon30::Game, Procon30::MaxGameNumber> games;
+
+	server.observer = gui.getObserver();
+
+	for (size_t i = 0; i < server.getMatchNum(); i++) {
+		games[i].observer = gui.getObserver();
+		games[i].buffer = server.getBufferPtr();
+		games[i].gameNum = i;
+		//gameIDは、先攻が1、後攻が2固定。また、公式配布のIDと同じとする
+		games[i].gameID = server.getGameIDfromGameNum(i);
+		//その内現在時間を入れる。
+		games[i].startedAtUnixTime = 0;
+		games[i].matchTo = (i == 0 ? U"A" : U"B");
+		games[i].MaxTurn = 60;
+		games[i].turnMillis = 10000;
+		games[i].intervalMillis = 2000;
+		//先攻から自分1,相手2
+		games[i].teams.first.teamID = (i == 0 ? 1 : 2);
+	}
+
+	Scene::SetBackground(Color(128));
+
+	for (size_t i = 0; i < server.getMatchNum(); i++) {
+		games[i].ThreadRun();
+	}
+	//ごくまれに間に合ってないでスレッド行っちゃった事例が発生するために、時間遅延。
+	server.ThreadRun();
+
+	gui.dataUpdate();
+	//TODO:あとでthreadGuardにします。
+	while (System::Update() || Procon30::ProglamEnd.load())
+	{
+
+		gui.draw();
+
+		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
+	}
+
+	Procon30::ProglamEnd.store(true);
+	return;
+}
+
+const size_t Procon30::VirtualServer::getMatchNum() const
+{
+	return 2;
+}
+
+const size_t Procon30::VirtualServer::getGameIDfromGameNum(const int32& num) const
+{
+	size_t table[] = { 1, 2 };
+	return table[num];
+}
+
+std::shared_ptr<Procon30::SendBuffer> Procon30::VirtualServer::getBufferPtr()
+{
+	return buffer;
+}
+
+
+void Procon30::VirtualServer::Loop()
+{
+	//サーバーからデータ取得
+	//その代わりにデータをセットしておく
+
+	/*
+	while (comData.gotMatchInfomationNum != comData.matchNum) {
+		getMatchInfomation();
+		while (true)
+		{
+			if (checkResult())break;
+		}
+		std::this_thread::sleep_for(500ms);
+	}
+	*/
+
+	//仮置き
+	FileSystem::Copy(U"A-1.json", Format(U"json/", 0, U"/nowField.json"), CopyOption::OverwriteExisting);
+	FileSystem::Copy(U"A-1.json", Format(U"json/", 1, U"/nowField.json"), CopyOption::OverwriteExisting);
+	Print << U"gotMatchInfoof:" << 0;
+	Print << U"gotMatchInfoof:" << 0;
+
+	std::this_thread::sleep_for(500ms);
+	Procon30::Game::HTTPReceived();
+	//observer->notify(*this);
+	while (true) {
+		update();
+		if (ProglamEnd.load() == true)
+			break;
+	}
+	Logger << U"VirtualServer Thread End";
+	return;
+}
+
+void Procon30::VirtualServer::ThreadRun()
+{
+	//observer->notify(*this);
+	std::thread th(&VirtualServer::Loop, this);
+	this->thisThread = std::move(th);
+	return;
+}
+
+void Procon30::VirtualServer::update()
+{
+	//結果が帰ってきてないか確認
+	//bool gotResult = checkResult();
+
+	//TODO:ここで時間になってたらシミュレーションを行う。
+	//TODO:サーバー側のデータのconvertToJsonを作る。
+
+	//post処理は何よりも優先されるべき
+	//答えをポスト
+
+	//TODO:SendBuffer等を用いて答えが投稿されてきたらどこかにコピーしておくようにする。
+
+	//bool postNow = checkPostAction();
+	//TODO:シミュレーションを行ったらフラグを立てて置いてここでGameを起こすようにする
+	/*
+	if (comData.gotMatchInfomationNum == comData.matchNum) {
+		Procon30::Game::HTTPReceived();
+		comData.gotMatchInfomationNum = 0;
+	}
+	*/
+	//データの更新は一斉だからいらないかな
+	/*
+	if (comData.gotMatchInfomationNum != 0) {
+		getMatchInfomation();
+	}
+	*/
+	//時間に合わせて取得処理を書きますが...(今はかけない(公式の回答待ち))
+	//ここはいらないかな
+	/*
+	if (gotResult || postNow) {
+		observer->notify(*this);
+	}
+	*/
 }
