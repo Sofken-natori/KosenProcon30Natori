@@ -30,8 +30,6 @@ namespace Procon30 {
 		//これ思ったんだけど個別に起こしたほうが死ににくくて良い感じじゃないのか.jp
 		static void HTTPReceived();
 
-		
-
 		Field field;
 
 		//first: MyTeam
@@ -64,8 +62,6 @@ namespace Procon30 {
 		//Mainから呼び出すもの
 		void ThreadRun();
 
-		//nasatame
-		//TODO : AgentIDなどを前もって聞いていないので適当実装、後で書き換える必要あり
 		void parseJson(FilePath fileName);
 
 		//actionデータをjsonにパースするだけの機能しか持たない。
