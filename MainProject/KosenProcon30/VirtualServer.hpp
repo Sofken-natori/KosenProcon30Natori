@@ -22,11 +22,20 @@ namespace Procon30 {
 		int32 agent_count = 8;
 		int32 width = 20;
 		int32 height = 20;
+
+		////////////  対戦用にHTTPCommunicationと同じような機能を持たせる。  //////////////////
+
+		static const int32 v_turnMillis = 1000;
+		static const int32 v_intervalMillis = 1000;
+
+		bool isStrategyStep;
+
 	public:
 		VirtualServer();
 		void putPoint(int32 fieldType);
 		void putAgent();
 		void writeJson(FilePath path);
+		void writeFieldJson(FilePath path);
 		void negativePercent(int32 percent,int32 fieldType);
 		int32 calculateScore(TeamColor color);
 
@@ -56,5 +65,21 @@ namespace Procon30 {
 
 		void update();
 
+		Stopwatch gameTimer;
+		Stopwatch turnTimer;
+
+
+		bool checkPostAction();
+
+		String getPostData(const FilePath& filePath);
+
+		bool posted[2];
+
+		int turn;
+	
+		bool initMatch(const FilePath& filePath);
+		bool parseActionData(const FilePath& filePath);
+
+		void simulation();
 	};
 }
