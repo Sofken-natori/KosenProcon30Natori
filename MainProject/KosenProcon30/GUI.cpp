@@ -11,7 +11,7 @@ void Procon30::GUI::draw() {
 		dataUpdate();
 	}
 
-	//TODO:Gameのコピーコンストラクタを作ってほしいかも。
+	//WAGNI:Gameのコピーコンストラクタを作ってほしいかも。なくていい
 	Game game;
 	game = observer->getStock((int32)match);
 

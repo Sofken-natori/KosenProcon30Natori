@@ -17,12 +17,19 @@ Procon30::SearchResult Procon30::RandAlgorithm::execute(const Game& game)
 
 
 	for (int32 i = 0; i < game.teams.first.agentNum; i++) {
+		int count = 0;
 		while (true) {
-			Point rand = RandomPoint(s3d::Rect(2, 2));
+			Point rand = RandomPoint(s3d::Rect(3, 3));
 			rand -= Point(1, 1);
-			if (InRange(game.teams.first.agents.at(i).nowPosition + rand)) {
+			if (InRange(game.teams.first.agents.at(i).nowPosition + rand) && rand != Point(0,0)) {
 				order.at(i).dir = rand;
 				order.at(i).action = getAction(game.teams.first.agents.at(i).nowPosition + rand);
+				break;
+			}
+			count++;
+			if (count > 100) {
+				order.at(i).dir = Point(0, 0);
+				order.at(i).action = Action::Stay;
 				break;
 			}
 		}

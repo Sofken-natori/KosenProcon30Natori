@@ -132,7 +132,8 @@ void Procon30::Game::parseActionsData(JSONValue object)
 	{
 		for (int32 i = 0; i < object.arrayCount(); i++)
 		{
-			//TODO: agentIDに合わせた保存先を選択するように変更この時ターンも確認すること。
+			//WAGNI: agentIDに合わせた保存先を選択するように変更この時(parseAgentDataでよくね)。
+			//ターンも確認すること（これは最新ターンのみの仕様だからいらない）。
 			const JSONValue& action = object.arrayView()[i];
 			const auto agentID = action[U"agentID"].get<int32>();
 			const auto type = action[U"type"].getString();
@@ -141,7 +142,7 @@ void Procon30::Game::parseActionsData(JSONValue object)
 
 			bool ok = false;
 			{
-				//TODO:このタイミングで整合性チェック
+				//WAGNI:このタイミングで整合性チェック。いらなそうだからあとで
 
 				auto& team = this->teams.first;
 				for (auto& agent : team.agents) {
