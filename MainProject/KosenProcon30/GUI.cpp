@@ -15,7 +15,7 @@ void Procon30::GUI::draw() {
 	Game game;
 	game = observer->getStock((int32)match);
 
-	//ここで盤面描画する
+	//盤面描画
 	for (size_t y : step(game.field.boardSize.y)) {
 		for (size_t x : step(game.field.boardSize.x)) {
 			Procon30::TeamColor tileColor = game.field.m_board[y][x].color;
@@ -29,13 +29,13 @@ void Procon30::GUI::draw() {
 			else {
 				teamTile[match].movedBy(pos).draw(noneTeamColor);
 			}
-			//点数描画が必要ならする
+			//点数描画
 			if (drawType == 1) {
-				//文字色切り離したほうがよさげかも
 				scoreFont[match](game.field.m_board[y][x].score).drawAt(Vec2((x + 0.5) * correctedTileSize[match], (y + 0.5) * correctedTileSize[match]), Palette::Black);
 			}
 		}
 	}
+
 
 	//エージェントの描画
 	if (drawType == 0) {
@@ -58,8 +58,7 @@ void Procon30::GUI::draw() {
 
 	bigFont(U"現在のターン : ", game.turn).draw(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.15), Palette::White);
 
-	//絵文字表示
-	//ここ要りますか（ぇ
+	//絵文字表示 +50 or -50 にて表情変化 
 	if (game.teams.first.score > game.teams.second.score + 50) {
 		texWinner.resized(90).draw(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.19);
 	}
@@ -78,6 +77,7 @@ void Procon30::GUI::draw() {
 	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.405, MaxFieldY * TileSize * 0.28)).draw();
 	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.405, MaxFieldY * TileSize * 0.28)).drawFrame(10, 0, enemyTeamColor);
 
+
 	//自チーム情報
 	bigFont(U"MyTeam").draw(Vec2(myInfoX, MaxFieldY * TileSize * 0.30), myTeamColor);
 	bigFont(U"Score : {}"_fmt(game.teams.first.score)).draw(Vec2(myInfoX, MaxFieldY * TileSize * 0.34), myTeamColor);
@@ -93,6 +93,7 @@ void Procon30::GUI::draw() {
 			game.teams.first.agents[i].nextPosition)).draw(Vec2(myInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), myTeamColor);
 	}
 
+
 	//相手チーム情報
 	bigFont(U"EnemyTeam").draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.30), enemyTeamColor);
 	bigFont(U"Score : {}"_fmt(game.teams.second.score)).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.34), enemyTeamColor);
@@ -107,58 +108,6 @@ void Procon30::GUI::draw() {
 			game.teams.second.agents[i].nowPosition,
 			game.teams.second.agents[i].nextPosition)).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), enemyTeamColor);
 	}
-	//for (int i : step(game.teams.second.agentNum)) {
-	//	smallFont(agentInfo[match].second[i]).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), enemyTeamColor);
-	//}
-
-
-
-
-
-
-	////本当にこれでいいのかテストします
-	////後で全部消す
-	//const int height = 20;
-	//const int width = 20;
-
-	//std::array<std::array<int, width>, height> tiles;
-	//for (int i : step(height))
-	//	for (int j : step(width))tiles[i][j] = 0;
-	//for (int i : step(height))tiles[i][(i + 2) % 20] = 1;
-
-	//double cts = (TileSize * MaxFieldX + .0) / (Max(width, height) * TileSize + .0) * TileSize;
-
-	//RectF dtile(cts * 0.96, cts * 0.96);
-
-	//for (int i : step(height))
-	//	for (int j : step(width)) {
-	//		dtile.movedBy(i * cts + cts * 0.02, j * cts + cts * 0.02).draw((i + j) % 2 == 0 ? myTeamColor : enemyTeamColor);
-	//		if (drawType == 1) {
-	//			test(U"-16").drawAt(Vec2((i + 0.5) * cts, (j + 0.5) * cts), Palette::Black);
-	//		}
-	//	}
-
-	//std::array<Vec2, 10> agents;
-	//for (int i : step(10))agents[i] = Vec2(i, i);
-
-	//if (drawType == 0) {
-	//	for (int i = 0; i < 10; i++) {
-	//		Shape2D::NStar(8, cts * 0.45, cts * 0.35, Vec2((agents[i].x + 0.5) * cts, (agents[i].y + 0.5) * cts)).draw();
-	//		Shape2D::NStar(8, cts * 0.375, cts * 0.275, Vec2((agents[i].x + 0.5) * cts, (agents[i].y + 0.5) * cts)).draw(myTeamColor);
-	//	}
-	//}
-
-
-	//Array<String> testS;
-	//for (int i = 0; i < 8; i++) {
-	//	testS.push_back(U"  ID : 10 ( 20 , 20 )");
-	//}
-
-	//for (int i = 0; i < 8; i++) {
-	//	smallFont(testS[i]).draw(Vec2(MaxFieldX * TileSize * 1.04, MaxFieldY * TileSize * (0.53 + i * 0.04)), myTeamColor);
-	//}
-
-
 }
 
 void Procon30::GUI::dataUpdate()
