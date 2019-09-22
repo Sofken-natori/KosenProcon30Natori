@@ -56,6 +56,8 @@ namespace Procon30 {
 
 		std::shared_ptr<Observer> observer;
 
+		std::shared_ptr<std::atomic<bool>> programEnd;
+
 		//thread‚É“Š‚°‚é‚à‚Ì
 		void Loop();
 		std::thread thisThread;

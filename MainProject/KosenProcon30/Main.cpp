@@ -36,14 +36,16 @@ void Main()
 	//4:Game1
 	//5:Game2
 	//6:VirtualServer
-
-	Procon30::ProglamEnd.store(false);
+	std::shared_ptr<std::atomic<bool>> ProgramEnd(new std::atomic<bool>);
+	ProgramEnd->store(false);
 
 	Procon30::GUI gui;
 
 	Procon30::HTTPCommunication http;
 
+
 	http.observer = gui.getObserver();
+	http.programEnd = ProgramEnd;
 
 	auto schools = http.initilizeFormLoop();
 
@@ -61,6 +63,7 @@ void Main()
 		games[i].turnMillis = schools[http.getGameIDfromGameNum(i)].turnMillis;
 		games[i].intervalMillis = schools[http.getGameIDfromGameNum(i)].intervalMillis;
 		games[i].teams.first.teamID = schools[http.getGameIDfromGameNum(i)].teamID;
+		games[i].programEnd = ProgramEnd;
 	}
 
 	//games[0].parseJson(U"example.json");
@@ -75,17 +78,20 @@ void Main()
 	}
 	gui.dataUpdate();
 	//TODO:あとでthreadGuardにします。
-	while (System::Update() || Procon30::ProglamEnd.load())
+	while (System::Update())
 	{
 		
 		gui.draw();
 
 		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
+		if (ProgramEnd->load()) {
+			break;
+		}
 	}
 
 	//std::terminateが出ます。許して
 	
-	Procon30::ProglamEnd.store(true);
+	ProgramEnd->store(true);
 	return;
 }
 

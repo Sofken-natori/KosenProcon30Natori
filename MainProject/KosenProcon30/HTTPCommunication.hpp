@@ -95,6 +95,8 @@ namespace Procon30 {
 		//結構頻繁に書き換わるけどnotifyガンガンやっていいの...?
 		std::shared_ptr<Observer> observer;
 
+		std::shared_ptr<std::atomic<bool>> programEnd;
+
 		//変換テーブルの設定
 		void setConversionTable(const Array<int>& arr);
 

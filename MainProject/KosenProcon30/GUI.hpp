@@ -45,7 +45,6 @@ namespace Procon30 {
 		//デバッグ用
 		Font test;
 	public:
-
 		void draw();
 
 

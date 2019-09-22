@@ -245,8 +245,11 @@ void Procon30::HTTPCommunication::Loop()
 	observer->notify(*this);
 	while (true) {
 		update();
-		if (ProglamEnd.load() == true)
+		if (programEnd->load() == true) {
+			//fake
+			Procon30::Game::HTTPReceived();
 			break;
+		}
 	}
 	Logger << U"HTTPCommunication Thread End";
 	return;
@@ -362,7 +365,7 @@ Procon30::HTTPCommunication::HTTPCommunication()
 Procon30::HTTPCommunication::~HTTPCommunication()
 {
 	if (thisThread.joinable()) {
-		//thisThread.detach();
+		thisThread.join();
 	}
 }
 

@@ -445,8 +445,9 @@ void Procon30::VirtualServer::VirtualServerMain()
 	//4:Game1
 	//5:Game2
 	//6:VirtualServer
+	std::shared_ptr<std::atomic<bool>> ProgramEnd(new std::atomic<bool>);
+	ProgramEnd->store(false);
 
-	Procon30::ProglamEnd.store(false);
 
 	Procon30::GUI gui;
 
@@ -457,6 +458,7 @@ void Procon30::VirtualServer::VirtualServerMain()
 	std::array<Procon30::Game, Procon30::MaxGameNumber> games;
 
 	server.observer = gui.getObserver();
+	server.programEnd = ProgramEnd;
 
 	for (size_t i = 0; i < server.getMatchNum(); i++) {
 		games[i].observer = gui.getObserver();
@@ -472,6 +474,7 @@ void Procon30::VirtualServer::VirtualServerMain()
 		games[i].intervalMillis = v_intervalMillis;
 		//games[0]‚ªŽ©•ª1,‘ŠŽè2Agames[1]‚ªŽ©•ª2,‘ŠŽè1
 		games[i].teams.first.teamID = (i == 0 ? 1 : 2);
+		games[i].programEnd = ProgramEnd;
 	}
 
 	Scene::SetBackground(Color(128));
@@ -484,7 +487,7 @@ void Procon30::VirtualServer::VirtualServerMain()
 
 	gui.dataUpdate();
 	//TODO:‚ ‚Æ‚ÅthreadGuard‚É‚µ‚Ü‚·B
-	while (System::Update() || Procon30::ProglamEnd.load())
+	while (System::Update() || ProgramEnd->load())
 	{
 
 		gui.draw();
@@ -492,7 +495,7 @@ void Procon30::VirtualServer::VirtualServerMain()
 		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
 	}
 
-	Procon30::ProglamEnd.store(true);
+	ProgramEnd->store(true);
 
 	//Procon30::Game::HTTPReceived();
 
@@ -564,8 +567,10 @@ void Procon30::VirtualServer::Loop()
 
 	while (true) {
 		update();
-		if (ProglamEnd.load() == true)
+		if (programEnd->load() == true) {
+			Procon30::Game::HTTPReceived();
 			break;
+		}
 	}
 	Logger << U"VirtualServer Thread End";
 	return;

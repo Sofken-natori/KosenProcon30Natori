@@ -72,6 +72,7 @@ namespace Procon30 {
 
 		std::shared_ptr<Observer> observer;
 		std::shared_ptr<SendBuffer> buffer;
+		std::shared_ptr<std::atomic<bool>> programEnd;
 
 		//初期化時にteamID設定しておく。 =L Teamのコンストラクタでやってる。
 		Game();

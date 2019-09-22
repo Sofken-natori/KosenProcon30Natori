@@ -204,7 +204,6 @@ Procon30::GUI::GUI()
 	texLoser = Texture(Emoji(U"😵"));
 	texEven = Texture(Emoji(U"🤔"));
 	texWinner = Texture(Emoji(U"🙂"));
-
 }
 
 

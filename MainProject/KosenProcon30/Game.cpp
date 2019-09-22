@@ -116,7 +116,9 @@ void Procon30::Game::updateData()
 		std::unique_lock<std::mutex> lockWait(HTTPWaitMtx);
 		HTTPWaitCond.wait(lockWait, [this]() {return dataReceived; });
 	}
-
+	if (programEnd->load()) {
+		return;
+	}
 	//ˆ—•”@¢ŠEˆêŽG.obj
 	FilePath path = Format(U"json/", gameNum, U"/nowField.json");
 	parseJson(path);
@@ -139,6 +141,8 @@ void Procon30::Game::Loop()
 {
 	while (true) {
 		updateData();
+		if (programEnd->load() == true)
+			break;
 		observer->notify(gameNum,*this);
 		//AlgoŽÀs
 		{
@@ -158,7 +162,7 @@ void Procon30::Game::Loop()
 		observer->notify(gameNum, *this);
 		sendToHTTP();
 		observer->notify(gameNum, *this);
-		if (ProglamEnd.load() == true)
+		if (programEnd->load() == true)
 			break;
 	}
 	Logger << U"Game Thread End";
@@ -185,7 +189,7 @@ Procon30::Game::Game()
 Procon30::Game::~Game()
 {
 	if (thisThread.joinable()) {
-		//thisThread.detach();
+		thisThread.join();
 	}
 }
 
