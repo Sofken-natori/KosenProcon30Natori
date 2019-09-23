@@ -448,6 +448,17 @@ void Procon30::VirtualServer::VirtualServerMain()
 	std::shared_ptr<std::atomic<bool>> ProgramEnd(new std::atomic<bool>);
 	ProgramEnd->store(false);
 
+	/*
+	ログの形式
+
+	Format(U"json/VirtualServer/",time.format(U"yyyy_m_d_HH_mm_ss"_sv),U"/")のフォルダーに入っている。
+	summary.csv
+	チーム１名,チーム２名,勝ったチーム名(引き分けならNone)
+	チーム1最終点数,チーム2最終点数
+	ターン数,チーム1点数,チーム２点数,チーム１stayが発生した数（衝突によるものも含む）,チーム2stayが発生した数,チーム1のpostされたms,チーム2のpostされたms
+	U"field_{}.json"_fmt(turn)
+	にターンごとの結果が書き出される。こっちを見れば極論全部わかる。はず
+	*/
 
 	Procon30::GUI gui;
 
@@ -532,6 +543,8 @@ void Procon30::VirtualServer::Loop()
 	teams.first.teamID = 1;
 	teams.second.teamID = 2;
 
+	turn = 0;
+
 	FilePath matchField = Format(U"json/VirtualServer/matchField.json");
 
 	//今後翔君の関数を使って自動生成する場合はここに
@@ -551,6 +564,20 @@ void Procon30::VirtualServer::Loop()
 
 	initMatch(matchField);
 
+	const DateTime time = DateTime::Now();
+
+	logFolderName = Format(U"json/VirtualServer/", time.format(U"yyyy_M_d_HH_mm_ss"_sv), U"/");
+	FileSystem::CreateDirectories(logFolderName);
+
+
+	this->logData.resize(v_MaxTurn + 1);
+
+
+	logData.at(turn).firstAreaScore = teams.first.areaScore;
+	logData.at(turn).firstTileScore = teams.first.tileScore;
+	logData.at(turn).secondAreaScore = teams.second.areaScore;
+	logData.at(turn).secondTileScore = teams.second.tileScore;
+
 	FileSystem::Copy(matchField, Format(U"json/", 0, U"/nowField.json"), CopyOption::OverwriteExisting);
 	FileSystem::Copy(matchField, Format(U"json/", 1, U"/nowField.json"), CopyOption::OverwriteExisting);
 	Print << U"gotMatchInfoof:" << 0;
@@ -563,10 +590,8 @@ void Procon30::VirtualServer::Loop()
 	gameTimer.start();
 	turnTimer.start();
 
-	turn = 0;
-
 	isStrategyStep = true;
-	posted[1] = posted[0] = false;
+	posted[1] = posted[0] = -1;
 
 	while (true) {
 		update();
@@ -591,7 +616,7 @@ void Procon30::VirtualServer::update()
 {
 	//結果が帰ってきてないか確認。多分いらない
 	//bool gotResult = checkResult();
-
+	
 
 	if (isStrategyStep && turnTimer.ms() > v_turnMillis) {
 		turnTimer.restart();
@@ -600,8 +625,6 @@ void Procon30::VirtualServer::update()
 		Logger << U"gameNum:0 {} posted"_fmt(posted[0]);
 		Logger << U"gameNum:1 {} posted"_fmt(posted[1]);
 
-		posted[1] = posted[0] = false;
-
 		//アクションデータの解析。
 		parseActionData(U"json/VirtualServer/post_{}_{}.json"_fmt(0, turn));
 		parseActionData(U"json/VirtualServer/post_{}_{}.json"_fmt(1, turn));
@@ -609,8 +632,6 @@ void Procon30::VirtualServer::update()
 		//シミュレーションを行う。
 		simulation();
 	}
-
-	bool gotResult = false;
 
 	if (!isStrategyStep && turnTimer.ms() > v_intervalMillis) {
 
@@ -625,19 +646,77 @@ void Procon30::VirtualServer::update()
 
 		writeFieldJson(v_nowField);
 
+		//これを対戦ログとして、保存しておく。
+		FileSystem::Copy(v_nowField, Format(logFolderName + U"field_{}.json"_fmt(turn)));
+
 		FileSystem::Copy(v_nowField, Format(U"json/", 0, U"/nowField.json"), CopyOption::OverwriteExisting);
 		FileSystem::Copy(v_nowField, Format(U"json/", 1, U"/nowField.json"), CopyOption::OverwriteExisting);
 
+		logData.at(turn).firstAreaScore = teams.first.areaScore;
+		logData.at(turn).firstTileScore = teams.first.tileScore;
+		logData.at(turn).secondAreaScore = teams.second.areaScore;
+		logData.at(turn).secondTileScore = teams.second.tileScore;
+		logData.at(turn).firstPostMS = posted[0];
+		logData.at(turn).secondPostMS = posted[1];
+		logData.at(turn).firstStayNum = teams.first.agentNum - logData.at(turn).firstStayNum;
+		logData.at(turn).secondStayNum = teams.second.agentNum - logData.at(turn).secondStayNum;
+
+		posted[1] = posted[0] = -1;
+
 		turnTimer.restart();
 		isStrategyStep = true;
-
-		gotResult = true;
 
 		//シミュレーションを行ったらフラグを立てて置いてここでGameを起こすようにする
 		Procon30::Game::HTTPReceived();
 	}
 
 	if (turn == v_MaxTurn) {
+		//summary.csvの書き出し動作。
+		{
+			TextWriter tw(this->logFolderName + U"summary.csv");
+
+			INIData data;
+			data.load(U"json/VirtualServer/config.ini");
+			
+			/*
+			(1) タイルポイントと領域ポイントの合計ポイントが大きい方のチームが勝利します。
+			(2) 合計ポイントが等しい場合，タイルポイントが大きい方のチームが勝利します。
+			*/
+
+			String winTeamName = U"None";
+
+			if (teams.first.tileScore + teams.first.areaScore == teams.second.tileScore + teams.second.areaScore) {
+				if (teams.first.tileScore == teams.second.tileScore) {
+
+				}
+				else {
+					if (teams.first.tileScore > teams.second.tileScore) {
+						winTeamName = data.getGlobalVaue(U"FirstTeamName");
+					}
+					else {
+						winTeamName = data.getGlobalVaue(U"SecondTeamName");
+					}
+				}
+			}
+			else {
+				if (teams.first.tileScore + teams.first.areaScore > teams.second.tileScore + teams.second.areaScore) {
+					winTeamName = data.getGlobalVaue(U"FirstTeamName");
+				}
+				else {
+					winTeamName = data.getGlobalVaue(U"SecondTeamName");
+				}
+			}
+
+			tw << data.getGlobalVaue(U"FirstTeamName") << U"," << data.getGlobalVaue(U"SecondTeamName") << U"," << winTeamName;
+			tw << teams.first.tileScore + teams.first.areaScore << U"," << teams.second.tileScore + teams.second.areaScore;
+			for (int i = 0; i < v_MaxTurn; i++) {
+				tw << i << U"," << logData.at(i).firstTileScore << U"," << logData.at(i).firstAreaScore
+					<< U"," << logData.at(i).secondTileScore << U"," << logData.at(i).secondAreaScore
+					<< U"," << logData.at(i).firstStayNum << U"," << logData.at(i).secondStayNum
+					<< U"," << logData.at(i).firstPostMS << U"," << logData.at(i).secondPostMS;
+			}
+		}
+
 		this->programEnd->store(true);
 		return;
 	}
@@ -662,8 +741,7 @@ void Procon30::VirtualServer::update()
 	//時間に合わせて取得処理を書きますが...(今はかけない(公式の回答待ち))
 	//ここはいらないかな
 
-	if (gotResult || postNow) {
-		//observer->notify(*this);
+	if (postNow) {
 	}
 
 }
@@ -682,7 +760,7 @@ bool Procon30::VirtualServer::checkPostAction()
 	tw << send;
 	tw.close();
 
-	posted[gameNum] = true;
+	posted[gameNum] = this->turnTimer.ms();
 
 	return true;
 }
@@ -723,8 +801,6 @@ bool Procon30::VirtualServer::initMatch(const FilePath& filePath)
 					}
 				}
 			}
-
-
 			{
 				const auto& teamJsonData = *reader[U"teams"].arrayView().begin();
 				//this->teams.first.teamID = team[U"teamID"].get<int32>();
@@ -973,10 +1049,14 @@ void Procon30::VirtualServer::simulation()
 						if (field.m_board.at(agent.nextPosition).color != TeamColor::Red) {
 							agent.nowPosition = agent.nextPosition;
 							field.m_board.at(agent.nextPosition).color = TeamColor::Blue;
+							//CATION:turn数
+							logData.at(turn + 1).firstStayNum++;
 						}
 						break;
 					case Action::Remove:
 						field.m_board.at(agent.nextPosition).color = TeamColor::None;
+						//CATION:turn数
+						logData.at(turn + 1).firstStayNum++;
 						break;
 					case Action::Stay:
 						break;
@@ -1000,10 +1080,14 @@ void Procon30::VirtualServer::simulation()
 						if (field.m_board.at(agent.nextPosition).color != TeamColor::Blue) {
 							agent.nowPosition = agent.nextPosition;
 							field.m_board.at(agent.nextPosition).color = TeamColor::Red;
+							//CATION:turn数
+							logData.at(turn + 1).secondStayNum++;
 						}
 						break;
 					case Action::Remove:
 						field.m_board.at(agent.nextPosition).color = TeamColor::None;
+						//CATION:turn数
+						logData.at(turn + 1).secondStayNum++;
 						break;
 					case Action::Stay:
 						break;
@@ -1018,6 +1102,24 @@ void Procon30::VirtualServer::simulation()
 		}
 
 	}
+
+	int32 sum = 0;
+	for (const auto& tile : field.m_board) {
+		if (teams.first.color == tile.color) {
+			sum += tile.score;
+		}
+	}
+	teams.first.tileScore = sum;
+	teams.first.areaScore = calculateScore(teams.first.color) - sum;
+	sum = 0;
+	for (const auto& tile : field.m_board) {
+		if (teams.second.color == tile.color) {
+			sum += tile.score;
+		}
+	}
+	teams.second.tileScore = sum;
+	teams.first.areaScore = calculateScore(teams.second.color) - sum;
+
 
 	return;
 }
@@ -1105,14 +1207,8 @@ void Procon30::VirtualServer::writeFieldJson(FilePath path)
 		}
 	}
 	s += U"\t\t\t],\n";
-	int32 sum = 0;
-	for (const auto& tile : field.m_board) {
-		if (teams.first.color == tile.color) {
-			sum += tile.score;
-		}
-	}
-	s += U"\t\t\t\"tilePoint\": " + Format(sum) + U",\n";
-	s += U"\t\t\t\"areaPoint\": " + Format(calculateScore(teams.first.color) - sum) + U"\n";
+	s += U"\t\t\t\"tilePoint\": " + Format(teams.first.tileScore) + U",\n";
+	s += U"\t\t\t\"areaPoint\": " + Format(teams.first.areaScore) + U"\n";
 	s += U"\t\t},\n";
 
 	s += U"\t\t{\n";
@@ -1131,14 +1227,8 @@ void Procon30::VirtualServer::writeFieldJson(FilePath path)
 		}
 	}
 	s += U"\t\t\t],\n";
-	sum = 0;
-	for (const auto& tile : field.m_board) {
-		if (teams.second.color == tile.color) {
-			sum += tile.score;
-		}
-	}
-	s += U"\t\t\t\"tilePoint\": " + Format(sum) + U",\n";
-	s += U"\t\t\t\"areaPoint\": " + Format(calculateScore(teams.second.color) - sum) + U"\n";
+	s += U"\t\t\t\"tilePoint\": " + Format(teams.second.tileScore) + U",\n";
+	s += U"\t\t\t\"areaPoint\": " + Format(teams.second.areaScore) + U"\n";
 	s += U"\t\t}\n";
 	s += U"\t],\n";
 	s += U"\t\"actions\": []\n";

@@ -8,7 +8,15 @@ void Main()
 {
 	if (Procon30::virtualServerMode) {
 		//VirtualServerMode
-		Procon30::VirtualServer::VirtualServerMain();
+
+		INIData data;
+		data.load(U"json/VirtualServer/config.ini");
+
+		int32 battleNum = ParseInt<int32>(data.getGlobalVaue(U"BattleNum"));
+
+		for (int i = 0; i < battleNum; i++) {
+			Procon30::VirtualServer::VirtualServerMain();
+		}
 		return;
 	}
 
