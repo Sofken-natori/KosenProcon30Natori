@@ -469,7 +469,7 @@ void Procon30::VirtualServer::VirtualServerMain()
 		//その内現在時間を入れる。
 		games[i].startedAtUnixTime = 0;
 		games[i].matchTo = (i == 0 ? U"A" : U"B");
-		games[i].MaxTurn = 60;
+		games[i].MaxTurn = v_MaxTurn;
 		games[i].turnMillis = v_turnMillis;
 		games[i].intervalMillis = v_intervalMillis;
 		//games[0]が自分1,相手2、games[1]が自分2,相手1
@@ -487,12 +487,15 @@ void Procon30::VirtualServer::VirtualServerMain()
 
 	gui.dataUpdate();
 	//TODO:あとでthreadGuardにします。
-	while (System::Update() || ProgramEnd->load())
+	while (System::Update())
 	{
 
 		gui.draw();
 
 		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
+		if (ProgramEnd->load()) {
+			break;
+		}
 	}
 
 	ProgramEnd->store(true);
@@ -632,6 +635,11 @@ void Procon30::VirtualServer::update()
 
 		//シミュレーションを行ったらフラグを立てて置いてここでGameを起こすようにする
 		Procon30::Game::HTTPReceived();
+	}
+
+	if (turn == v_MaxTurn) {
+		this->programEnd->store(true);
+		return;
 	}
 
 	//post処理は何よりも優先されるべき
