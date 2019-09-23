@@ -34,7 +34,7 @@ VirtualServer.cpp
 Main.cpp
 
 ### Other
-#### プロジェクトファイル関連
+* プロジェクトファイル関連  
 KosenProcon30.sln  
 KosenProcon30.vcxproj  
 KosenProcon30.vcxproj.filters  
