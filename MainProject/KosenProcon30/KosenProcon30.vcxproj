@@ -114,6 +114,7 @@
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Algorithm.cpp" />
+    <ClCompile Include="BeamSearchAlgorithm.cpp" />
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="Form.cpp" />
     <ClCompile Include="Game.cpp" />
