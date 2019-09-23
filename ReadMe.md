@@ -13,3 +13,8 @@
 
 ### プログラムソース
 * MainProject/KosenProcon30/ にソースを配置しています
+
+### 開発環境
+* VisualStudio 2019
+* OpenSiv3D
+* libcurl
