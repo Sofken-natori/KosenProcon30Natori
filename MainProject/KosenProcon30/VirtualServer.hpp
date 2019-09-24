@@ -19,21 +19,24 @@ namespace Procon30 {
 		Array<Array<int32>> tiles;
 		Array<Array<int32>> agents1;
 		Array<Array<int32>> agents2;*/
-		int32 agent_count = 8;
+		int32 agent_count;
 		int32 width = 20;
 		int32 height = 20;
+		int32 field_type = 3;
+		int32 negative_percent = 0;
 
 		////////////  対戦用にHTTPCommunicationと同じような機能を持たせる。  //////////////////
 
 		static const int32 v_turnMillis = 1000;
 		static const int32 v_intervalMillis = 1000;
+		static const int32 v_MaxTurn = 10;
 
 		bool isStrategyStep;
 
 	public:
 		VirtualServer();
 		void putPoint(int32 fieldType);
-		void putAgent();
+		void putAgent(int32 fieldType);
 		void writeJson(FilePath path);
 		void writeFieldJson(FilePath path);
 		void negativePercent(int32 percent,int32 fieldType);
@@ -70,12 +73,15 @@ namespace Procon30 {
 		Stopwatch gameTimer;
 		Stopwatch turnTimer;
 
+		//ログ保存先フォルダ名
+		FilePath logFolderName;
+
 
 		bool checkPostAction();
 
 		String getPostData(const FilePath& filePath);
 
-		bool posted[2];
+		int32 posted[2];
 
 		int turn;
 	
@@ -83,5 +89,19 @@ namespace Procon30 {
 		bool parseActionData(const FilePath& filePath);
 
 		void simulation();
+
+		struct LogData {
+			//ターン数, チーム1タイル点数,エリア点数, チーム２タイル点数,エリア点数, チーム１stayが発生した数（衝突によるものも含む）, チーム2stayが発生した数, チーム1のpostされたms, チーム2のpostされたms
+			int32 firstTileScore = 0;
+			int32 firstAreaScore = 0;
+			int32 secondTileScore = 0;
+			int32 secondAreaScore = 0;
+			int32 firstStayNum = 0;
+			int32 secondStayNum = 0;
+			int32 firstPostMS = -1;
+			int32 secondPostMS = -1;
+		};
+
+		Array<LogData> logData;
 	};
 }
