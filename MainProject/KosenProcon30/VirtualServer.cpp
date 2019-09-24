@@ -8,8 +8,8 @@ Procon30::VirtualServer::VirtualServer()
 	width = Random(10, MaxFieldX);
 	height = Random(10, MaxFieldY);
 	agent_count = (width * height + 39) / 50;
-	putPoint(0);
-	putAgent();
+	putPoint(field_type);
+	putAgent(field_type);
 }
 
 void Procon30::VirtualServer::writeJson(FilePath path)
@@ -174,6 +174,21 @@ void Procon30::VirtualServer::negativePercent(int32 percent, int32 fieldType)
 			}
 		}
 	}
+	else if (fieldType == 3) {
+		int32 cnt = (((height * width) * percent) / 100) / 2;
+		while (cnt > 0) {
+			posX = Random(0, width - 1);
+			posY = Random(0, (height - 1) / 2);
+			if (isNegativeBorad == false && field.m_board[posY][posX].score >= 0) {
+				field.m_board[posY][posX].score *= -1;
+				cnt--;
+			}
+			if (isNegativeBorad == true && field.m_board[posY][posX].score <= 0) {
+				field.m_board[posY][posX].score *= -1;
+				cnt--;
+			}
+		}
+	}
 
 }
 
@@ -190,7 +205,7 @@ void Procon30::VirtualServer::putPoint(int32 fieldType)
 			}
 		}
 
-		//negativePercent(20, 0);
+		negativePercent(negative_percent, 0);
 
 		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
 			for (int j = 0; j < (width + 1) / 2; j++) {
@@ -209,7 +224,7 @@ void Procon30::VirtualServer::putPoint(int32 fieldType)
 			}
 		}
 
-		negativePercent(20, 0);
+		negativePercent(negative_percent, 0);
 
 		for (int i = 0; i < field.boardSize.y; i++) {
 			for (int j = 0; j < (width + 1) / 2; j++) {
@@ -226,11 +241,32 @@ void Procon30::VirtualServer::putPoint(int32 fieldType)
 			}
 		}
 
-		negativePercent(20, 2);
+		negativePercent(negative_percent, 2);
 
 		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
-			for (int j = 0; j < (width + 1) / 2; j++) {
+			for (int j = 0; j < width; j++) {
 				field.m_board[field.boardSize.y - i - 1][j] = field.m_board[i][j];
+			}
+		}
+	}
+	else if (fieldType == 3) {
+		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
+			for (int j = 0; j < field.boardSize.x; j++) {
+				field.m_board[i][j].score = abs(Random(-16, 16));
+				field.m_board[i][j].exist = true;
+			}
+		}
+
+		negativePercent(negative_percent, 3);
+
+		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
+			for (int j = 0; j < width; j++) {
+				field.m_board[field.boardSize.y - i - 1][field.boardSize.x - j - 1] = field.m_board[i][j];
+			}
+		}
+		if (field.boardSize.y % 2 == 1) {
+			for (int i = 0; i < field.boardSize.x / 2; i++) {
+				field.m_board[field.boardSize.y / 2][i] = field.m_board[field.boardSize.y / 2][field.boardSize.x - i - 1];
 			}
 		}
 	}
@@ -255,7 +291,7 @@ void Procon30::VirtualServer::putPoint(int32 fieldType)
 	return;
 }
 
-void Procon30::VirtualServer::putAgent()
+void Procon30::VirtualServer::putAgent(int32 fieldType)
 {
 	//エージェントの数
 	teams.first.agentNum = agent_count;
@@ -284,28 +320,69 @@ void Procon30::VirtualServer::putAgent()
 		}
 	}
 
-	for (int i = 0; i < teams.first.agentNum; i++) {
-		teams.first.agents[i].nowPosition.y = Random(0, height - 1);
-		teams.second.agents[i].nowPosition.y = teams.first.agents[i].nowPosition.y;
-	}
-	for (int i = 0; i < teams.first.agentNum; i++) {
-		bool isLoop = true;
-		while (isLoop) {
-			isLoop = false;
-			teams.first.agents[i].nowPosition.x = Random(0, (width - 1) / 2);
-			for (int j = 0; j < teams.first.agentNum; j++) {
-				if (i != j) {
-					if (teams.first.agents[i].nowPosition.x == teams.first.agents[j].nowPosition.x && teams.first.agents[i].nowPosition.y == teams.first.agents[j].nowPosition.y) {
-						isLoop = true;
+
+
+	if (fieldType == 2) {
+		for (int i = 0; i < teams.first.agentNum; i++) {
+			teams.first.agents[i].nowPosition.x = Random(0, width - 1);
+			teams.second.agents[i].nowPosition.x = teams.first.agents[i].nowPosition.x;
+		}
+
+		for (int i = 0; i < teams.first.agentNum; i++) {
+			bool isLoop = true;
+			while (isLoop) {
+				isLoop = false;
+				teams.first.agents[i].nowPosition.y = Random(0, height / 2 - 1);
+				for (int j = 0; j < teams.first.agentNum; j++) {
+					if (i != j) {
+						if (teams.first.agents[i].nowPosition.y == teams.first.agents[j].nowPosition.y && teams.first.agents[i].nowPosition.x == teams.first.agents[j].nowPosition.x) {
+							isLoop = true;
+						}
 					}
 				}
 			}
+
+			teams.second.agents[i].nowPosition.y = height - teams.first.agents[i].nowPosition.y - 1;
+			tile[teams.first.agents[i].nowPosition.y][teams.first.agents[i].nowPosition.x] = teams.first.teamID;
+			tile[teams.second.agents[i].nowPosition.y][teams.second.agents[i].nowPosition.x] = teams.second.teamID;
+
 		}
-		teams.second.agents[i].nowPosition.x = width - teams.first.agents[i].nowPosition.x - 1;
-		tile[teams.first.agents[i].nowPosition.y][teams.first.agents[i].nowPosition.x] = teams.first.teamID;
-		tile[teams.second.agents[i].nowPosition.y][teams.second.agents[i].nowPosition.x] = teams.second.teamID;
-		//	tiles[agents1[i][2]][agents1[i][1]] = agents1[i][0];
-	//	tiles[agents2[i][2]][agents2[i][1]] = agents2[i][0];
+	}
+	else {
+		for (int i = 0; i < teams.first.agentNum; i++) {
+			teams.first.agents[i].nowPosition.y = Random(0, height - 1);
+			teams.second.agents[i].nowPosition.y = teams.first.agents[i].nowPosition.y;
+		}
+
+		for (int i = 0; i < teams.first.agentNum; i++) {
+			bool isLoop = true;
+			while (isLoop) {
+				isLoop = false;
+				teams.first.agents[i].nowPosition.x = Random(0, width / 2 - 1);
+				for (int j = 0; j < teams.first.agentNum; j++) {
+					if (i != j) {
+						if (teams.first.agents[i].nowPosition.x == teams.first.agents[j].nowPosition.x && teams.first.agents[i].nowPosition.y == teams.first.agents[j].nowPosition.y) {
+							isLoop = true;
+						}
+					}
+				}
+			}
+
+			if (fieldType == 1) {
+				teams.second.agents[i].nowPosition.x = width - teams.first.agents[i].nowPosition.x - 1;
+				tile[teams.first.agents[i].nowPosition.y][teams.first.agents[i].nowPosition.x] = teams.first.teamID;
+				tile[teams.second.agents[i].nowPosition.y][teams.second.agents[i].nowPosition.x] = teams.second.teamID;
+			}
+			else if (fieldType == 0 || fieldType == 3) {
+				teams.second.agents[i].nowPosition.x = width - teams.first.agents[i].nowPosition.x - 1;
+				teams.second.agents[i].nowPosition.y = height - teams.first.agents[i].nowPosition.y - 1;
+				tile[teams.first.agents[i].nowPosition.y][teams.first.agents[i].nowPosition.x] = teams.first.teamID;
+				tile[teams.second.agents[i].nowPosition.y][teams.second.agents[i].nowPosition.x] = teams.second.teamID;
+			}
+
+			//	tiles[agents1[i][2]][agents1[i][1]] = agents1[i][0];
+		//	tiles[agents2[i][2]][agents2[i][1]] = agents2[i][0];
+		}
 	}
 	//agents1.resize(agent_count);
 	//agents2.resize(agent_count);

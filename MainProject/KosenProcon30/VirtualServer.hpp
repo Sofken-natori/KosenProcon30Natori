@@ -22,6 +22,8 @@ namespace Procon30 {
 		int32 agent_count = 8;
 		int32 width = 20;
 		int32 height = 20;
+		int32 field_type = 3;
+		int32 negative_percent = 0;
 
 		////////////  対戦用にHTTPCommunicationと同じような機能を持たせる。  //////////////////
 
@@ -33,7 +35,7 @@ namespace Procon30 {
 	public:
 		VirtualServer();
 		void putPoint(int32 fieldType);
-		void putAgent();
+		void putAgent(int32 fieldType);
 		void writeJson(FilePath path);
 		void writeFieldJson(FilePath path);
 		void negativePercent(int32 percent,int32 fieldType);
