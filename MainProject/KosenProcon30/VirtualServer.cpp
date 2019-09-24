@@ -85,11 +85,11 @@ void Procon30::VirtualServer::writeJson(FilePath path)
 		sum += field.m_board[teams.first.agents[i].nowPosition.y][teams.first.agents[i].nowPosition.x].score;
 	}
 	s += U"\t\t\t\"tilePoint\": " + Format(sum) + U",\n";
-	s += U"\t\t\t\"areaPoint\": " + Format(calculateScore(teams.first.color)) + U"\n";
+	s += U"\t\t\t\"areaPoint\": " + Format(calculateScore(TeamColor::Blue)) + U"\n";
 	s += U"\t\t},\n";
 
 	s += U"\t\t{\n";
-	s += U"\t\t\t\"teamID\": 11,\n";
+	s += U"\t\t\t\"teamID\": 2,\n";
 	s += U"\t\t\t\"agents\": [\n";
 	for (int i = 0; i < agent_count; i++) {
 		s += U"\t\t\t\t{\n";
@@ -105,7 +105,7 @@ void Procon30::VirtualServer::writeJson(FilePath path)
 	}
 	s += U"\t\t\t],\n";
 	s += U"\t\t\t\"tilePoint\": " + Format(sum) + U",\n";
-	s += U"\t\t\t\"areaPoint\": " + Format(calculateScore(teams.second.color)) + U"\n";
+	s += U"\t\t\t\"areaPoint\": " + Format(calculateScore(TeamColor::Red)) + U"\n";
 	s += U"\t\t}\n";
 	s += U"\t],\n";
 	s += U"\t\"actions\": []\n";
@@ -300,7 +300,7 @@ void Procon30::VirtualServer::putAgent(int32 fieldType)
 	teams.second.agents.resize(teams.second.agentNum);
 	//チームidの設定
 	teams.first.teamID = 1;
-	teams.second.teamID = 11;
+	teams.second.teamID = 2;
 	//x,yを-1に設定
 	for (int i = 0; i < teams.first.agentNum; i++) {
 		teams.first.agents[i].nowPosition.x = -1;
@@ -310,8 +310,8 @@ void Procon30::VirtualServer::putAgent(int32 fieldType)
 	}
 	//エージェントidの設定
 	for (int i = 0; i < teams.first.agentNum; i++) {
-		teams.first.agents[i].agentID = i + 2;
-		teams.second.agents[i].agentID = i + 12;
+		teams.first.agents[i].agentID = i + 1;
+		teams.second.agents[i].agentID = i + agent_count + 1;
 	}
 	//tileの設定
 	for (int i = 0; i < height; i++) {

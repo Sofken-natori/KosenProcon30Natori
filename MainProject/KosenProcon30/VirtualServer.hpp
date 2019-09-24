@@ -19,7 +19,7 @@ namespace Procon30 {
 		Array<Array<int32>> tiles;
 		Array<Array<int32>> agents1;
 		Array<Array<int32>> agents2;*/
-		int32 agent_count = 8;
+		int32 agent_count;
 		int32 width = 20;
 		int32 height = 20;
 		int32 field_type = 3;
