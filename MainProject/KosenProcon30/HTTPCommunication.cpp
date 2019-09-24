@@ -148,7 +148,7 @@ bool Procon30::HTTPCommunication::checkResult()
 				comData.receiveJsonPath = Format(U"json/", comData.gotMatchInfomationNum, U"/field_", comData.gotMatchInfomationNum, U"_TE.json");
 				jsonReader.close();
 				FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
-				Print << U"gotMatchInfoof:" << comData.gotMatchInfomationNum << U"::TooEarly";
+				//Print << U"gotMatchInfoof:" << comData.gotMatchInfomationNum << U"::TooEarly";
 				if (isFormLoop) {
 					comData.gotMatchInfomationNum++;
 				}

@@ -32,4 +32,8 @@ namespace Procon30 {
 		SearchResult execute(const Game& game);
 	};
 
+	class BeamSearchAlgorithm : public Algorithm {
+		SearchResult execute(const Game& game);
+	};
+
 }
