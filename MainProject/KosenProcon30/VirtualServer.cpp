@@ -1199,17 +1199,17 @@ void Procon30::VirtualServer::simulation()
 	}
 
 	int32 sum = 0;
-	for (const auto& tile : field.m_board) {
-		if (teams.first.color == tile.color) {
-			sum += tile.score;
+	for (const auto& t : field.m_board) {
+		if (teams.first.color == t.color) {
+			sum += t.score;
 		}
 	}
 	teams.first.tileScore = sum;
 	teams.first.areaScore = calculateScore(teams.first.color) - sum;
 	sum = 0;
-	for (const auto& tile : field.m_board) {
-		if (teams.second.color == tile.color) {
-			sum += tile.score;
+	for (const auto& t : field.m_board) {
+		if (teams.second.color == t.color) {
+			sum += t.score;
 		}
 	}
 	teams.second.tileScore = sum;
@@ -1281,20 +1281,18 @@ void Procon30::VirtualServer::writeFieldJson(FilePath path)
 		}
 	}
 	s += U"\t],\n";
+
 	//teams
-
-	int agent_count = teams.first.agentNum;
-
 	s += U"\t\"teams\": [\n";
 	s += U"\t\t{\n";
 	s += U"\t\t\t\"teamID\": {},\n"_fmt(teams.first.teamID);
 	s += U"\t\t\t\"agents\": [\n";
-	for (int i = 0; i < agent_count; i++) {
+	for (int i = 0; i < teams.first.agentNum; i++) {
 		s += U"\t\t\t\t{\n";
 		s += U"\t\t\t\t\t\"agentID\": " + Format(teams.first.agents[i].agentID) + U",\n";
 		s += U"\t\t\t\t\t\"x\": " + Format(teams.first.agents[i].nowPosition.x + 1) + U",\n";
 		s += U"\t\t\t\t\t\"y\": " + Format(teams.first.agents[i].nowPosition.y + 1) + U"\n";
-		if (i == agent_count - 1) {
+		if (i == teams.first.agentNum - 1) {
 			s += U"\t\t\t\t}\n";
 		}
 		else {
@@ -1309,12 +1307,12 @@ void Procon30::VirtualServer::writeFieldJson(FilePath path)
 	s += U"\t\t{\n";
 	s += U"\t\t\t\"teamID\": {},\n"_fmt(teams.second.teamID);
 	s += U"\t\t\t\"agents\": [\n";
-	for (int i = 0; i < agent_count; i++) {
+	for (int i = 0; i < teams.second.agentNum; i++) {
 		s += U"\t\t\t\t{\n";
 		s += U"\t\t\t\t\t\"agentID\": " + Format(teams.second.agents[i].agentID) + U",\n";
 		s += U"\t\t\t\t\t\"x\": " + Format(teams.second.agents[i].nowPosition.x + 1) + U",\n";
 		s += U"\t\t\t\t\t\"y\": " + Format(teams.second.agents[i].nowPosition.y + 1) + U"\n";
-		if (i == agent_count - 1) {
+		if (i == teams.second.agentNum - 1) {
 			s += U"\t\t\t\t}\n";
 		}
 		else {
