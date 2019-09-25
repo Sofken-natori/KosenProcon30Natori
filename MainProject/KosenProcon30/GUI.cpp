@@ -115,10 +115,9 @@ void Procon30::GUI::draw() {
 	bigFont(U"Agents").draw(Vec2(enemyInfoX, MaxFieldY * TileSize * 0.48), enemyTeamColor);
 
 	for (int i : step(game.teams.second.agentNum)) {
-		smallFont(U"ID {0} , pos {1} → {2} "_fmt(
+		smallFont(U"ID {0} , pos {1}"_fmt(
 			game.teams.second.agents[i].agentID,
-			game.teams.second.agents[i].nowPosition,
-			game.teams.second.agents[i].nextPosition)).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), enemyTeamColor);
+			game.teams.second.agents[i].nowPosition)).draw(Vec2(enemyInfoX, MaxFieldY * TileSize * (0.53 + i * 0.04)), enemyTeamColor);
 	}
 }
 

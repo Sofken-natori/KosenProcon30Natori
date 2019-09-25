@@ -39,8 +39,8 @@ namespace Procon30 {
 		Texture texEven;
 		Texture texWinner;
 
-		const double myInfoX = MaxFieldX * TileSize * 1.04;
-		const double enemyInfoX = MaxFieldX * TileSize * 1.43;
+		const double myInfoX = MaxFieldX * TileSize * 1.03;
+		const double enemyInfoX = MaxFieldX * TileSize * 1.425;
 
 		//デバッグ用
 		Font test;
