@@ -41,11 +41,23 @@ void Procon30::GUI::draw() {
 	if (drawType == 0) {
 		//自分
 		for (Agent agent : game.teams.first.agents) {
-			//ポリゴン生成めんどいしShape2D::NStarでいいですか
-			//その場生成しかできない代わりに軽いらしいので
 			Vec2 pos = { (agent.nowPosition.x + 0.5) * correctedTileSize[match],(agent.nowPosition.y + 0.5) * correctedTileSize[match] };
-			Shape2D::NStar(8, correctedTileSize[match] * 0.45, correctedTileSize[match] * 0.35, pos).draw();
-			Shape2D::NStar(8, correctedTileSize[match] * 0.375, correctedTileSize[match] * 0.275, pos).draw(myTeamColor);
+			Vec2 nxpos = { (agent.nextPosition.x + 0.5) * correctedTileSize[match],(agent.nextPosition.y + 0.5) * correctedTileSize[match] };
+
+			Line(pos, nxpos).drawArrow(correctedTileSize[match] * 0.066, Vec2(correctedTileSize[match] * 0.133, correctedTileSize[match] * 0.133));
+			Circle(pos, correctedTileSize[match] / 2 * 0.8).draw();
+			Circle(pos, correctedTileSize[match] / 2 * 0.675).draw(myTeamColor);
+			if (agent.action == Action::Move) {
+				scoreFont[match](U"M").drawAt(pos);
+			}
+			else if (agent.action == Action::Remove) {
+				scoreFont[match](U"R").drawAt(pos);
+			}
+			else {
+				scoreFont[match](U"S").drawAt(pos);
+			}
+			//Shape2D::NStar(8, correctedTileSize[match] * 0.45, correctedTileSize[match] * 0.35, pos).draw();
+			//Shape2D::NStar(8, correctedTileSize[match] * 0.375, correctedTileSize[match] * 0.275, pos).draw(myTeamColor);
 		}
 		//相手
 		for (Agent agent : game.teams.second.agents) {
