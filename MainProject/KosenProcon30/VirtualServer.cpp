@@ -895,6 +895,8 @@ bool Procon30::VirtualServer::initMatch(const FilePath& filePath)
 					this->teams.first.agents.at(i).agentID = agent[U"agentID"].get<int32>();
 					this->teams.first.agents.at(i).nowPosition.x = agent[U"x"].get<int32>() - 1;
 					this->teams.first.agents.at(i).nowPosition.y = agent[U"y"].get<int32>() - 1;
+					this->teams.first.agents.at(i).action = Action::Stay;
+					this->teams.first.agents.at(i).nextPosition = this->teams.first.agents.at(i).nowPosition;
 				}
 			}
 			{
@@ -914,6 +916,8 @@ bool Procon30::VirtualServer::initMatch(const FilePath& filePath)
 					this->teams.second.agents.at(i).agentID = agent[U"agentID"].get<int32>();
 					this->teams.second.agents.at(i).nowPosition.x = agent[U"x"].get<int32>() - 1;
 					this->teams.second.agents.at(i).nowPosition.y = agent[U"y"].get<int32>() - 1;
+					this->teams.second.agents.at(i).action = Action::Stay;
+					this->teams.second.agents.at(i).nextPosition = this->teams.first.agents.at(i).nowPosition;
 				}
 			}
 
@@ -1019,6 +1023,8 @@ bool Procon30::VirtualServer::parseActionData(const FilePath& filePath)
 
 void Procon30::VirtualServer::simulation()
 {
+	//互いにremove時あやしい。
+	//謎のはぎとられるバグ。青がRR交互配置で負けるバグ
 
 	//ok == 0 or 1
 	//ng == 2
@@ -1028,39 +1034,45 @@ void Procon30::VirtualServer::simulation()
 		int flag[2][10] = {};
 
 		{//check
-			auto& team = this->teams.first;
+			const auto& team = this->teams.first;
 			int i = 0;
-			for (auto& agent : team.agents) {
+			for (const auto& agent : team.agents) {
 
 				if (agent.action == Action::Stay) {
 					flag[0][i] = 1;
 				}
 				else if (agent.action == Action::Move || agent.action == Action::Remove) {
-					auto& f_team = this->teams.first;
-					for (auto& f_agent : f_team.agents) {
+					const auto& f_team = this->teams.first;
+					for (const auto& f_agent : f_team.agents) {
 						if (agent.nowPosition == f_agent.nowPosition) {
 							continue;
 						}
 						if (agent.nextPosition == f_agent.nextPosition) {
 							flag[0][i] = 2;
-						}
+						}//move or remove , move (nowPosition)
 						else if (agent.nextPosition == f_agent.nowPosition && f_agent.action == Action::Move) {
 							if (flag[0][i] != 2)
 								flag[0][i] = 3;
+						}//move or remove , remove (nowPosition) or stay
+						else if (agent.nextPosition == f_agent.nowPosition) {
+							flag[0][i] = 2;
 						}
 						else {
 							if (flag[0][i] == 0)
 								flag[0][i] = 1;
 						}
 					}
-					auto& s_team = this->teams.second;
-					for (auto& s_agent : s_team.agents) {
+					const auto& s_team = this->teams.second;
+					for (const auto& s_agent : s_team.agents) {
 						if (agent.nextPosition == s_agent.nextPosition) {
 							flag[0][i] = 2;
-						}
+						}//move or remove , move (nowPosition)
 						else if (agent.nextPosition == s_agent.nowPosition && s_agent.action == Action::Move) {
 							if (flag[0][i] != 2)
 								flag[0][i] = 3;
+						}//move or remove , remove (nowPosition) or stay
+						else if (agent.nextPosition == s_agent.nowPosition) {
+							flag[0][i] = 2;
 						}
 						else {
 							if (flag[0][i] == 0)
@@ -1072,39 +1084,45 @@ void Procon30::VirtualServer::simulation()
 			}
 		}
 		{//check
-			auto& team = this->teams.second;
+			const auto& team = this->teams.second;
 			int i = 0;
-			for (auto& agent : team.agents) {
+			for (const auto& agent : team.agents) {
 
 				if (agent.action == Action::Stay) {
 					flag[1][i] = 1;
 				}
 				else if (agent.action == Action::Move || agent.action == Action::Remove) {
-					auto& f_team = this->teams.first;
-					for (auto& f_agent : f_team.agents) {
+					const auto& f_team = this->teams.first;
+					for (const auto& f_agent : f_team.agents) {
 						if (agent.nextPosition == f_agent.nextPosition) {
 							flag[1][i] = 2;
-						}
+						}//move or remove , move (nowPosition)
 						else if (agent.nextPosition == f_agent.nowPosition && f_agent.action == Action::Move) {
 							if (flag[1][i] != 2)
 								flag[1][i] = 3;
+						}//move or remove , remove (nowPosition) or stay
+						else if (agent.nextPosition == f_agent.nowPosition) {
+							flag[1][i] = 2;
 						}
 						else {
 							if (flag[1][i] == 0)
 								flag[1][i] = 1;
 						}
 					}
-					auto& s_team = this->teams.second;
-					for (auto& s_agent : s_team.agents) {
+					const auto& s_team = this->teams.second;
+					for (const auto& s_agent : s_team.agents) {
 						if (agent.nowPosition == s_agent.nowPosition) {
 							continue;
 						}
 						if (agent.nextPosition == s_agent.nextPosition) {
 							flag[1][i] = 2;
-						}
+						}//move or remove , move (nowPosition)
 						else if (agent.nextPosition == s_agent.nowPosition && s_agent.action == Action::Move) {
 							if (flag[1][i] != 2)
 								flag[1][i] = 3;
+						}//move or remove , remove (nowPosition) or stay
+						else if (agent.nextPosition == s_agent.nowPosition) {
+							flag[1][i] = 2;
 						}
 						else {
 							if (flag[1][i] == 0)
@@ -1195,7 +1213,7 @@ void Procon30::VirtualServer::simulation()
 		}
 	}
 	teams.second.tileScore = sum;
-	teams.first.areaScore = calculateScore(teams.second.color) - sum;
+	teams.second.areaScore = calculateScore(teams.second.color) - sum;
 
 
 	return;
