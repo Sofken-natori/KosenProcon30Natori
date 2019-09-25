@@ -43,14 +43,15 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	const int minus_demerit = -2;
 	const int mine_remove_demerit = -1;
 
-	//TODO:Listへの置き換え
+	//WAGNI:Listへの置き換え。追加は早くなる気がする。
 
-	//TODO:ゴミほど遅い、そもそも可能性がないのはnextBeamBucketにpushしないように
-	//TODO:左下に滞留問題。
+	//TODO:遅い、そもそも可能性がないのはnextBeamBucketにpushしないように、つまり枝狩りを実装しよう。
+	//WAGNI:左下に滞留問題＝＞解決。そもそもPOSTされてないせいだった。その内、時間で自動で切るように
 
 	Array<BeamSearchData> nowBeamBucket;
 	nowBeamBucket.reserve(beam_size);
 	Array<BeamSearchData> nextBeamBucket;
+	nextBeamBucket.reserve(beam_size * 100000);
 	//8エージェントの場合 8^10=10^9ぐらいになりえるのでたまらん
 	//5secから15secらしい、
 	//2^10=1024で昨年、1secだから
@@ -59,8 +60,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	//+1は普通に見積もれる。
 	//3ぐらいまでは昨年と同じでいける。
 	const int canSimulationNum[9] = { 0,0,13,8,6,5,5,4,4 };
-
-	nowBeamBucket.reserve(beam_size * 100000);
 
 	BeamSearchData first_state;
 
@@ -174,10 +173,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 								next_state.first_dir[agent_num] =
 									next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition;
 
-								if (abs(next_state.first_dir[agent_num].y) >= 2 || abs(next_state.first_dir[agent_num].x) >= 2) {
-									abort();
-								}
-
 								switch (targetTile.color) {
 								case TeamColor::Blue:
 									next_state.first_act[agent_num] = next_act[agent_num] ? Action::Remove : Action::Move;
@@ -254,7 +249,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 							(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - i);
 
 						//いけそうだからpushする。
-						nextBeamBucket << next_state;
+						nextBeamBucket << std::move(next_state);
 					}
 				}
 
@@ -265,7 +260,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 
 		//TODO:同じ盤面なら枝狩り
 		//TODO:同じエージェント位置なら枝狩り。
-		//TODO:同じエージェントの動き方に関してはある程度枝狩りしておく
 		nowBeamBucket.clear();
 
 		//nowにプッシュ

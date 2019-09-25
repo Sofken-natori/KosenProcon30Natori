@@ -12,6 +12,7 @@ void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
 			team.agents.at(i).agentID = agent[U"agentID"].get<int32>();
 			team.agents.at(i).nowPosition.x = agent[U"x"].get<int32>() - 1;
 			team.agents.at(i).nowPosition.y = agent[U"y"].get<int32>() - 1;
+			team.agents.at(i).nextPosition = team.agents.at(i).nowPosition;
 		}
 	}
 	else
@@ -24,6 +25,7 @@ void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
 				if (team.agents.at(k).agentID == agent[U"agentID"].get<int32>()) {
 					team.agents.at(k).nowPosition.x = agent[U"x"].get<int32>() - 1;
 					team.agents.at(k).nowPosition.y = agent[U"y"].get<int32>() - 1;
+					team.agents.at(k).nextPosition = team.agents.at(i).nowPosition;
 					ok = true;
 					break;
 				}

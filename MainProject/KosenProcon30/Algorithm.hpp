@@ -25,6 +25,8 @@ namespace Procon30 {
 	class Algorithm
 	{
 	private:
+		int q_front = 0;
+		int q_end = 0;
 		std::array<std::array<bool, 22>, 22> visit = {};
 		s3d::Point q[2000] = {};
 	public:
@@ -41,7 +43,7 @@ namespace Procon30 {
 		int32 beamWidth;
 	public:
 		struct BeamSearchData {
-			int32 evaluatedScore;
+			double evaluatedScore;
 			Point first_dir[8] = {};
 			Action first_act[8] = {};
 			std::pair<Team, Team> teams;

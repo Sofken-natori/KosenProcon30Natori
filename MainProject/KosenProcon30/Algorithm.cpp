@@ -46,8 +46,8 @@ Procon30::SearchResult Procon30::RandAlgorithm::execute(const Game& game)
 
 int32 Procon30::Algorithm::calculateScore(Field& field, TeamColor teamColor)
 {
-	int q_front = 0;
-	int q_end = 0;
+
+	q_front = q_end = 0;
 
 	const int& fieldSizeX = field.boardSize.x;
 	const int& fieldSizeY = field.boardSize.y;
