@@ -24,7 +24,11 @@ namespace Procon30 {
 
 	class Algorithm
 	{
+	private:
+		std::array<std::array<bool, 22>, 22> visit = {};
+		s3d::Point q[2000] = {};
 	public:
+		int32 calculateScore(Field& field, TeamColor teamColor);
 		virtual SearchResult execute(const Game& game) = 0;
 	};
 
@@ -33,6 +37,17 @@ namespace Procon30 {
 	};
 
 	class BeamSearchAlgorithm : public Algorithm {
+	private:
+		int32 beamWidth;
+	public:
+		struct BeamSearchData {
+			int32 evaluatedScore;
+			Point first_dir[8] = {};
+			Action first_act[8] = {};
+			std::pair<Team, Team> teams;
+			Field field;
+		};
+		BeamSearchAlgorithm(int32 beamWidth);
 		SearchResult execute(const Game& game);
 	};
 
