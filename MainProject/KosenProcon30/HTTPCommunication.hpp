@@ -91,11 +91,21 @@ namespace Procon30 {
 		bool isFormLoop;
 
 		std::thread thisThread;
+
+		
 	public:
 		//Œ‹\•p”É‚É‘‚«Š·‚í‚é‚¯‚ÇnotifyƒKƒ“ƒKƒ“‚â‚Á‚Ä‚¢‚¢‚Ì...?
 		std::shared_ptr<Observer> observer;
 
 		std::shared_ptr<std::atomic<bool>> programEnd;
+
+		uint64 baseUnixTime;
+
+		uint64 baseIntervalMillis;
+
+		uint64 baseTurnMillis;
+
+		bool needWait = false;
 
 		//•ÏŠ·ƒe[ƒuƒ‹‚Ìİ’è
 		void setConversionTable(const Array<int>& arr);

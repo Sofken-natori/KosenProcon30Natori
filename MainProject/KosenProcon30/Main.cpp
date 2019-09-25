@@ -59,7 +59,6 @@ void Main()
 
 	std::array<Procon30::Game,Procon30::MaxGameNumber> games;
 
-
 	for (size_t i = 0; i < http.getMatchNum(); i++) {
 		games[i].observer = gui.getObserver();
 		games[i].buffer = http.getBufferPtr();
@@ -72,8 +71,11 @@ void Main()
 		games[i].intervalMillis = schools[http.getGameIDfromGameNum(i)].intervalMillis;
 		games[i].teams.first.teamID = schools[http.getGameIDfromGameNum(i)].teamID;
 		games[i].programEnd = ProgramEnd;
+		http.baseUnixTime = Min(http.baseUnixTime, schools[http.getGameIDfromGameNum(i)].startedAtUnixTime);
+		http.baseIntervalMillis = Min(http.baseIntervalMillis, static_cast<uint64>(schools[http.getGameIDfromGameNum(i)].intervalMillis));
+		http.baseTurnMillis = Min(http.baseTurnMillis, static_cast<uint64>(schools[http.getGameIDfromGameNum(i)].turnMillis));
 	}
-
+	http.baseUnixTime *= (uint64)1000;
 	//games[0].parseJson(U"example.json");
 	Scene::SetBackground(Color(128));
 
