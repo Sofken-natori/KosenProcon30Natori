@@ -161,5 +161,13 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 	initilizeAllMatchHandles();
 	comData.gotMatchInfomationNum = 0;
 	isFormLoop = false;
-	return form.schools;
+
+
+	Array<Form::school> schools;
+	for (size_t i = 0; i < form.schools.size(); i++) {
+		if (form.schools[i].checked)
+			schools << form.schools[i];
+	}
+
+	return schools;
 }

@@ -15,7 +15,7 @@ namespace Procon30 {
 	constexpr Size WindowSize{ MaxFieldX * TileSize + SideAreaX * 2, MaxFieldY * TileSize };
 	constexpr size_t MaxGameNumber = 3;
 
-	constexpr bool virtualServerMode = true;
+	constexpr bool virtualServerMode = false;
 
 	enum class Action {
 		Stay,

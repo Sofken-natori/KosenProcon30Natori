@@ -74,7 +74,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 				{
 					const auto& team = *(++object.arrayView().begin());
 					//UNDONE:本番環境では入れること
-					//assert(this->teams.first.teamID == team[U"teamID"].get<int32>());
+					assert(this->teams.first.teamID == team[U"teamID"].get<int32>());
 					this->teams.first.teamID = team[U"teamID"].get<int32>();
 					this->teams.first.tileScore = team[U"tilePoint"].get<int32>();
 					this->teams.first.areaScore = team[U"areaPoint"].get<int32>();
