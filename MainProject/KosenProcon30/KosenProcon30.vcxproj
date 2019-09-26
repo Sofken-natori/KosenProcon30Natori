@@ -114,6 +114,7 @@
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Algorithm.cpp" />
+    <ClCompile Include="Algorithm\SuzukiAlgorithm.cpp" />
     <ClCompile Include="BeamSearchAlgorithm.cpp" />
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="Form.cpp" />
@@ -180,6 +181,10 @@
   <ItemGroup>
     <ClInclude Include="Agent.hpp" />
     <ClInclude Include="Algorithm.hpp" />
+    <ClInclude Include="Algorithm\KikutiAlgorithm.hpp" />
+    <ClInclude Include="Algorithm\SuzukiAlgorithm.hpp" />
+    <ClInclude Include="Algorithm\TakahashiAlgorithm.hpp" />
+    <ClInclude Include="Algorithm\WatanabeAlgorithm.hpp" />
     <ClInclude Include="CommunicationData.hpp" />
     <ClInclude Include="Field.hpp" />
     <ClInclude Include="Game.hpp" />

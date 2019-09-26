@@ -15,6 +15,8 @@ Team.hpp
 Tile.hpp  
 VirtualServer.hpp  
 
+Algorithmフォルダに各開発メンバーのアルゴリズムの宣言と定義があります。
+
 ### 定義
 Agent.cpp  
 Algorithm.cpp  

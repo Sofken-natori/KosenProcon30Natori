@@ -58,6 +58,12 @@
     <Filter Include="Resource Files\nlp\japanese\jumanpp">
       <UniqueIdentifier>{f6fe2a89-c647-48e2-bb2c-27b03b1aeced}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algorithm">
+      <UniqueIdentifier>{f0505f35-c840-4754-b4f4-720094c651a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Algorithm">
+      <UniqueIdentifier>{047975ca-ed1f-46ac-a48d-9b47329b89c0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -101,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="BeamSearchAlgorithm.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\SuzukiAlgorithm.cpp">
+      <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -279,6 +288,18 @@
     </ClInclude>
     <ClInclude Include="CommunicationData.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\SuzukiAlgorithm.hpp">
+      <Filter>Header Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\TakahashiAlgorithm.hpp">
+      <Filter>Header Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\KikutiAlgorithm.hpp">
+      <Filter>Header Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\WatanabeAlgorithm.hpp">
+      <Filter>Header Files\Algorithm</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
