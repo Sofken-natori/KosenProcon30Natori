@@ -38,6 +38,12 @@ namespace Procon30 {
 		SearchResult execute(const Game& game);
 	};
 
+	class PruneBranchesAlgorithm {
+	public:
+		//canSimulateNumは1エージェント当たりの列挙可能数、enumerateDirに探索する方向を入れる。終端は、-1,-1にして。
+		bool  pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams);
+	};
+
 	class BeamSearchAlgorithm : public Algorithm {
 	private:
 		int32 beamWidth;
@@ -49,8 +55,11 @@ namespace Procon30 {
 			std::pair<Team, Team> teams;
 			Field field;
 		};
-		BeamSearchAlgorithm(int32 beamWidth);
+		BeamSearchAlgorithm(int32 beamWidth, std::unique_ptr<PruneBranchesAlgorithm> pruneBranches = nullptr);
 		SearchResult execute(const Game& game);
+
+		SearchResult PruningExecute(const Game& game);
+		std::unique_ptr<PruneBranchesAlgorithm> pruneBranchesAlgorithm;
 	};
 
 }
