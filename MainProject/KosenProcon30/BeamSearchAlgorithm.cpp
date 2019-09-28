@@ -380,7 +380,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	//可能なシミュレーション手数一覧。
 	//+1は普通に見積もれる。
 	//3ぐらいまでは昨年と同じでいける。
-	const int canSimulationNums[9] = { 0,0,13,8,6,5,5,4,4 };
+	const int canSimulationNums[9] = { 0,0,13,8,6,4,4,3,3 };
 
 	BeamSearchData first_state;
 
