@@ -8,3 +8,19 @@ Procon30::SearchResult Procon30::AlternatelyBeamSearchAlgorithm::execute(const G
 {
 	return SearchResult();
 }
+
+/*
+	memo
+
+	auto getAction = [&](s3d::Point p) {
+		if (game.field.m_board.at(p).color == game.teams.second.color)
+			return Action::Remove;
+		else
+			return Action::Move;
+	};
+
+	auto convXY = [](const s3d::Point& p) {
+		return p.x + p.y * 20;//Å‘åƒ}ƒbƒv‘å‚«‚³20
+	};
+
+*/

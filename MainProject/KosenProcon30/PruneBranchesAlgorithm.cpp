@@ -11,6 +11,7 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 	constexpr double enemy_ratio = 1.1;
 	constexpr double minus_ratio = 0.7;
 	constexpr double agent_ratio = 0;
+	const int section_size = 2;
 
 	std::array<std::array<double, 22>, 22> memo;
 	std::array<std::array<double, 22>, 22> ruiseki;
@@ -35,7 +36,17 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 			if (score < 0) {
 				score *= -1 * minus_ratio;
 			}
+
+			memo[y][x] = score;
+
 		}
+	}
+
+	for (auto& agent : teams.first.agents) {
+		memo[agent.nowPosition.y][agent.nowPosition.x] = 0;
+	}
+	for (auto& agent : teams.second.agents) {
+		memo[agent.nowPosition.y][agent.nowPosition.x] = 0;
 	}
 
 	for (auto y : step(fieldSizeY)) {
@@ -51,8 +62,46 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 		}
 	}
 
-	//TODO:ここにコードを挿入してください。
+
+	auto InRange = [&](s3d::Point p) {
+		return 0 <= p.x && p.x < field.boardSize.x && 0 <= p.y && p.y < field.boardSize.y;
+	};
+
+	//中心の座標を与えると、指定したサイズの区間の合計を取り出せる。
+	auto getSectionSum = [&](s3d::Point p) {
+
+		const s3d::Point leftUp = p + Point(section_size * -1 + -1, section_size * -1 + -1);
+		const s3d::Point rightUp = p + Point(section_size, section_size * -1 + -1);
+		const s3d::Point leftDown = p + Point(section_size * -1 + -1, section_size);
+		const s3d::Point rightDown = p + Point(section_size, section_size);
+
+		const double leftUpScore = InRange(leftUp) ? ruiseki[leftUp.y][leftUp.x] : 0;
+		const double rightUpScore = InRange(rightUp) ? ruiseki[rightUp.y][rightUp.x] : 0;
+		const double leftDownScore = InRange(leftDown) ? ruiseki[leftDown.y][leftDown.x] : 0;
+		const double rightDownScore = InRange(rightDown) ? ruiseki[rightDown.y][rightDown.x] : 0;
 
 
-	return false;
+		return leftUpScore + rightDownScore - leftDownScore - rightUpScore;
+	};
+
+	s3d::Point dirs[9] = { {0,0},{1,0},{-1,0},{0,-1},{0,1},{-1,-1},{-1,1},{1,-1},{1,1} };
+
+	std::array<std::pair<double, s3d::Point>, 9> sortedDirs;
+
+	for (int agent_num = 0; agent_num < teams.first.agentNum; agent_num++) {
+		const auto& agent = teams.first.agents;
+		for (int i = 0; i < 9; i++) {
+			sortedDirs[i].first = getSectionSum(dirs[i] * 2);
+			sortedDirs[i].second = dirs[i];
+		}
+		sort(sortedDirs.begin(), sortedDirs.end(),
+			[](const std::pair<double, s3d::Point> left, const std::pair<double, s3d::Point> right) {return left.first < right.first; });
+
+		for (int i = 8; i > 8 - canSimulateNum; i--) {
+			enumerateDir[agent_num][8 - i] = sortedDirs[i].second;
+		}
+		enumerateDir[agent_num][canSimulateNum] = { -2,-2 };
+	}
+
+	return true;
 }

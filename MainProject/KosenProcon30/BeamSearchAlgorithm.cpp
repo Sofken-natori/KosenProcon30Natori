@@ -14,21 +14,16 @@ Procon30::BeamSearchAlgorithm::BeamSearchAlgorithm(int32 beamWidth, std::unique_
 Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 {
 
+	//ここらへんで、4以上のあれと分岐する。
+	if (game.teams.first.agentNum >= 4) {
+		return this->PruningExecute(game);
+	}
+
+
 	constexpr int dxy[10] = { 1,-1,-1,0,-1,1,0,0,1,1 };
 
 	auto InRange = [&](s3d::Point p) {
 		return 0 <= p.x && p.x < game.field.boardSize.x && 0 <= p.y && p.y < game.field.boardSize.y;
-	};
-
-	auto getAction = [&](s3d::Point p) {
-		if (game.field.m_board.at(p).color == game.teams.second.color)
-			return Action::Remove;
-		else
-			return Action::Move;
-	};
-
-	auto convXY = [](const s3d::Point& p) {
-		return p.x + p.y * 20;//最大マップ大きさ20
 	};
 
 	//内部定数はスネークケースで統一許して
@@ -59,13 +54,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	nowBeamBucket.reserve(beam_size);
 	Array<BeamSearchData> nextBeamBucket;
 	nextBeamBucket.reserve(beam_size * 100000);
-	//TODO:方向の集合用にここで確保する。
-
-	//ここらへんで、4以上のあれと分岐する。
-	if (game.teams.first.agentNum >= 4) {
-		return this->PruningExecute(game);
-	}
-
 
 	//8エージェントの場合 8^10=10^9ぐらいになりえるのでたまらん
 	//5secから15secらしい、
@@ -350,17 +338,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 		return 0 <= p.x && p.x < game.field.boardSize.x && 0 <= p.y && p.y < game.field.boardSize.y;
 	};
 
-	auto getAction = [&](s3d::Point p) {
-		if (game.field.m_board.at(p).color == game.teams.second.color)
-			return Action::Remove;
-		else
-			return Action::Move;
-	};
-
-	auto convXY = [](const s3d::Point& p) {
-		return p.x + p.y * 20;//最大マップ大きさ20
-	};
-
 	//内部定数はスネークケースで統一許して
 
 	const size_t beam_size = beamWidth;
@@ -393,7 +370,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	//TODO:方向の集合用にここで確保する。
 	//集合の確保様式をどうするか悩んでいるが、各エージェントごとに配列でいいかな。
 
-	//[エージェント番号][方向番号（終端を-1にしておいて）] = 方向;
+	//[エージェント番号][方向番号（終端を-2にしておいて）] = 方向;
 	std::array<std::array<Point, 10>, 8> enumerateDir;
 
 	//8エージェントの場合 8^10=10^9ぐらいになりえるのでたまらん
@@ -403,7 +380,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	//可能なシミュレーション手数一覧。
 	//+1は普通に見積もれる。
 	//3ぐらいまでは昨年と同じでいける。
-	const int canSimulationNums[9] = { 0,0,13,8,7,5,5,4,4 };
+	const int canSimulationNums[9] = { 0,0,13,8,6,5,5,4,4 };
 
 	BeamSearchData first_state;
 
@@ -423,7 +400,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 			//機能としては、Fieldとteamsを与えることで1000-10000前後の方向の集合を返す。
 			assert(pruneBranchesAlgorithm);
 
-			bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir,now_state.field,now_state.teams);
+			bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
 
 			assert(okPrune);
 
@@ -438,7 +415,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 				for (int agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
 					now_state.teams.first.agents[agent_num].nextPosition
 						= now_state.teams.first.agents[agent_num].nowPosition
-						+ Point(dxy[next_dir[agent_num]], dxy[next_dir[agent_num] + 1]);
+						+ enumerateDir[agent_num][next_dir[agent_num]];
 
 					if (!InRange(now_state.teams.first.agents[agent_num].nextPosition))
 						skip = true;
@@ -473,7 +450,8 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 				//ここで次の移動方向を更新する。
 				//9方向だから9まで
 				for (int agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
-					if (enumerateDir[agent_num][next_dir[agent_num]] == Point(-1, -1)) {
+					next_dir[agent_num]++;
+					if (enumerateDir[agent_num][next_dir[agent_num]] == Point(-2, -2)) {
 						next_dir[agent_num] = 0;
 						if (agent_num == now_state.teams.first.agentNum - 1) {
 							enumerateLoop = false;
@@ -481,7 +459,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 						}
 					}
 					else {
-						next_dir[agent_num]++;
 						break;
 					}
 				}
