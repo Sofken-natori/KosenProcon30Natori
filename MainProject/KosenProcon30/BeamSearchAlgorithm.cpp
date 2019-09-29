@@ -1,4 +1,5 @@
 #include "Algorithm.hpp"
+#include <queue>
 
 Procon30::BeamSearchAlgorithm::BeamSearchAlgorithm(int32 beamWidth, std::unique_ptr<PruneBranchesAlgorithm> pruneBranches)
 {
@@ -361,11 +362,27 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	//TODO:遅い、そもそも可能性がないのはnextBeamBucketにpushしないように、つまり枝狩りを実装しよう。
 	//WAGNI:左下に滞留問題＝＞解決。そもそもPOSTされてないせいだった。その内、時間で自動で切るように
 
-	Array<BeamSearchData> nowBeamBucket;
+	//Array<BeamSearchData> nowBeamBucket;
 	//TODO:reserveから固定長で確保して、あれした方がいいかも
-	nowBeamBucket.reserve(beam_size);
-	Array<BeamSearchData> nextBeamBucket;
-	nextBeamBucket.reserve(beam_size * 100000);
+	//nowBeamBucket.reserve(beam_size);
+	//Array<BeamSearchData> nextBeamBucket;
+	//nextBeamBucket.reserve(beam_size * 100000);
+
+
+	//TODO:演算子のオーバーロード
+	std::vector<BeamSearchData> nowContainer;
+	nowContainer.reserve(10000);
+
+	auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
+
+	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nowBeamBucketQueue(
+		compare, std::move(nowContainer));
+
+	std::vector<BeamSearchData> nextContainer;
+	nextContainer.reserve(10000);
+	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nextBeamBucketQueue(
+		compare, std::move(nextContainer));
+
 
 	//TODO:方向の集合用にここで確保する。
 	//集合の確保様式をどうするか悩んでいるが、各エージェントごとに配列でいいかな。
@@ -380,7 +397,8 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	//可能なシミュレーション手数一覧。
 	//+1は普通に見積もれる。
 	//3ぐらいまでは昨年と同じでいける。
-	const int canSimulationNums[9] = { 0,0,13,8,6,4,4,3,3 };
+	//TODO:計算量見つつビーム幅の調整しませう
+	const int canSimulationNums[9] = { 0,0,13,8,8,5,4,3,3 };
 
 	BeamSearchData first_state;
 
@@ -388,21 +406,24 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	first_state.field = game.field;
 	first_state.teams = game.teams;
 
-	nowBeamBucket << first_state;
+	nowBeamBucketQueue.push(first_state);
 
+	//TODO:いい加減秒数に合わせて計算打ち切る工夫追加しろ！あほ！このままだと本番死ぬぞ
 	for (int i = 0; i < search_depth; i++) {
 		//enumerate
-		for (int k = 0; k < nowBeamBucket.size(); k++) {
-			auto& now_state = nowBeamBucket[k];
+		while(!nowBeamBucketQueue.empty()) {
+			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
+			nowBeamBucketQueue.pop();
 
 			//8^9はビームサーチでも計算不能に近い削らないと
 			//TODO:枝狩り探索を呼び出して、ここでいい感じにする。
 			//機能としては、Fieldとteamsを与えることで1000-10000前後の方向の集合を返す。
 			assert(pruneBranchesAlgorithm);
 
-			bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
+			pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
 
-			assert(okPrune);
+			//bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
+			//assert(okPrune);
 
 			int32 next_dir[8] = {};
 
@@ -562,9 +583,15 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 							(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - i);
 
 						//いけそうだからpushする。
-						nextBeamBucket << std::move(next_state);
-
-
+						if(nextBeamBucketQueue.size() > beam_size){
+							if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
+								nextBeamBucketQueue.pop();
+								nextBeamBucketQueue.push(std::move(next_state));
+							}
+						}
+						else {
+							nextBeamBucketQueue.push(std::move(next_state));
+						}
 
 						//move or remove
 						for (int agent_num = 0; agent_num < next_state.teams.first.agentNum; agent_num++) {
@@ -588,17 +615,21 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 
 			}
 		}
-		//sort
-		std::sort(nextBeamBucket.begin(), nextBeamBucket.end(), [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; });
+		//sortないほうが早そう
+		//std::sort(nextBeamBucket.begin(), nextBeamBucket.end(), );
 
 		//TODO:同じ盤面なら枝狩り
 		//TODO:同じエージェント位置なら枝狩り。
-		nowBeamBucket.clear();
+		//よく考えたらpopしてんだからsize() == 0じゃん
+		//clear跡地
 
 		//nowにプッシュ
-		for (int k = 0; k < std::min(nextBeamBucket.size(), beam_size); k++) {
-			nowBeamBucket << std::move(nextBeamBucket[k]);
-		}
+		//for (int k = 0; k < std::min(nextBeamBucket.size(), beam_size); k++) {
+		//	nowBeamBucket << std::move(nextBeamBucket[k]);
+		//}
+
+		//TODO:ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。ここまででメインのBeamSearchいじるの一旦終了かも
+		nowBeamBucketQueue.swap(nextBeamBucketQueue);
 
 	}
 
@@ -609,12 +640,22 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	result.code = AlgorithmStateCode::None;
 
 
-	if (nowBeamBucket.size() == 0) {
-		assert(nowBeamBucket.size() != 0);
+	if (nowBeamBucketQueue.size() == 0) {
+		assert(nowBeamBucketQueue.size() != 0);
 	}
 	else {
 
-		for (int i = 0; i < std::min(nowBeamBucket.size(), result_size); i++) {
+		Array<BeamSearchData> nowBeamBucket;
+
+		while (!nowBeamBucketQueue.empty()) {
+			nowBeamBucket << nowBeamBucketQueue.top();
+			nowBeamBucketQueue.pop();
+		}
+
+		nowBeamBucket.reverse();
+
+		int32 count = 0;
+		for (int i = 0; i < nowBeamBucket.size() && count < result_size; i++) {
 			const auto& now_state = nowBeamBucket[i];
 
 			bool same = false;
@@ -635,6 +676,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 			}
 
 			{
+				count++;
 				agentsOrder order;
 
 				for (int32 k = 0; k < game.teams.first.agentNum; k++) {

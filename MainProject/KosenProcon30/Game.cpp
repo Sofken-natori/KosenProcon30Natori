@@ -183,7 +183,7 @@ Procon30::Game::Game()
 	turn = 0;
 	startedAtUnixTime = 0;
 
-	algorithm.reset(new BeamSearchAlgorithm(20));
+	algorithm.reset(new BeamSearchAlgorithm(40));
 	//algorithm.reset(new RandAlgorithm());
 }
 
