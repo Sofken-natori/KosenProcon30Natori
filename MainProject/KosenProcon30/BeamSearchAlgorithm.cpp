@@ -50,11 +50,23 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	//TODO:遅い、そもそも可能性がないのはnextBeamBucketにpushしないように、つまり枝狩りを実装しよう。
 	//WAGNI:左下に滞留問題＝＞解決。そもそもPOSTされてないせいだった。その内、時間で自動で切るように
 
-	Array<BeamSearchData> nowBeamBucket;
-	//TODO:reserveから固定長で確保して、あれした方がいいかも
-	nowBeamBucket.reserve(beam_size);
-	Array<BeamSearchData> nextBeamBucket;
-	nextBeamBucket.reserve(beam_size * 100000);
+	//Array<BeamSearchData> nowBeamBucket;
+	//nowBeamBucket.reserve(beam_size);
+	//Array<BeamSearchData> nextBeamBucket;
+	//nextBeamBucket.reserve(beam_size * 100000);
+
+	auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
+
+	//TODO:演算子のオーバーロード
+	std::vector<BeamSearchData> nowContainer;
+	nowContainer.reserve(10000);
+	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nowBeamBucketQueue(
+		compare, std::move(nowContainer));
+
+	std::vector<BeamSearchData> nextContainer;
+	nextContainer.reserve(10000);
+	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nextBeamBucketQueue(
+		compare, std::move(nextContainer));
 
 	//8エージェントの場合 8^10=10^9ぐらいになりえるのでたまらん
 	//5secから15secらしい、
@@ -71,12 +83,13 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	first_state.field = game.field;
 	first_state.teams = game.teams;
 
-	nowBeamBucket << first_state;
+	nowBeamBucketQueue.push(first_state);
 
 	for (int i = 0; i < search_depth; i++) {
 		//enumerate
-		for (int k = 0; k < nowBeamBucket.size(); k++) {
-			auto& now_state = nowBeamBucket[k];
+		while (!nowBeamBucketQueue.empty()) {
+			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
+			nowBeamBucketQueue.pop();
 
 			//8^9はビームサーチでも計算不能に近い削らないと
 			//TODO:枝狩り探索を呼び出して、ここでいい感じにする。
@@ -153,6 +166,8 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 					while (actionLoop) {
 						BeamSearchData next_state = now_state;
 
+						bool mustCalcFirstScore = false;
+						bool mustCalcSecondScore = false;
 
 						//シミュレーションしてみる。やばそうには理論的にならない
 						//WAGNI:負けている際、にらみ合いのロック解除の機構
@@ -179,8 +194,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 								}
 							}
 
-							std::pair<int32, int32> s;
-
 							//フィールドとエージェントの位置更新
 							//エージェントの次に行くタイルの色
 							switch (targetTile.color) {
@@ -196,10 +209,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 								else {//Remove
 									targetTile.color = TeamColor::None;
 
-									s = this->calculateScore(next_state.field, TeamColor::Blue);
-									next_state.teams.first.tileScore = s.first;
-									next_state.teams.first.areaScore = s.second;
-									next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
+									mustCalcFirstScore = true;
 
 									if (targetTile.score <= 0)
 										next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - i) + mine_remove_demerit) * enemy_peel_bonus;
@@ -210,10 +220,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 							case TeamColor::Red:
 								targetTile.color = TeamColor::None;
 
-								s = this->calculateScore(next_state.field, TeamColor::Red);
-								next_state.teams.second.tileScore = s.first;
-								next_state.teams.second.areaScore = s.second;
-								next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
+								mustCalcSecondScore = true;
 
 								if (targetTile.score <= 0)
 									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - i) + minus_demerit) * enemy_peel_bonus;
@@ -228,10 +235,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 
 								targetTile.color = TeamColor::Blue;
 
-								s = this->calculateScore(next_state.field, TeamColor::Blue);
-								next_state.teams.first.tileScore = s.first;
-								next_state.teams.first.areaScore = s.second;
-								next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
+								mustCalcFirstScore = true;
 
 								next_state.evaluatedScore += isDiagonal * diagonal_bonus;
 								if (targetTile.score <= 0)
@@ -243,11 +247,32 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 							}
 						}
 
+						if (mustCalcFirstScore) {
+							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, TeamColor::Blue);
+							next_state.teams.first.tileScore = s.first;
+							next_state.teams.first.areaScore = s.second;
+							next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
+						}
+						if (mustCalcSecondScore) {
+							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, TeamColor::Red);
+							next_state.teams.second.tileScore = s.first;
+							next_state.teams.second.areaScore = s.second;
+							next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
+						}
+
 						next_state.evaluatedScore += (next_state.teams.first.areaScore - now_state.teams.first.areaScore) * my_area_merit +
 							(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - i);
 
 						//いけそうだからpushする。
-						nextBeamBucket << std::move(next_state);
+						if (nextBeamBucketQueue.size() > beam_size) {
+							if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
+								nextBeamBucketQueue.pop();
+								nextBeamBucketQueue.push(std::move(next_state));
+							}
+						}
+						else {
+							nextBeamBucketQueue.push(std::move(next_state));
+						}
 
 						//次の移動方向への更新。先頭でやると入ってすぐ更新されておかしな話になる。
 						//move or remove
@@ -272,20 +297,23 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 
 			}
 		}
-		//sort
-		std::sort(nextBeamBucket.begin(), nextBeamBucket.end(), [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; });
+		//sortないほうが早そう
+		//std::sort(nextBeamBucket.begin(), nextBeamBucket.end(), );
 
 		//TODO:同じ盤面なら枝狩り
 		//TODO:同じエージェント位置なら枝狩り。
-		nowBeamBucket.clear();
+		//よく考えたらpopしてんだからsize() == 0じゃん
+		//clear跡地
 
 		//nowにプッシュ
-		for (int k = 0; k < std::min(nextBeamBucket.size(), beam_size); k++) {
-			nowBeamBucket << std::move(nextBeamBucket[k]);
-		}
+		//for (int k = 0; k < std::min(nextBeamBucket.size(), beam_size); k++) {
+		//	nowBeamBucket << std::move(nextBeamBucket[k]);
+		//}
+
+		//TODO:ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。ここまででメインのBeamSearchいじるの一旦終了かも
+		nowBeamBucketQueue.swap(nextBeamBucketQueue);
 
 	}
-
 
 
 	SearchResult result;
@@ -293,12 +321,22 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	result.code = AlgorithmStateCode::None;
 
 
-	if (nowBeamBucket.size() == 0) {
-		assert(nowBeamBucket.size() != 0);
+	if (nowBeamBucketQueue.size() == 0) {
+		assert(nowBeamBucketQueue.size() != 0);
 	}
 	else {
 
-		for (int i = 0; i < std::min(nowBeamBucket.size(), result_size); i++) {
+		Array<BeamSearchData> nowBeamBucket;
+
+		while (!nowBeamBucketQueue.empty()) {
+			nowBeamBucket << nowBeamBucketQueue.top();
+			nowBeamBucketQueue.pop();
+		}
+
+		nowBeamBucket.reverse();
+
+		int32 count = 0;
+		for (int i = 0; i < nowBeamBucket.size() && count < result_size; i++) {
 			const auto& now_state = nowBeamBucket[i];
 
 			bool same = false;
@@ -319,6 +357,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 			}
 
 			{
+				count++;
 				agentsOrder order;
 
 				for (int32 k = 0; k < game.teams.first.agentNum; k++) {
@@ -373,13 +412,11 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	//Array<BeamSearchData> nextBeamBucket;
 	//nextBeamBucket.reserve(beam_size * 100000);
 
+	auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
 
 	//TODO:演算子のオーバーロード
 	std::vector<BeamSearchData> nowContainer;
 	nowContainer.reserve(10000);
-
-	auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
-
 	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nowBeamBucketQueue(
 		compare, std::move(nowContainer));
 
@@ -500,6 +537,9 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 					while (actionLoop) {
 						BeamSearchData next_state = now_state;
 
+						bool mustCalcFirstScore = false;
+						bool mustCalcSecondScore = false;
+
 						//シミュレーションしてみる。やばそうには理論的にならない
 						//WAGNI:負けている際、にらみ合いのロック解除の機構
 						//自分色のマイナス点をmoveとremoveするステートを作る。
@@ -525,8 +565,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 								}
 							}
 
-							std::pair<int32, int32> s;
-
 							//フィールドとエージェントの位置更新
 							//エージェントの次に行くタイルの色
 							switch (targetTile.color) {
@@ -542,10 +580,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 								else {//Remove
 									targetTile.color = TeamColor::None;
 
-									s = this->calculateScoreFast(next_state.field, TeamColor::Blue);
-									next_state.teams.first.tileScore = s.first;
-									next_state.teams.first.areaScore = s.second;
-									next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
+									mustCalcFirstScore = true;
 
 									if (targetTile.score <= 0)
 										next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - i) + mine_remove_demerit) * enemy_peel_bonus;
@@ -556,10 +591,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 							case TeamColor::Red:
 								targetTile.color = TeamColor::None;
 
-								s = this->calculateScoreFast(next_state.field, TeamColor::Red);
-								next_state.teams.second.tileScore = s.first;
-								next_state.teams.second.areaScore = s.second;
-								next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
+								mustCalcSecondScore = true;
 
 								if (targetTile.score <= 0)
 									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - i) + minus_demerit) * enemy_peel_bonus;
@@ -574,10 +606,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 
 								targetTile.color = TeamColor::Blue;
 
-								s = this->calculateScoreFast(next_state.field, TeamColor::Blue);
-								next_state.teams.first.tileScore = s.first;
-								next_state.teams.first.areaScore = s.second;
-								next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
+								mustCalcFirstScore = true;
 
 								next_state.evaluatedScore += isDiagonal * diagonal_bonus;
 								if (targetTile.score <= 0)
@@ -587,6 +616,19 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 
 								break;
 							}
+						}
+
+						if (mustCalcFirstScore) {
+							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, TeamColor::Blue);
+							next_state.teams.first.tileScore = s.first;
+							next_state.teams.first.areaScore = s.second;
+							next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
+						}
+						if (mustCalcSecondScore) {
+							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, TeamColor::Red);
+							next_state.teams.second.tileScore = s.first;
+							next_state.teams.second.areaScore = s.second;
+							next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
 						}
 
 						next_state.evaluatedScore += (next_state.teams.first.areaScore - now_state.teams.first.areaScore) * my_area_merit +

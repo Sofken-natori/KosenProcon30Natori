@@ -103,7 +103,7 @@ std::pair<int32, int32> Procon30::Algorithm::calculateScore(Field& field, TeamCo
 		}
 	}
 
-	return std::pair<int32,int32>(resultTile,resultArea);
+	return std::pair<int32, int32>(resultTile, resultArea);
 }
 
 std::pair<int32, int32> Procon30::Algorithm::calculateScoreFast(Field& field, TeamColor teamColor)
@@ -135,15 +135,17 @@ std::pair<int32, int32> Procon30::Algorithm::calculateScoreFast(Field& field, Te
 
 		const auto& now = qFast[q_front++];
 
-		if (SHORT_TO_Y(now) < fieldSizeY && SHORT_TO_X(now) < fieldSizeX && !visitFast[now]) {
+		if (!visitFast[now]) {
 
 			visitFast[now] = true;
 
 			if (field.m_board.at(SHORT_TO_Y(now), SHORT_TO_X(now)).color != teamColor) {
 				if (SHORT_TO_X(now) != 0)
 					qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) - 1, SHORT_TO_Y(now));
-				qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) + 1);
-				qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) + 1, SHORT_TO_Y(now));
+				if (SHORT_TO_Y(now) + 1 < fieldSizeY)
+					qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) + 1);
+				if (SHORT_TO_X(now) + 1 < fieldSizeX)
+					qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) + 1, SHORT_TO_Y(now));
 				if (SHORT_TO_Y(now) != 0)
 					qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) - 1);
 			}
@@ -159,11 +161,11 @@ std::pair<int32, int32> Procon30::Algorithm::calculateScoreFast(Field& field, Te
 
 	for (auto y : step(fieldSizeY)) {
 		for (auto x : step(fieldSizeX)) {
-			if (teamColor != field.m_board.at(y, x).color && visitFast[XY_TO_SHORT(x, y)] == false) {
-				resultArea += abs(field.m_board.at(y, x).score);
-			}
 			if (field.m_board.at(y, x).color == teamColor) {
 				resultTile += field.m_board.at(y, x).score;
+			}
+			else if (visitFast[XY_TO_SHORT(x, y)] == false) {
+				resultArea += abs(field.m_board.at(y, x).score);
 			}
 		}
 	}
