@@ -179,6 +179,8 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 								}
 							}
 
+							std::pair<int32, int32> s;
+
 							//フィールドとエージェントの位置更新
 							//エージェントの次に行くタイルの色
 							switch (targetTile.color) {
@@ -194,8 +196,9 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 								else {//Remove
 									targetTile.color = TeamColor::None;
 
-									next_state.teams.first.tileScore -= targetTile.score;
-									next_state.teams.first.areaScore = this->calculateScore(next_state.field, TeamColor::Blue) - next_state.teams.first.tileScore;
+									s = this->calculateScore(next_state.field, TeamColor::Blue);
+									next_state.teams.first.tileScore = s.first;
+									next_state.teams.first.areaScore = s.second;
 									next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
 
 									if (targetTile.score <= 0)
@@ -207,8 +210,9 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 							case TeamColor::Red:
 								targetTile.color = TeamColor::None;
 
-								next_state.teams.second.tileScore -= targetTile.score;
-								next_state.teams.second.areaScore = this->calculateScore(next_state.field, TeamColor::Red) - next_state.teams.second.tileScore;
+								s = this->calculateScore(next_state.field, TeamColor::Red);
+								next_state.teams.second.tileScore = s.first;
+								next_state.teams.second.areaScore = s.second;
 								next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
 
 								if (targetTile.score <= 0)
@@ -224,8 +228,9 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 
 								targetTile.color = TeamColor::Blue;
 
-								next_state.teams.first.tileScore += targetTile.score;
-								next_state.teams.first.areaScore = this->calculateScore(next_state.field, TeamColor::Blue) - next_state.teams.first.tileScore;
+								s = this->calculateScore(next_state.field, TeamColor::Blue);
+								next_state.teams.first.tileScore = s.first;
+								next_state.teams.first.areaScore = s.second;
 								next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
 
 								next_state.evaluatedScore += isDiagonal * diagonal_bonus;
@@ -520,6 +525,8 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 								}
 							}
 
+							std::pair<int32, int32> s;
+
 							//フィールドとエージェントの位置更新
 							//エージェントの次に行くタイルの色
 							switch (targetTile.color) {
@@ -535,8 +542,9 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 								else {//Remove
 									targetTile.color = TeamColor::None;
 
-									next_state.teams.first.tileScore -= targetTile.score;
-									next_state.teams.first.areaScore = this->calculateScore(next_state.field, TeamColor::Blue) - next_state.teams.first.tileScore;
+									s = this->calculateScoreFast(next_state.field, TeamColor::Blue);
+									next_state.teams.first.tileScore = s.first;
+									next_state.teams.first.areaScore = s.second;
 									next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
 
 									if (targetTile.score <= 0)
@@ -548,8 +556,9 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 							case TeamColor::Red:
 								targetTile.color = TeamColor::None;
 
-								next_state.teams.second.tileScore -= targetTile.score;
-								next_state.teams.second.areaScore = this->calculateScore(next_state.field, TeamColor::Red) - next_state.teams.second.tileScore;
+								s = this->calculateScoreFast(next_state.field, TeamColor::Red);
+								next_state.teams.second.tileScore = s.first;
+								next_state.teams.second.areaScore = s.second;
 								next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
 
 								if (targetTile.score <= 0)
@@ -565,8 +574,9 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 
 								targetTile.color = TeamColor::Blue;
 
-								next_state.teams.first.tileScore += targetTile.score;
-								next_state.teams.first.areaScore = this->calculateScore(next_state.field, TeamColor::Blue) - next_state.teams.first.tileScore;
+								s = this->calculateScoreFast(next_state.field, TeamColor::Blue);
+								next_state.teams.first.tileScore = s.first;
+								next_state.teams.first.areaScore = s.second;
 								next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
 
 								next_state.evaluatedScore += isDiagonal * diagonal_bonus;

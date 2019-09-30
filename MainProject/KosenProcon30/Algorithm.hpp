@@ -1,6 +1,7 @@
 #pragma once
 #include "KosenProcon30.hpp"
 #include "Game.hpp"
+#include <bitset>
 
 namespace Procon30 {
 
@@ -29,8 +30,12 @@ namespace Procon30 {
 		int q_end = 0;
 		std::array<std::array<bool, 22>, 22> visit = {};
 		s3d::Point q[2000] = {};
+		std::bitset<1023> visitFast = {};
+		unsigned short qFast[2000] = {};
 	public:
-		int32 calculateScore(Field& field, TeamColor teamColor);
+		//tile area
+		std::pair<int32, int32> calculateScore(Field& field, TeamColor teamColor);
+		std::pair<int32, int32> calculateScoreFast(Field& field, TeamColor teamColor);
 		virtual SearchResult execute(const Game& game) = 0;
 	};
 
