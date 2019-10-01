@@ -9,7 +9,7 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 
 	constexpr double my_ratio = 0.3;
 	constexpr double enemy_ratio = 1.1;
-	constexpr double minus_ratio = 0.7;
+	constexpr double minus_ratio = 0.8;
 	constexpr double agent_ratio = 0;
 	const int section_size = 2;
 
@@ -89,9 +89,9 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 	std::array<std::pair<double, s3d::Point>, 9> sortedDirs;
 
 	for (int agent_num = 0; agent_num < teams.first.agentNum; agent_num++) {
-		const auto& agent = teams.first.agents;
+		const auto& agent = teams.first.agents[agent_num];
 		for (int i = 0; i < 9; i++) {
-			sortedDirs[i].first = getSectionSum(dirs[i] * 2);
+			sortedDirs[i].first = getSectionSum(agent.nowPosition + dirs[i] * section_size);
 			sortedDirs[i].second = dirs[i];
 		}
 		sort(sortedDirs.begin(), sortedDirs.end(),

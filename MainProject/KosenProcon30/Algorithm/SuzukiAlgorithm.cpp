@@ -1,7 +1,7 @@
 #include "SuzukiAlgorithm.hpp"
 #include <queue>
 
-Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::AlternatelyBeamSearchAlgorithm(int32 beamWidth)
+Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::AlternatelyBeamSearchAlgorithm(int32 beamWidth) : BeamSearchAlgorithm(beamWidth)
 {
 }
 

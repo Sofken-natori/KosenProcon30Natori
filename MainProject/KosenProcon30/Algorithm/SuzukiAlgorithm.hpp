@@ -6,7 +6,7 @@
 namespace Procon30::SUZUKI {
 
 	//ASAP:交互ビームサーチ実装のため、求・高速化
-	class AlternatelyBeamSearchAlgorithm : public Algorithm {
+	class AlternatelyBeamSearchAlgorithm : public BeamSearchAlgorithm {
 	private:
 		int32 beamWidth;
 	public:
