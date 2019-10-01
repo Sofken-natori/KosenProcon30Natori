@@ -34,7 +34,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	const TeamColor my_team = TeamColor::Blue;
 	const TeamColor enemy_team = TeamColor::Red;
 	const int search_depth = std::min(10, game.MaxTurn - game.turn);
-	const int same_demerit = -30;
 	const int was_moved_demerit = -5;
 	const int wait_demerit = -10;
 	const double diagonal_bonus = 1.5;
@@ -47,7 +46,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 
 	//WAGNI:Listへの置き換え。追加は早くなる気がする。
 
-	//TODO:遅い、そもそも可能性がないのはnextBeamBucketにpushしないように、つまり枝狩りを実装しよう。
+	//遅い、そもそも可能性がないのはnextBeamBucketにpushしないように、つまり枝狩りを実装しよう。
 	//WAGNI:左下に滞留問題＝＞解決。そもそもPOSTされてないせいだった。その内、時間で自動で切るように
 
 	//Array<BeamSearchData> nowBeamBucket;
@@ -55,9 +54,9 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	//Array<BeamSearchData> nextBeamBucket;
 	//nextBeamBucket.reserve(beam_size * 100000);
 
+	//演算子の準備
 	auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
 
-	//TODO:演算子のオーバーロード
 	std::vector<BeamSearchData> nowContainer;
 	nowContainer.reserve(10000);
 	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nowBeamBucketQueue(
@@ -90,11 +89,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 		while (!nowBeamBucketQueue.empty()) {
 			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
 			nowBeamBucketQueue.pop();
-
-			//8^9はビームサーチでも計算不能に近い削らないと
-			//TODO:枝狩り探索を呼び出して、ここでいい感じにする。
-			//機能としては、Fieldとteamsを与えることで1000-10000前後の方向の集合を返す。
-
 
 			int32 next_dir[8] = {};
 
@@ -297,20 +291,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 
 			}
 		}
-		//sortないほうが早そう
-		//std::sort(nextBeamBucket.begin(), nextBeamBucket.end(), );
 
-		//TODO:同じ盤面なら枝狩り
-		//TODO:同じエージェント位置なら枝狩り。
-		//よく考えたらpopしてんだからsize() == 0じゃん
-		//clear跡地
-
-		//nowにプッシュ
-		//for (int k = 0; k < std::min(nextBeamBucket.size(), beam_size); k++) {
-		//	nowBeamBucket << std::move(nextBeamBucket[k]);
-		//}
-
-		//TODO:ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。ここまででメインのBeamSearchいじるの一旦終了かも
 		nowBeamBucketQueue.swap(nextBeamBucketQueue);
 
 	}
@@ -390,7 +371,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	const TeamColor my_team = TeamColor::Blue;
 	const TeamColor enemy_team = TeamColor::Red;
 	const int search_depth = std::min(10, game.MaxTurn - game.turn);
-	const int same_demerit = -30;
 	const int was_moved_demerit = -5;
 	const int wait_demerit = -10;
 	const double diagonal_bonus = 1.5;
@@ -406,15 +386,11 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	//TODO:遅い、そもそも可能性がないのはnextBeamBucketにpushしないように、つまり枝狩りを実装しよう。
 	//WAGNI:左下に滞留問題＝＞解決。そもそもPOSTされてないせいだった。その内、時間で自動で切るように
 
-	//Array<BeamSearchData> nowBeamBucket;
-	//TODO:reserveから固定長で確保して、あれした方がいいかも
-	//nowBeamBucket.reserve(beam_size);
-	//Array<BeamSearchData> nextBeamBucket;
-	//nextBeamBucket.reserve(beam_size * 100000);
 
+	//演算子の準備
 	auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
 
-	//TODO:演算子のオーバーロード
+	//vector => priority_queue 10倍ぐらい高速化
 	std::vector<BeamSearchData> nowContainer;
 	nowContainer.reserve(10000);
 	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nowBeamBucketQueue(
@@ -426,9 +402,8 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 		compare, std::move(nextContainer));
 
 
-	//TODO:方向の集合用にここで確保する。
+	//方向の集合用にここで確保する。
 	//集合の確保様式をどうするか悩んでいるが、各エージェントごとに配列でいいかな。
-
 	//[エージェント番号][方向番号（終端を-2にしておいて）] = 方向;
 	std::array<std::array<Point, 10>, 8> enumerateDir;
 
@@ -458,7 +433,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 			nowBeamBucketQueue.pop();
 
 			//8^9はビームサーチでも計算不能に近い削らないと
-			//TODO:枝狩り探索を呼び出して、ここでいい感じにする。
+			//枝狩り探索を呼び出して、ここでいい感じにする。いい感じの関数欲しいな
 			//機能としては、Fieldとteamsを与えることで1000-10000前後の方向の集合を返す。
 			assert(pruneBranchesAlgorithm);
 
@@ -667,20 +642,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 
 			}
 		}
-		//sortないほうが早そう
-		//std::sort(nextBeamBucket.begin(), nextBeamBucket.end(), );
-
-		//TODO:同じ盤面なら枝狩り
-		//TODO:同じエージェント位置なら枝狩り。
-		//よく考えたらpopしてんだからsize() == 0じゃん
-		//clear跡地
-
-		//nowにプッシュ
-		//for (int k = 0; k < std::min(nextBeamBucket.size(), beam_size); k++) {
-		//	nowBeamBucket << std::move(nextBeamBucket[k]);
-		//}
-
-		//TODO:ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。ここまででメインのBeamSearchいじるの一旦終了かも
+		
 		nowBeamBucketQueue.swap(nextBeamBucketQueue);
 
 	}

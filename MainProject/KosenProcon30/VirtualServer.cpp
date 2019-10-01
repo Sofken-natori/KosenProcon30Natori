@@ -2,6 +2,7 @@
 #include "GUI.hpp"
 #include "SendBuffer.hpp"
 #include "Observer.hpp"
+#include "Algorithm/SuzukiAlgorithm.hpp"
 
 Procon30::VirtualServer::VirtualServer(int32 field_type)
 {
@@ -573,6 +574,13 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 		//games[0]が自分1,相手2、games[1]が自分2,相手1
 		games[i].teams.first.teamID = (i == 0 ? 1 : 2);
 		games[i].programEnd = ProgramEnd;
+		//CATION:かなり無理やり一時的だから許して
+		/*
+		if(i == 0)
+			games[i].algorithm.reset(new BeamSearchAlgorithm(100));
+		else
+			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(100));
+		*/
 	}
 
 	Scene::SetBackground(Color(128));
@@ -697,7 +705,7 @@ void Procon30::VirtualServer::update()
 {
 	//結果が帰ってきてないか確認。多分いらない
 	//bool gotResult = checkResult();
-	
+
 
 	if (isStrategyStep && turnTimer.ms() > v_turnMillis) {
 		turnTimer.restart();
@@ -758,7 +766,7 @@ void Procon30::VirtualServer::update()
 
 			INIData data;
 			data.load(U"json/VirtualServer/config.ini");
-			
+
 			/*
 			(1) タイルポイントと領域ポイントの合計ポイントが大きい方のチームが勝利します。
 			(2) 合計ポイントが等しい場合，タイルポイントが大きい方のチームが勝利します。
@@ -790,7 +798,7 @@ void Procon30::VirtualServer::update()
 
 			tw << data.getGlobalVaue(U"FirstTeamName") << U"," << data.getGlobalVaue(U"SecondTeamName") << U"," << winTeamName;
 			tw << teams.first.tileScore + teams.first.areaScore << U"," << teams.second.tileScore + teams.second.areaScore;
-			for (int i = 0; i < v_MaxTurn; i++) {
+			for (int i = 0; i <= v_MaxTurn; i++) {
 				tw << i << U"," << logData.at(i).firstTileScore << U"," << logData.at(i).firstAreaScore
 					<< U"," << logData.at(i).secondTileScore << U"," << logData.at(i).secondAreaScore
 					<< U"," << logData.at(i).firstStayNum << U"," << logData.at(i).secondStayNum

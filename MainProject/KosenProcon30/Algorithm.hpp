@@ -50,7 +50,7 @@ namespace Procon30 {
 	};
 
 	class BeamSearchAlgorithm : public Algorithm {
-	private:
+	protected:
 		int32 beamWidth;
 	public:
 		struct BeamSearchData {
