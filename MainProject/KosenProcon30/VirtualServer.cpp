@@ -580,6 +580,8 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 			games[i].algorithm.reset(new BeamSearchAlgorithm(100));
 		else
 			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(100));
+
+		games[i].algorithm.reset(new Procon30::RandAlgorithm());
 		
 	}
 
@@ -957,7 +959,7 @@ bool Procon30::VirtualServer::parseActionData(const FilePath& filePath)
 
 	const auto& object = reader[U"actions"];
 
-	{
+	if(reader){
 		for (int32 i = 0; i < object.arrayCount(); i++)
 		{
 			const JSONValue& action = object.arrayView()[i];
