@@ -575,12 +575,12 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 		games[i].teams.first.teamID = (i == 0 ? 1 : 2);
 		games[i].programEnd = ProgramEnd;
 		//CATION:‚©‚È‚è–³—‚â‚èˆê“I‚¾‚©‚ç‹–‚µ‚Ä
-		/*
+		
 		if(i == 0)
 			games[i].algorithm.reset(new BeamSearchAlgorithm(100));
 		else
 			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(100));
-		*/
+		
 	}
 
 	Scene::SetBackground(Color(128));

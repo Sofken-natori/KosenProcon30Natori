@@ -46,7 +46,7 @@ namespace Procon30 {
 	class PruneBranchesAlgorithm {
 	public:
 		//canSimulateNumは1エージェント当たりの列挙可能数、enumerateDirに探索する方向を入れる。終端は、-1,-1にして。
-		bool  pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams);
+		virtual bool  pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams);
 	};
 
 	class BeamSearchAlgorithm : public Algorithm {

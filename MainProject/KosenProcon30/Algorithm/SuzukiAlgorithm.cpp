@@ -37,7 +37,6 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 		return this->PruningExecute(game);
 	}
 
-
 	constexpr int dxy[10] = { 1,-1,-1,0,-1,1,0,0,1,1 };
 
 	auto InRange = [&](s3d::Point p) {
