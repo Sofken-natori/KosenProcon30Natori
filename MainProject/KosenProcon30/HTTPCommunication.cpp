@@ -23,7 +23,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 		if (result != CURLE_OK) {
 			Logger << U"curl_easy_perform() failed.\nUnixTime(Milli):"
 				<< Time::GetMillisecSinceEpoch();
-			//Print << U"curl_easy_perform() failed.";
+			SafeConsole(U"curl_easy_perform() failed.");
 			return ConnectionStatusCode::ConnectionLost;
 		}
 		{
@@ -37,7 +37,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 			receiveRawData.clear();
 		}
 		if (code != 200 && code != 201) {
-			//Logger << U"Status Error:" << code;
+			SafeConsole(U"Status Error:",code);
 			if (code == 401) {
 				return ConnectionStatusCode::InvaildToken;
 			}
@@ -108,12 +108,12 @@ bool Procon30::HTTPCommunication::checkResult()
 				case Procon30::ConnectionType::Ping:
 					comData.receiveJsonPath = U"json/ping.json";
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
-					//Print << U"PingTest:OK";
+					SafeConsole(U"PingTest:OK");
 					break;
 				case Procon30::ConnectionType::AllMatchesInfo:
 					comData.receiveJsonPath = U"json/AllMatchesInfo.json";
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
-					//Print << U"gotAllInfo";
+					SafeConsole(U"gotAllInfo");
 					break;
 				case Procon30::ConnectionType::MatchInfomation:
 					jsonReader.open(jsonBuffer);
@@ -122,7 +122,7 @@ bool Procon30::HTTPCommunication::checkResult()
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
 					FileSystem::Copy(jsonBuffer, Format(U"json/",comData.connectionMatchNumber, U"/nowfield.json"), CopyOption::OverwriteExisting);
-					//Print << U"gotMatchInfoof:" << comData.connectionMatchNumber;
+					SafeConsole(U"gotMatchInfoof:", comData.connectionMatchNumber);
 					if (isFormLoop) {
 						comData.gotMatchInfomationNum++;
 					}else if (thisTurn > comData.gotMatchInfoOfTurn[comData.connectionMatchNumber]) {
@@ -139,7 +139,7 @@ bool Procon30::HTTPCommunication::checkResult()
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
 					FileSystem::Copy(jsonBuffer, Format(U"json/", comData.connectionMatchNumber, U"/nowField.json"), CopyOption::OverwriteExisting);
-					//Print << U"postActionof:" << comData.connectionMatchNumber;
+					SafeConsole(U"postActionof:",comData.connectionMatchNumber);
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
@@ -150,7 +150,7 @@ bool Procon30::HTTPCommunication::checkResult()
 				comData.receiveJsonPath = Format(U"json/", comData.connectionMatchNumber, U"/field_", comData.connectionMatchNumber, U"_TE.json");
 				jsonReader.close();
 				FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
-				//Print << U"gotMatchInfoof:" << comData.gotMatchInfomationNum << U"::TooEarly";
+				SafeConsole(U"gotMatchInfoof:", comData.gotMatchInfomationNum, U"::TooEarly");
 				if (isFormLoop) {
 					comData.gotMatchInfomationNum++;
 				}
@@ -222,9 +222,9 @@ void Procon30::HTTPCommunication::update()
 	bool postNow = checkPostAction();
 	if (comData.gotMatchInfomationNum == comData.matchNum) {
 		Procon30::Game::HTTPReceived();
-		comData.gotMatchInfomationNum = 0;
+		comData.gotMatchInfomationNum = -1;
 	}
-	if (comData.gotMatchInfomationNum != 0) {
+	if (comData.gotMatchInfomationNum != -1) {
 		if(needWait)std::this_thread::sleep_for(500ms);
 		needWait = false;
 		getMatchInfomation();
@@ -288,6 +288,7 @@ bool Procon30::HTTPCommunication::getMatchInfomation()
 {
 	if (comData.nowConnecting) return false;
 	if (comData.gotMatchInfomationNum >= comData.matchNum && !isFormLoop) return false;
+	if (comData.gotMatchInfomationNum == -1)comData.gotMatchInfomationNum = 0;
 	comData.nowConnecting = true;
 	comData.connectionType = ConnectionType::MatchInfomation;
 	comData.connectionMatchNumber = comData.gotMatchInfomationNum;
