@@ -3,7 +3,7 @@
 #include "SendBuffer.hpp"
 #include "Observer.hpp"
 
-Procon30::VirtualServer::VirtualServer()
+Procon30::VirtualServer::VirtualServer(int32 field_type)
 {
 	width = Random(10, MaxFieldX);
 	height = Random(10, MaxFieldY);
@@ -70,8 +70,8 @@ void Procon30::VirtualServer::writeJson(FilePath path)
 	for (int i = 0; i < agent_count; i++) {
 		s += U"\t\t\t\t{\n";
 		s += U"\t\t\t\t\t\"agentID\": " + Format(teams.first.agents[i].agentID) + U",\n";
-		s += U"\t\t\t\t\t\"x\": " + Format(teams.first.agents[i].nowPosition.x) + U",\n";
-		s += U"\t\t\t\t\t\"y\": " + Format(teams.first.agents[i].nowPosition.y) + U"\n";
+		s += U"\t\t\t\t\t\"x\": " + Format(teams.first.agents[i].nowPosition.x + 1) + U",\n";
+		s += U"\t\t\t\t\t\"y\": " + Format(teams.first.agents[i].nowPosition.y + 1) + U"\n";
 		if (i == agent_count - 1) {
 			s += U"\t\t\t\t}\n";
 		}
@@ -94,8 +94,8 @@ void Procon30::VirtualServer::writeJson(FilePath path)
 	for (int i = 0; i < agent_count; i++) {
 		s += U"\t\t\t\t{\n";
 		s += U"\t\t\t\t\t\"agentID\": " + Format(teams.second.agents[i].agentID) + U",\n";
-		s += U"\t\t\t\t\t\"x\": " + Format(teams.second.agents[i].nowPosition.x) + U",\n";
-		s += U"\t\t\t\t\t\"y\": " + Format(teams.second.agents[i].nowPosition.y) + U"\n";
+		s += U"\t\t\t\t\t\"x\": " + Format(teams.second.agents[i].nowPosition.x + 1) + U",\n";
+		s += U"\t\t\t\t\t\"y\": " + Format(teams.second.agents[i].nowPosition.y + 1) + U"\n";
 		if (i == agent_count - 1) {
 			s += U"\t\t\t\t}\n";
 		}
@@ -496,7 +496,8 @@ int32 Procon30::VirtualServer::calculateScore(TeamColor color)
 	return result;
 }
 
-void Procon30::VirtualServer::VirtualServerMain()
+
+void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 {
 
 	Window::Resize(Procon30::WindowSize);
@@ -540,6 +541,15 @@ void Procon30::VirtualServer::VirtualServerMain()
 	Procon30::GUI gui;
 
 	Procon30::VirtualServer server;
+
+	server.matchField = matchField;
+
+	//翔君の関数を使って自動生成する
+	constexpr bool isGeneratedField = false;
+
+	if (isGeneratedField) {
+		server.writeJson(matchField);
+	}
 
 	server.buffer.reset(new SendBuffer());
 
@@ -621,12 +631,6 @@ void Procon30::VirtualServer::Loop()
 	teams.second.teamID = 2;
 
 	turn = 0;
-
-	FilePath matchField = Format(U"json/VirtualServer/matchField.json");
-
-	//今後翔君の関数を使って自動生成する場合はここに
-
-	constexpr bool isGeneratedField = false;
 
 	/*
 	while (comData.gotMatchInfomationNum != comData.matchNum) {

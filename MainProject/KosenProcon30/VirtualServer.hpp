@@ -22,7 +22,6 @@ namespace Procon30 {
 		int32 agent_count;
 		int32 width = 20;
 		int32 height = 20;
-		int32 field_type = 3;
 		int32 negative_percent = 0;
 
 		////////////  対戦用にHTTPCommunicationと同じような機能を持たせる。  //////////////////
@@ -34,7 +33,7 @@ namespace Procon30 {
 		bool isStrategyStep;
 
 	public:
-		VirtualServer();
+		VirtualServer(int32 field_type = 3);
 		void putPoint(int32 fieldType);
 		void putAgent(int32 fieldType);
 		void writeJson(FilePath path);
@@ -44,7 +43,7 @@ namespace Procon30 {
 
 		////////////  対戦用にHTTPCommunicationと同じような機能を持たせる。  //////////////////
 
-		static void VirtualServerMain();
+		static void VirtualServerMain(FilePath matchField = U"json/VirtualServer/matchField.json");
 
 		//基本常に２
 		[[nodiscard]] const size_t getMatchNum() const;
@@ -72,6 +71,9 @@ namespace Procon30 {
 
 		Stopwatch gameTimer;
 		Stopwatch turnTimer;
+
+		//対戦ファイル保存場所
+		FilePath matchField;
 
 		//ログ保存先フォルダ名
 		FilePath logFolderName;
