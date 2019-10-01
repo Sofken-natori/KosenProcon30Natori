@@ -141,13 +141,17 @@ std::pair<int32, int32> Procon30::Algorithm::calculateScoreFast(Field& field, Te
 
 			if (field.m_board.at(SHORT_TO_Y(now), SHORT_TO_X(now)).color != teamColor) {
 				if (SHORT_TO_X(now) != 0)
-					qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) - 1, SHORT_TO_Y(now));
+					qFast[q_end++] = now - (1 << 5);
+					//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) - 1, SHORT_TO_Y(now));
 				if (SHORT_TO_Y(now) + 1 < fieldSizeY)
-					qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) + 1);
+					qFast[q_end++] = now + 1;
+					//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) + 1);
 				if (SHORT_TO_X(now) + 1 < fieldSizeX)
-					qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) + 1, SHORT_TO_Y(now));
+					qFast[q_end++] = now + (1 << 5);
+					//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) + 1, SHORT_TO_Y(now));
 				if (SHORT_TO_Y(now) != 0)
-					qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) - 1);
+					qFast[q_end++] = now - 1;
+					//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) - 1);
 			}
 
 			assert(q_end <= 2000);
