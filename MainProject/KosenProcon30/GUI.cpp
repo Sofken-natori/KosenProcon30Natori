@@ -39,12 +39,18 @@ void Procon30::GUI::draw() {
 
 	//エージェントの描画
 	if (drawType == 0) {
+		//相手
+		for (Agent agent : game.teams.second.agents) {
+			Vec2 pos = { (agent.nowPosition.x + 0.5) * correctedTileSize[match],(agent.nowPosition.y + 0.5) * correctedTileSize[match] };
+			Shape2D::NStar(8, correctedTileSize[match] * 0.45, correctedTileSize[match] * 0.35, pos).draw();
+			Shape2D::NStar(8, correctedTileSize[match] * 0.375, correctedTileSize[match] * 0.275, pos).draw(enemyTeamColor);
+		}
 		//自分
 		for (Agent agent : game.teams.first.agents) {
 			Vec2 pos = { (agent.nowPosition.x + 0.5) * correctedTileSize[match],(agent.nowPosition.y + 0.5) * correctedTileSize[match] };
 			Vec2 nxpos = { (agent.nextPosition.x + 0.5) * correctedTileSize[match],(agent.nextPosition.y + 0.5) * correctedTileSize[match] };
 
-			Line(pos, nxpos).drawArrow(correctedTileSize[match] * 0.066, Vec2(correctedTileSize[match] * 0.133, correctedTileSize[match] * 0.133));
+			Line(pos, nxpos).drawArrow(correctedTileSize[match] * 0.066, Vec2(correctedTileSize[match] * 0.133, correctedTileSize[match] * 0.133), Palette::Yellow);
 			Circle(pos, correctedTileSize[match] / 2 * 0.8).draw();
 			Circle(pos, correctedTileSize[match] / 2 * 0.675).draw(myTeamColor);
 			if (agent.action == Action::Move) {
@@ -56,14 +62,6 @@ void Procon30::GUI::draw() {
 			else {
 				scoreFont[match](U"S").drawAt(pos);
 			}
-			//Shape2D::NStar(8, correctedTileSize[match] * 0.45, correctedTileSize[match] * 0.35, pos).draw();
-			//Shape2D::NStar(8, correctedTileSize[match] * 0.375, correctedTileSize[match] * 0.275, pos).draw(myTeamColor);
-		}
-		//相手
-		for (Agent agent : game.teams.second.agents) {
-			Vec2 pos = { (agent.nowPosition.x + 0.5) * correctedTileSize[match],(agent.nowPosition.y + 0.5) * correctedTileSize[match] };
-			Shape2D::NStar(8, correctedTileSize[match] * 0.45, correctedTileSize[match] * 0.35, pos).draw();
-			Shape2D::NStar(8, correctedTileSize[match] * 0.375, correctedTileSize[match] * 0.275, pos).draw(enemyTeamColor);
 		}
 	}
 
@@ -91,7 +89,7 @@ void Procon30::GUI::draw() {
 
 
 	//自チーム情報
-	int32 y = MaxFieldY * TileSize * 0.30;
+	double y = MaxFieldY * TileSize * 0.30;
 	bigFont(U"MyTeam (ID : {})"_fmt(game.teams.first.teamID)).draw(Vec2(myInfoX, y), myTeamColor);
 	bigFont(U"Score : {}"_fmt(game.teams.first.score)).draw(Vec2(myInfoX, y += (bigFont.fontSize() * 1.5)), myTeamColor);
 	smallFont(U"  TileScore  : {}"_fmt(game.teams.first.tileScore)).draw(Vec2(myInfoX, y += (bigFont.fontSize() * 1.5)), myTeamColor);

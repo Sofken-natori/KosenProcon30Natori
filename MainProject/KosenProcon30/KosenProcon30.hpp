@@ -69,4 +69,11 @@ namespace Procon30 {
 		//深刻なエラー、強制終了をお勧めする。
 		UnknownError
 	};
+	
+	template <class... Args, std::enable_if_t<s3d::detail::format_validation<Args...>::value>* = nullptr>
+	inline void SafeConsole(const Args & ... args) {
+		static std::mutex consoleMtx;
+		std::lock_guard<std::mutex> lock(consoleMtx);
+		Console << Format(args...);
+	}
 }
