@@ -11,7 +11,7 @@ namespace Procon30::SUZUKI {
 		int32 beamWidth;
 	public:
 		AlternatelyBeamSearchAlgorithm(int32 beamWidth);
-		SearchResult execute(const Game& game);
+		SearchResult execute(const Game& game) override final;
 	};
 
 	//自前環境でできる限りの工夫を試したたかわせるためのクラス
@@ -19,8 +19,8 @@ namespace Procon30::SUZUKI {
 	public:
 		SuzukiBeamSearchAlgorithm(int32 beamWidth, std::unique_ptr<PruneBranchesAlgorithm> pruneBranches = nullptr);
 	
-		SearchResult execute(const Game& game);
-		SearchResult PruningExecute(const Game& game);
+		SearchResult execute(const Game& game) override final;
+		SearchResult PruningExecute(const Game& game) override final;
 	};
 
 }

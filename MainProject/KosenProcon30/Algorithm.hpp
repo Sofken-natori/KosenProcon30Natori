@@ -40,7 +40,7 @@ namespace Procon30 {
 	};
 
 	class RandAlgorithm : public Algorithm {
-		SearchResult execute(const Game& game);
+		SearchResult execute(const Game& game) override final;
 	};
 
 	class PruneBranchesAlgorithm {
@@ -61,9 +61,9 @@ namespace Procon30 {
 			Field field;
 		};
 		BeamSearchAlgorithm(int32 beamWidth, std::unique_ptr<PruneBranchesAlgorithm> pruneBranches = nullptr);
-		SearchResult execute(const Game& game);
+		virtual SearchResult execute(const Game& game) override;
 
-		SearchResult PruningExecute(const Game& game);
+		virtual SearchResult PruningExecute(const Game& game);
 		std::unique_ptr<PruneBranchesAlgorithm> pruneBranchesAlgorithm;
 	};
 
