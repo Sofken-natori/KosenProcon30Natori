@@ -3,6 +3,7 @@
 #include "SendBuffer.hpp"
 #include "Observer.hpp"
 #include "Algorithm/SuzukiAlgorithm.hpp"
+#include "Algorithm/TakahashiAlgorithm.hpp"
 
 Procon30::VirtualServer::VirtualServer(int32 field_type)
 {
@@ -594,7 +595,7 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 		else
 			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(100));
 
-		games[i].algorithm.reset(new Procon30::RandAlgorithm());
+		games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(100,std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8))));
 		
 	}
 

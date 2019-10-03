@@ -355,6 +355,15 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	return result;
 }
 
+void Procon30::BeamSearchAlgorithm::initilize(const Game& game)
+{
+	if (isInitilized)return;
+	isInitilized = true;
+	if (pruneBranchesAlgorithm) {
+		pruneBranchesAlgorithm->initilize(game);
+	}
+}
+
 Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game& game)
 {
 

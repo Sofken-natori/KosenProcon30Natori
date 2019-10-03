@@ -32,11 +32,14 @@ namespace Procon30 {
 		s3d::Point q[2000] = {};
 		std::bitset<1023> visitFast = {};
 		unsigned short qFast[2000] = {};
+	protected:
+		bool isInitilized = false;
 	public:
 		//tile area
 		std::pair<int32, int32> calculateScore(Field& field, TeamColor teamColor);
 		std::pair<int32, int32> calculateScoreFast(Field& field, TeamColor teamColor);
 		virtual SearchResult execute(const Game& game) = 0;
+		virtual void initilize(const Game& game) = 0;
 	};
 
 	class RandAlgorithm : public Algorithm {
@@ -47,11 +50,14 @@ namespace Procon30 {
 	public:
 		//canSimulateNumは1エージェント当たりの列挙可能数、enumerateDirに探索する方向を入れる。終端は、-1,-1にして。
 		virtual bool  pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams);
+		virtual void initilize(const Game& game);
+		
 	};
 
 	class BeamSearchAlgorithm : public Algorithm {
 	protected:
 		int32 beamWidth;
+		virtual SearchResult PruningExecute(const Game& game);
 	public:
 		struct BeamSearchData {
 			double evaluatedScore;
@@ -62,8 +68,9 @@ namespace Procon30 {
 		};
 		BeamSearchAlgorithm(int32 beamWidth, std::unique_ptr<PruneBranchesAlgorithm> pruneBranches = nullptr);
 		virtual SearchResult execute(const Game& game) override;
+		virtual void initilize(const Game& game);
 
-		virtual SearchResult PruningExecute(const Game& game);
+		
 		std::unique_ptr<PruneBranchesAlgorithm> pruneBranchesAlgorithm;
 	};
 

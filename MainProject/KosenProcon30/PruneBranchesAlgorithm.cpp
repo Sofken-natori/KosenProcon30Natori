@@ -105,3 +105,7 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 
 	return true;
 }
+
+void Procon30::PruneBranchesAlgorithm::initilize(const Game& game)
+{
+}

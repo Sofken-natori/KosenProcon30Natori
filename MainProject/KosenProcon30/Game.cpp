@@ -148,6 +148,8 @@ void Procon30::Game::Loop()
 		{
 			assert(algorithm);
 
+			algorithm->initilize(*this);
+
 			auto result = algorithm->execute(*this);
 
 			assert(result.code == Procon30::AlgorithmStateCode::None);
