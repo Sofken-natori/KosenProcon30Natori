@@ -115,6 +115,7 @@
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Algorithm.cpp" />
     <ClCompile Include="Algorithm\SuzukiAlgorithm.cpp" />
+    <ClCompile Include="Algorithm\TakahashiAlgorithm.cpp" />
     <ClCompile Include="BeamSearchAlgorithm.cpp" />
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="Form.cpp" />
