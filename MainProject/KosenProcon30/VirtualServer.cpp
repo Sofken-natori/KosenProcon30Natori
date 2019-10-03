@@ -6,10 +6,15 @@
 
 Procon30::VirtualServer::VirtualServer(int32 field_type)
 {
+	//Fieldの幅
 	width = Random(10, MaxFieldX);
+	//Fieldの高さ
 	height = Random(10, MaxFieldY);
+	//エージェントの数
 	agent_count = (width * height + 39) / 50;
+	//タイルの点数を設置
 	putPoint(field_type);
+	//エージェントを設置
 	putAgent(field_type);
 }
 
@@ -251,6 +256,7 @@ void Procon30::VirtualServer::putPoint(int32 fieldType)
 		}
 	}
 	else if (fieldType == 3) {
+		//点対称
 		for (int i = 0; i < (field.boardSize.y + 1) / 2; i++) {
 			for (int j = 0; j < field.boardSize.x; j++) {
 				field.m_board[i][j].score = abs(Random(-16, 16));
@@ -549,6 +555,13 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 	constexpr bool isGeneratedField = false;
 
 	if (isGeneratedField) {
+		//fieldTypeが
+		//0なら上下左右対称
+		//1なら左右対称
+		//2なら上下対称
+		//3なら点対称です。VirtualServerのコンストラクターの引数に入れてください。
+		//Fieldの高さと幅はコンストラクターでランダムに設定しています。任意の数にしたいときはRandomの所をコメントアウトして良い感じにやってください。
+		//エージェントの数はコンストラクターで良い感じに設定してます。
 		server.writeJson(matchField);
 	}
 
