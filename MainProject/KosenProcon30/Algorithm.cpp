@@ -44,6 +44,10 @@ Procon30::SearchResult Procon30::RandAlgorithm::execute(const Game& game)
 	return result;
 }
 
+void Procon30::RandAlgorithm::initilize(const Game& game)
+{
+}
+
 std::pair<int32, int32> Procon30::Algorithm::calculateScore(Field& field, TeamColor teamColor)
 {
 

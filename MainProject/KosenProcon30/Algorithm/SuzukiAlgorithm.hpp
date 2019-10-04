@@ -10,7 +10,7 @@ namespace Procon30::SUZUKI {
 	private:
 		int32 beamWidth;
 	public:
-		AlternatelyBeamSearchAlgorithm(int32 beamWidth);
+		AlternatelyBeamSearchAlgorithm(int32 beamWidth, std::unique_ptr<PruneBranchesAlgorithm> pruneBranches = nullptr);
 		SearchResult execute(const Game& game) override final;
 	};
 
@@ -22,5 +22,7 @@ namespace Procon30::SUZUKI {
 		SearchResult execute(const Game& game) override final;
 		SearchResult PruningExecute(const Game& game) override final;
 	};
+
+	//TODO:PruneAlgorithm無茶苦茶だから改善。少なくとも、きちんと勾配で点数つけるように。
 
 }
