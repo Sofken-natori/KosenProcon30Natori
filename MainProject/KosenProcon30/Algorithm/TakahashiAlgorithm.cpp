@@ -19,6 +19,7 @@ void Procon30::YASAI::CompressBranch::initilize(const Game& game)
 			weightSum[setPos.y][setPos.x] += distanceWeight[distance];
 		}
 	}
+	SafeConsole(U"initilize Done",game.gameNum);
 }
 
 bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams)
@@ -31,11 +32,16 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 	for (int agent_num = 0; agent_num < teams.first.agentNum; agent_num++) {
 		const auto& agent = teams.first.agents[agent_num];
 		for (int i = 0; i < 9; i++) {
+			const Point nextPos = agent.nowPosition + dirs[i];
+			if (Min(nextPos.x, nextPos.y) == -1 || nextPos.x == fieldSize.x || nextPos.y == fieldSize.y) {
+				sortedDirs[i].first = std::numeric_limits<double>::min();
+				sortedDirs[i].second = {-2,-2};
+			}
 			sortedDirs[i].first = weightSum[agent.nowPosition.y + dirs[i].y][agent.nowPosition.x + dirs[i].x];
 			sortedDirs[i].second = dirs[i];
 		}
 		sort(sortedDirs.begin(), sortedDirs.end(),
-			[](const std::pair<double, s3d::Point> left, const std::pair<double, s3d::Point> right) {return left.first < right.first; });
+			[](const std::pair<double, s3d::Point> left, const std::pair<double, s3d::Point> right) {return left.first > right.first; });
 
 		for (int i = 8; i > 8 - canSimulateNum; i--) {
 			enumerateDir[agent_num][8 - i] = sortedDirs[i].second;
