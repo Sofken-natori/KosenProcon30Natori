@@ -31,6 +31,7 @@ namespace Procon30 {
 		std::array<std::array<bool, 22>, 22> visit = {};
 		s3d::Point q[2000] = {};
 		std::bitset<1023> visitFast = {};
+		std::bitset<1023> isTeamColorFast = {};
 		unsigned short qFast[2000] = {};
 	protected:
 		bool isInitilized = false;

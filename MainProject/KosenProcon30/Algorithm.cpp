@@ -135,6 +135,12 @@ std::pair<int32, int32> Procon30::Algorithm::calculateScoreFast(Field& field, Te
 		qFast[q_end++] = XY_TO_SHORT(x, fieldSizeY - 1);
 	}
 
+	for (auto y : step(fieldSizeY)) {
+		for (auto x : step(fieldSizeX)) {
+			isTeamColorFast[XY_TO_SHORT(x, y)] = field.m_board.at(y,x).color != teamColor;
+		}
+	}
+
 	while (q_front < q_end) {
 
 		const auto& now = qFast[q_front++];
@@ -143,7 +149,7 @@ std::pair<int32, int32> Procon30::Algorithm::calculateScoreFast(Field& field, Te
 
 			visitFast[now] = true;
 
-			if (field.m_board.at(SHORT_TO_Y(now), SHORT_TO_X(now)).color != teamColor) {
+			if (isTeamColorFast[now]) {
 				if (SHORT_TO_X(now) != 0)
 					qFast[q_end++] = now - (1 << 5);
 					//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) - 1, SHORT_TO_Y(now));

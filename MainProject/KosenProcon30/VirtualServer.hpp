@@ -28,7 +28,7 @@ namespace Procon30 {
 
 		static const int32 v_turnMillis = 15000;
 		static const int32 v_intervalMillis = 1000;
-		static const int32 v_MaxTurn = 10;
+		static const int32 v_MaxTurn = 40;
 
 		bool isStrategyStep;
 

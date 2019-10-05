@@ -207,8 +207,6 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 								next_state.first_dir[agent_num] =
 									next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition;
 
-								if (abs(next_state.first_dir[agent_num].x) > 1 || abs(next_state.first_dir[agent_num].y) > 1)
-									next_state.first_dir[agent_num] = Point(0,0);
 
 							}
 
@@ -291,7 +289,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 												else if (agent.nextPosition == s_agent.nowPosition) {
 													flag[0][agent_num] = 2;//相手に動きをつぶされる
 													//つまり動かないことで相手の動きもつぶせる
-													if(s_agent.nextPosition != agent.nowPosition)
+													if (s_agent.nextPosition != agent.nowPosition)
 														firstDestroyedFlag[agent_num] = true;//多分ここの判定がバグっているはず。
 
 												}
@@ -414,7 +412,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 												next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
 											}
 											else {//動きをつぶしあう
-												if(next_state.teams.first.score > next_state.teams.second.score)
+												if (next_state.teams.first.score > next_state.teams.second.score)
 													next_state.evaluatedScore += 1.2 * cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
 												else
 													next_state.evaluatedScore += cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
@@ -462,7 +460,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 											agent.nextPosition = agent.nowPosition;
 											flag[1][agent_num] = 4;
 										}
-			
+
 										if (flag[1][agent_num] == 3)
 											count++;
 										agent_num++;
@@ -554,6 +552,11 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 
 						next_state.evaluatedScore += (next_state.teams.first.areaScore - now_state.teams.first.areaScore) * my_area_merit +
 							(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - i);
+
+						//終了でだんだん評価値が、ゲーム自体の勝敗と同じくなるように調整。
+						const double finish_slope = std::max(1 - (game.MaxTurn - game.turn - i) / 10.0, 0.0);
+
+						next_state.evaluatedScore = (1 - finish_slope) * next_state.evaluatedScore + finish_slope * ((next_state.teams.first.score - next_state.teams.second.score));
 
 						//いけそうだからpushする。
 						if (nextBeamBucketQueue.size() > beam_size) {
