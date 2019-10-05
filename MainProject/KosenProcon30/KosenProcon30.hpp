@@ -69,6 +69,25 @@ namespace Procon30 {
 		//深刻なエラー、強制終了をお勧めする。
 		UnknownError
 	};
+
+	enum class PublicField {
+		NONE,
+		A_1,
+		A_2,
+		A_3,
+		A_4,
+		B_1,
+		B_2,
+		B_3,
+		C_1,
+		C_2,
+		D_1,
+		D_2,
+		E_1,
+		E_2,
+		F_1,
+		F_2
+	};
 	
 	template <class... Args, std::enable_if_t<s3d::detail::format_validation<Args...>::value>* = nullptr>
 	inline void SafeConsole(const Args & ... args) {

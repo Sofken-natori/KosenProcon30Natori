@@ -188,3 +188,8 @@ std::pair<int32, int32> Procon30::Algorithm::calculateScoreFast(Field& field, Te
 
 	return std::pair<int32, int32>(resultTile, resultArea);
 }
+
+Procon30::PublicField Procon30::checkPublicField(const Game& game)
+{
+	return PublicField();
+}

@@ -76,4 +76,6 @@ namespace Procon30 {
 		std::unique_ptr<PruneBranchesAlgorithm> pruneBranchesAlgorithm;
 	};
 
+	PublicField checkPublicField(const Game& game);
+
 }

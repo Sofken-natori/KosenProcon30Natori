@@ -81,8 +81,9 @@ namespace Procon30 {
 		//UNDONE: When member variable changed, You must check this function. 
 		Game& operator=(const Procon30::Game& right);
 
-
 		std::unique_ptr<Algorithm> algorithm;
+
+		PublicField fieldType;
 	};
 
 }
