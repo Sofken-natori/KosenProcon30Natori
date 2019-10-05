@@ -8,7 +8,6 @@ namespace Procon30::SUZUKI {
 	//ASAP:交互ビームサーチ実装のため、求・高速化
 	class AlternatelyBeamSearchAlgorithm : public BeamSearchAlgorithm {
 	private:
-		int32 beamWidth;
 	public:
 		AlternatelyBeamSearchAlgorithm(int32 beamWidth, std::unique_ptr<PruneBranchesAlgorithm> pruneBranches = nullptr);
 		SearchResult execute(const Game& game) override final;

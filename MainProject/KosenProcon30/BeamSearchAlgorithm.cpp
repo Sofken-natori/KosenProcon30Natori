@@ -377,8 +377,8 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 
 	const size_t beam_size = beamWidth;
 	const size_t result_size = 3;
-	const TeamColor my_team = TeamColor::Blue;
-	const TeamColor enemy_team = TeamColor::Red;
+	//const TeamColor my_team = TeamColor::Blue;
+	//const TeamColor enemy_team = TeamColor::Red;
 	const int search_depth = std::min(10, game.MaxTurn - game.turn);
 	const int was_moved_demerit = -5;
 	const int wait_demerit = -10;
@@ -535,23 +535,18 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 								next_state.first_dir[agent_num] =
 									next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition;
 
-								switch (targetTile.color) {
-								case TeamColor::Blue:
+								if (targetTile.color == next_state.teams.first.color) {
 									next_state.first_act[agent_num] = next_act[agent_num] ? Action::Remove : Action::Move;
-									break;
-								case TeamColor::Red:
+								}
+								else if (targetTile.color == next_state.teams.second.color) {
 									next_state.first_act[agent_num] = Action::Remove;
-									break;
-								case TeamColor::None:
+								}
+								else {
 									next_state.first_act[agent_num] = Action::Move;
-									break;
 								}
 							}
 
-							//フィールドとエージェントの位置更新
-							//エージェントの次に行くタイルの色
-							switch (targetTile.color) {
-							case TeamColor::Blue:
+							if (targetTile.color == next_state.teams.first.color) {//blue
 								if (!next_act[agent_num]) {//Move
 									if (next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {//Moved
 										next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
@@ -570,8 +565,8 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 									else
 										next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 								}
-								break;
-							case TeamColor::Red:
+							}
+							else if (targetTile.color == next_state.teams.second.color) {//red
 								targetTile.color = TeamColor::None;
 
 								mustCalcSecondScore = true;
@@ -581,13 +576,13 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 								else
 									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - i)) * enemy_peel_bonus;
 
-								break;
-							case TeamColor::None:
+							}
+							else {//none
 								const bool isDiagonal = (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).x != 0
 									&& (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).y != 0;
 								next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
 
-								targetTile.color = TeamColor::Blue;
+								targetTile.color = next_state.teams.first.color;
 
 								mustCalcFirstScore = true;
 
@@ -597,18 +592,17 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 								else
 									next_state.evaluatedScore += targetTile.score * pow(fast_bonus, search_depth - i);
 
-								break;
 							}
 						}
 
 						if (mustCalcFirstScore) {
-							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, TeamColor::Blue);
+							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, next_state.teams.first.color);
 							next_state.teams.first.tileScore = s.first;
 							next_state.teams.first.areaScore = s.second;
 							next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
 						}
 						if (mustCalcSecondScore) {
-							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, TeamColor::Red);
+							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, next_state.teams.second.color);
 							next_state.teams.second.tileScore = s.first;
 							next_state.teams.second.areaScore = s.second;
 							next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;

@@ -8,8 +8,8 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 	//フィールド用の配列準備して、累積和して、区間取得すればいいか。
 
 	constexpr double my_ratio = 0.3;
-	constexpr double enemy_ratio = 1.1;
-	constexpr double minus_ratio = 0.8;
+	constexpr double enemy_ratio = 1.2;
+	constexpr double minus_ratio = 0.6;
 	constexpr double agent_ratio = 0;
 	const int section_size = 2;
 
@@ -43,10 +43,10 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 	}
 
 	for (auto& agent : teams.first.agents) {
-		memo[agent.nowPosition.y][agent.nowPosition.x] = 0;
+		memo[agent.nowPosition.y][agent.nowPosition.x] *= 0.1;
 	}
 	for (auto& agent : teams.second.agents) {
-		memo[agent.nowPosition.y][agent.nowPosition.x] = 0;
+		memo[agent.nowPosition.y][agent.nowPosition.x] *= 0.5;
 	}
 
 	for (auto y : step(fieldSizeY)) {

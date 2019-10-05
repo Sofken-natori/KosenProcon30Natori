@@ -40,6 +40,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 	const double enemy_area_merit = 0.8;
 	const int minus_demerit = -2;
 	const int mine_remove_demerit = -1;
+	const int cancel_demerit = 0.9;
 
 	//WAGNI:Listへの置き換え。追加は早くなる気がする。
 
@@ -70,7 +71,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 	//可能なシミュレーション手数一覧。
 	//+1は普通に見積もれる。
 	//3ぐらいまでは昨年と同じでいける。
-	const int canSimulationNums[9] = { 0,0,13,8,7,5,5,4,4 };
+	const int canSimulationNums[9] = { 0,0,13,8,8,5,5,4,4 };
 
 	BeamSearchData first_state;
 
@@ -85,7 +86,6 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 		while (!nowBeamBucketQueue.empty()) {
 			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
 			nowBeamBucketQueue.pop();
-
 
 			//8^9はビームサーチでも計算不能に近い削らないと
 			//枝狩り探索を呼び出して、ここでいい感じにする。
@@ -242,6 +242,8 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 							//nextPositionをupdateで書き換えて
 							for (int loop = 0; loop < 16; loop++) {
 								int flag[2][8] = {};
+								bool firstDestroyedFlag[8] = {};
+								bool secondDestroyedFlag[8] = {};
 								int count = 0;
 
 								//以下を移植していく。
@@ -262,14 +264,15 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 													continue;
 												}
 												if (agent.nextPosition == f_agent.nextPosition) {
-													flag[0][agent_num] = 2;
+													//ここら辺はそれぞれ1回しか通らない
+													flag[0][agent_num] = 2;//味方の動きをつぶす
 												}//move or remove , move (nowPosition)
 												else if (agent.nextPosition == f_agent.nowPosition && f_agent.action == Action::Move) {
 													if (flag[0][agent_num] != 2)
 														flag[0][agent_num] = 3;
 												}//move or remove , remove (nowPosition) or stay
 												else if (agent.nextPosition == f_agent.nowPosition) {
-													flag[0][agent_num] = 2;
+													flag[0][agent_num] = 2;//味方に動きをつぶされる
 												}
 												else {
 													if (flag[0][agent_num] == 0)
@@ -279,14 +282,18 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 											const auto& s_team = next_state.teams.second;
 											for (const auto& s_agent : s_team.agents) {
 												if (agent.nextPosition == s_agent.nextPosition) {
-													flag[0][agent_num] = 2;
+													flag[0][agent_num] = 2;//相手と動きをつぶしあう
 												}//move or remove , move (nowPosition)
 												else if (agent.nextPosition == s_agent.nowPosition && s_agent.action == Action::Move) {
 													if (flag[0][agent_num] != 2)
 														flag[0][agent_num] = 3;
 												}//move or remove , remove (nowPosition) or stay
 												else if (agent.nextPosition == s_agent.nowPosition) {
-													flag[0][agent_num] = 2;
+													flag[0][agent_num] = 2;//相手に動きをつぶされる
+													//つまり動かないことで相手の動きもつぶせる
+													if(s_agent.nextPosition != agent.nowPosition)
+														firstDestroyedFlag[agent_num] = true;//多分ここの判定がバグっているはず。
+
 												}
 												else {
 													if (flag[0][agent_num] == 0)
@@ -311,7 +318,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 											const auto& f_team = next_state.teams.first;
 											for (const auto& f_agent : f_team.agents) {
 												if (agent.nextPosition == f_agent.nextPosition) {
-													flag[1][agent_num] = 2;
+													flag[1][agent_num] = 2;//firstと動きをつぶしあう
 												}//move or remove , move (nowPosition)
 												else if (agent.nextPosition == f_agent.nowPosition && f_agent.action == Action::Move) {
 													if (flag[1][agent_num] != 2)
@@ -319,6 +326,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 												}//move or remove , remove (nowPosition) or stay
 												else if (agent.nextPosition == f_agent.nowPosition) {
 													flag[1][agent_num] = 2;
+													secondDestroyedFlag[agent_num] = true;//firstに動きをつぶされる
 												}
 												else {
 													if (flag[1][agent_num] == 0)
@@ -363,12 +371,12 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 
 													mustCalcFirstScore = true;
 
-													next_state.evaluatedScore += isDiagonal * diagonal_bonus;
 													if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
 														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score + minus_demerit) * pow(fast_bonus, search_depth - agent_num);
-													else
+													else {
+														next_state.evaluatedScore += isDiagonal * diagonal_bonus;
 														next_state.evaluatedScore += next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
-
+													}
 
 													agent.nowPosition = agent.nextPosition;
 													next_state.field.m_board.at(agent.nextPosition).color = TeamColor::Blue;
@@ -401,7 +409,16 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 											}
 										}
 										else if (flag[0][agent_num] == 2) {
-											next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
+											//next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
+											if (firstDestroyedFlag[agent_num]) {//動きをつぶされる
+												next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
+											}
+											else {//動きをつぶしあう
+												if(next_state.teams.first.score > next_state.teams.second.score)
+													next_state.evaluatedScore += 1.2 * cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
+												else
+													next_state.evaluatedScore += cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
+											}
 										}
 										if (flag[0][agent_num] == 0 || flag[0][agent_num] == 1 || flag[0][agent_num] == 2) {
 											agent.action = Action::Stay;
@@ -432,11 +449,20 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 												break;
 											}
 										}
+										if (flag[1][agent_num] == 2) {
+											if (secondDestroyedFlag[agent_num]) {//動きをうまくつぶした
+												next_state.evaluatedScore -= wait_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
+											}
+											else {//動きをつぶしあった
+
+											}
+										}
 										if (flag[1][agent_num] == 0 || flag[1][agent_num] == 1 || flag[1][agent_num] == 2) {
 											agent.action = Action::Stay;
 											agent.nextPosition = agent.nowPosition;
 											flag[1][agent_num] = 4;
 										}
+			
 										if (flag[1][agent_num] == 3)
 											count++;
 										agent_num++;

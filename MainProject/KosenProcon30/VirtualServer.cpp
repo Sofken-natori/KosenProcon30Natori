@@ -591,10 +591,10 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 		//CATION:Ç©Ç»ÇËñ≥óùÇ‚ÇËàÍéûìIÇæÇ©ÇÁãñÇµÇƒ
 		
 		if(i == 0)
-			games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(100, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8))));
+			games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8))));
 		else
-			games[i].algorithm.reset(new Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm(70, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8))));
-
+			games[i].algorithm.reset(new Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::PruneBranchesAlgorithm())));
+			//games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(100));
 		
 	}
 
