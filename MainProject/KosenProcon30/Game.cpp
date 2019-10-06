@@ -144,6 +144,7 @@ void Procon30::Game::Loop()
 		if (programEnd->load() == true)
 			break;
 		observer->notify(gameNum,*this);
+		this->turnTimer.restart();
 		//AlgoÀs
 		{
 			assert(algorithm);

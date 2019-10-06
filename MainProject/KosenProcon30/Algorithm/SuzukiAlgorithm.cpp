@@ -869,8 +869,8 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 											if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
 												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
 												next_state.field.m_board.at(
-												next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+													next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+													next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
 												color == next_state.teams.first.color)
 												tileCount++;
 										}
@@ -900,10 +900,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 										if (dxy[direction] == 0 && dxy[direction + 1] == 0)
 											continue;
 										if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) && 
+											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
 											next_state.field.m_board.at(
-											next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+												next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
 											color == next_state.teams.second.color)
 											tileCount++;
 									}
@@ -937,10 +937,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 										if (dxy[direction] == 0 && dxy[direction + 1] == 0)
 											continue;
 										if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) && 
+											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
 											next_state.field.m_board.at(
-											next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+												next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
 											color == next_state.teams.first.color)
 											tileCount++;
 									}
@@ -1087,7 +1087,16 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 	//内部定数はスネークケースで統一許して
 
+	//ここで調整する
+	//とりあえず暫定でマップの広さと探索時間に関係はないため、（calcScoreの影響は未定）
+	//ビーム幅は、エージェント数で決めます。
+
+	//constexpr int32 canBeamWidths[9] = { 0,0,100,100,100, 100, 100, 100, 100 };
+
+	//beamWidth = canBeamWidths[game.teams.first.agentNum];
+
 	const size_t beam_size = beamWidth;
+
 	constexpr size_t result_size = 3;
 	constexpr TeamColor my_team = TeamColor::Blue;
 	constexpr TeamColor enemy_team = TeamColor::Red;
@@ -1103,6 +1112,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	constexpr double enemy_area_merit = 0.8;
 	constexpr int minus_demerit = -2;
 	constexpr int mine_remove_demerit = -1;
+	constexpr int32 timeMargin = 1000;
 
 	//TODO:ターンが進めば進むほど実際の評価と同じようになるようにする。
 	//演算子の準備
@@ -1132,7 +1142,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	//+1は普通に見積もれる。
 	//3ぐらいまでは昨年と同じでいける。
 	//TODO:アルゴリズム固まってから計算量見つつビーム幅の調整しませう。
-	const int canSimulationNums[9] = { 0,0,13,8,8,5,4,3,3 };
+	constexpr int32 canSimulationNums[9] = { 0,0,13,8,8,5,4,3,3 };
 
 	BeamSearchData first_state;
 
@@ -1142,8 +1152,21 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 	nowBeamBucketQueue.push(first_state);
 
-	//TODO:いい加減秒数に合わせて計算打ち切る工夫追加しろ！あほ！このままだと本番死ぬぞ
-	for (int i = 0; i < search_depth; i++) {
+	int32 beforeOneDepthSearchEnd = game.turnTimer.ms();
+	int32 nowSearchDepth;
+
+	//秒数に合わせて計算打ち切る工夫追加。とりあえずこれだけあれば動けないことはない。
+	//WAGNI:余った時間に合わせてビーム幅を調整する工夫？
+	for (nowSearchDepth = 0; nowSearchDepth < search_depth; nowSearchDepth++) {
+
+		if (nowSearchDepth != 0) {
+			beforeOneDepthSearchEnd = game.turnTimer.ms() - beforeOneDepthSearchEnd;
+			if ((game.turnMillis - timeMargin) < game.turnTimer.ms() + beforeOneDepthSearchEnd) {
+				break;
+			}
+		}
+
+
 		//enumerate
 		while (!nowBeamBucketQueue.empty()) {
 			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
@@ -1239,7 +1262,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 							Tile& targetTile = next_state.field.m_board.at(next_state.teams.first.agents[agent_num].nextPosition);
 
-							if (i == 0) {
+							if (nowSearchDepth == 0) {
 
 								next_state.first_dir[agent_num] =
 									next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition;
@@ -1264,10 +1287,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 								if (!next_act[agent_num]) {//Move
 									if (next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {//Moved
 										next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
-										next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - i);
+										next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
 									}
 									else//Wait
-										next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - i);
+										next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
 								}
 								else {//Remove
 									targetTile.color = TeamColor::None;
@@ -1280,10 +1303,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 											if (dxy[direction] == 0 && dxy[direction + 1] == 0)
 												continue;
 											if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) && 
+												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
 												next_state.field.m_board.at(
-												next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+													next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+													next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
 												color == next_state.teams.first.color)
 												tileCount++;
 										}
@@ -1297,7 +1320,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 									}
 
 									if (targetTile.score <= 0)
-										next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - i) + mine_remove_demerit) * enemy_peel_bonus;
+										next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + mine_remove_demerit) * enemy_peel_bonus;
 									else
 										next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 								}
@@ -1313,10 +1336,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 										if (dxy[direction] == 0 && dxy[direction + 1] == 0)
 											continue;
 										if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) && 
+											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
 											next_state.field.m_board.at(
-											next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+												next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
 											color == next_state.teams.second.color)
 											tileCount++;
 									}
@@ -1330,9 +1353,9 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 								}
 
 								if (targetTile.score <= 0)
-									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - i) + minus_demerit) * enemy_peel_bonus;
+									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + minus_demerit) * enemy_peel_bonus;
 								else
-									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - i)) * enemy_peel_bonus;
+									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth)) * enemy_peel_bonus;
 
 								break;
 							case TeamColor::None:
@@ -1349,10 +1372,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 										if (dxy[direction] == 0 && dxy[direction + 1] == 0)
 											continue;
 										if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) && 
+											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
 											next_state.field.m_board.at(
-											next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+												next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
 											color == next_state.teams.first.color)
 											tileCount++;
 									}
@@ -1367,9 +1390,9 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 								next_state.evaluatedScore += isDiagonal * diagonal_bonus;
 								if (targetTile.score <= 0)
-									next_state.evaluatedScore += (targetTile.score + minus_demerit) * pow(fast_bonus, search_depth - i);
+									next_state.evaluatedScore += (targetTile.score + minus_demerit) * pow(fast_bonus, search_depth - nowSearchDepth);
 								else
-									next_state.evaluatedScore += targetTile.score * pow(fast_bonus, search_depth - i);
+									next_state.evaluatedScore += targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth);
 
 								break;
 							}
@@ -1389,7 +1412,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 						}
 
 						next_state.evaluatedScore += (next_state.teams.first.areaScore - now_state.teams.first.areaScore) * my_area_merit +
-							(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - i);
+							(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - nowSearchDepth);
 
 						//いけそうだからpushする。
 						if (nextBeamBucketQueue.size() > beam_size) {
