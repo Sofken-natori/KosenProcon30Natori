@@ -143,7 +143,7 @@ void Procon30::Game::Loop()
 		updateData();
 		if (programEnd->load() == true)
 			break;
-		observer->notify(gameNum,*this);
+		observer->notify(gameNum, *this);
 		this->turnTimer.restart();
 		//AlgoŽÀs
 		{
@@ -214,4 +214,50 @@ Procon30::Game& Procon30::Game::operator=(const Procon30::Game& right)
 	this->isSearchFinished = right.isSearchFinished;
 
 	return (*this);
+}
+
+
+
+
+
+
+Procon30::PublicFields::PublicFields() {
+	//‹–‚µ‚Ä
+	std::array<String, 15> fileNames = {
+		U"A-1",U"A-2",U"A-3",U"A-4",
+		U"B-1",U"B-2",U"B-3",
+		U"C-1",U"C-2",
+		U"D-1",U"D-2",
+		U"E-1",U"E-2",
+		U"F-1",U"F-2" };
+
+	FilePath filePath = U"json/PublicField/";
+	for (int i = 0; i < 15; i++) {
+		FilePath path = Format(filePath, fileNames[i], U".json");
+		fields[i].parseJson(path);
+	}
+}
+
+void Procon30::PublicFields::read() {
+	
+}
+
+Procon30::PublicField Procon30::PublicFields::checkPublicField(const Game& game) {
+	bool worng = false;
+	for (int i = 0; i < 15; i++, worng = false) {
+		if (game.field.boardSize.x != fields[i].field.boardSize.x)continue;
+		if (game.field.boardSize.y != fields[i].field.boardSize.y)continue;
+		for (int y : step(game.field.boardSize.y)) {
+			for (int x : step(game.field.boardSize.x)) {
+				if (game.field.m_board[y][x].score != fields[i].field.m_board[y][x].score) {
+					worng = true;
+					break;
+				}
+			}
+			if (worng)break;
+		}
+		if (worng)continue;
+		return PublicField(i + 1);
+	}
+	return PublicField(0);
 }
