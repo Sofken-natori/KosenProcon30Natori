@@ -1,5 +1,6 @@
 #include "SuzukiAlgorithm.hpp"
 #include <queue>
+#include <future>
 
 Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::AlternatelyBeamSearchAlgorithm(int32 beamWidth, std::unique_ptr<PruneBranchesAlgorithm> pruneBranches) : BeamSearchAlgorithm(beamWidth, std::move(pruneBranches))
 {
@@ -40,7 +41,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 	const double enemy_area_merit = 0.8;
 	const int minus_demerit = -2;
 	const int mine_remove_demerit = -1;
-	const int cancel_demerit = 0.9;
+	const double cancel_demerit = 0.9;
 
 	//WAGNI:Listへの置き換え。追加は早くなる気がする。
 
@@ -1077,13 +1078,91 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 	return result;
 }
 
+
+std::pair<int32, int32> innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast, std::bitset<1023> & isTeamColorFast)
+{
+
+	//short is 16bit and 2byte.
+#define XY_TO_SHORT(x,y) ((((x) & 31) << 5) | ((y) & 31))
+#define SHORT_TO_X(c) (((c) >> 5) & 31)
+#define SHORT_TO_Y(c) ((c) & 31)
+
+	int32 q_front = 0;
+	int32 q_end = 0;
+
+	const int& fieldSizeX = field.boardSize.x;
+	const int& fieldSizeY = field.boardSize.y;
+
+	assert(fieldSizeX > 0);
+	assert(fieldSizeY > 0);
+
+	for (auto y : step(fieldSizeY)) {
+		qFast[q_end++] = XY_TO_SHORT(0, y);
+		qFast[q_end++] = XY_TO_SHORT(fieldSizeX - 1, y);
+	}
+	for (auto x : step(fieldSizeX)) {
+		qFast[q_end++] = XY_TO_SHORT(x, 0);
+		qFast[q_end++] = XY_TO_SHORT(x, fieldSizeY - 1);
+	}
+
+	for (auto y : step(fieldSizeY)) {
+		for (auto x : step(fieldSizeX)) {
+			isTeamColorFast[XY_TO_SHORT(x, y)] = field.m_board.at(y, x).color != teamColor;
+		}
+	}
+
+	while (q_front < q_end) {
+
+		const auto& now = qFast[q_front++];
+
+		if (!visitFast[now]) {
+
+			visitFast[now] = true;
+
+			if (isTeamColorFast[now]) {
+				if (SHORT_TO_X(now) != 0)
+					qFast[q_end++] = now - (1 << 5);
+				//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) - 1, SHORT_TO_Y(now));
+				if (SHORT_TO_Y(now) + 1 < fieldSizeY)
+					qFast[q_end++] = now + 1;
+				//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) + 1);
+				if (SHORT_TO_X(now) + 1 < fieldSizeX)
+					qFast[q_end++] = now + (1 << 5);
+				//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) + 1, SHORT_TO_Y(now));
+				if (SHORT_TO_Y(now) != 0)
+					qFast[q_end++] = now - 1;
+				//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now), SHORT_TO_Y(now) - 1);
+			}
+
+			assert(q_end <= 2000);
+		}
+
+	}
+
+
+	int32 resultTile = 0;
+	int32 resultArea = 0;
+
+	for (auto y : step(fieldSizeY)) {
+		for (auto x : step(fieldSizeX)) {
+			if (field.m_board.at(y, x).color == teamColor) {
+				resultTile += field.m_board.at(y, x).score;
+			}
+			else if (visitFast[XY_TO_SHORT(x, y)] == false) {
+				resultArea += abs(field.m_board.at(y, x).score);
+			}
+		}
+	}
+
+	visitFast.reset();
+
+	return std::pair<int32, int32>(resultTile, resultArea);
+}
+
+
+
 Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecute(const Game& game)
 {
-	constexpr int dxy[10] = { 1,-1,-1,0,-1,1,0,0,1,1 };
-
-	auto InRange = [&](s3d::Point p) {
-		return 0 <= p.x && p.x < game.field.boardSize.x && 0 <= p.y && p.y < game.field.boardSize.y;
-	};
 
 	//内部定数はスネークケースで統一許して
 
@@ -1101,6 +1180,8 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	constexpr TeamColor my_team = TeamColor::Blue;
 	constexpr TeamColor enemy_team = TeamColor::Red;
 	const int search_depth = std::min(10, game.MaxTurn - game.turn);
+	const int field_width = game.field.boardSize.x;
+	const int field_height = game.field.boardSize.y;
 	constexpr double same_location_demerit = 0.7;
 	constexpr double same_area_demerit = 0.7;
 	constexpr int was_moved_demerit = -5;
@@ -1113,36 +1194,20 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	constexpr int minus_demerit = -2;
 	constexpr int mine_remove_demerit = -1;
 	constexpr int32 timeMargin = 1000;
+	constexpr int32 parallelSize = 3;
 
 	//TODO:ターンが進めば進むほど実際の評価と同じようになるようにする。
 	//演算子の準備
-	auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
-
-	std::vector<BeamSearchData> nowContainer;
-	nowContainer.reserve(10000);
-	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nowBeamBucketQueue(
-		compare, std::move(nowContainer));
-
-	std::vector<BeamSearchData> nextContainer;
-	nextContainer.reserve(10000);
-	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, decltype(compare)> nextBeamBucketQueue(
-		compare, std::move(nextContainer));
+	//騒乱をもたらしたためoperatorをオーバーライドして実装
+	//auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
 
 
+	int32 beforeOneDepthSearchEnd = game.turnTimer.ms();
+	int32 nowSearchDepth;
 
-	//方向の集合用にここで確保する。
-	//[エージェント番号][方向番号（終端を-2にしておいて）] = 方向;
-	std::array<std::array<Point, 10>, 8> enumerateDir;
+	Array<BeamSearchData> nowBeamBucketArray;
 
-	//8エージェントの場合 8^10=10^9ぐらいになりえるのでたまらん
-	//5secから15secらしい、
-	//2^10=1024で昨年、1secだから
-	//8^4=4096ぐらいにしたい。
-	//可能なシミュレーション手数一覧。
-	//+1は普通に見積もれる。
-	//3ぐらいまでは昨年と同じでいける。
-	//TODO:アルゴリズム固まってから計算量見つつビーム幅の調整しませう。
-	constexpr int32 canSimulationNums[9] = { 0,0,13,8,8,5,4,3,3 };
+	std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueues[parallelSize];
 
 	BeamSearchData first_state;
 
@@ -1150,11 +1215,13 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	first_state.field = game.field;
 	first_state.teams = game.teams;
 
-	nowBeamBucketQueue.push(first_state);
-
-	int32 beforeOneDepthSearchEnd = game.turnTimer.ms();
-	int32 nowSearchDepth;
-
+	//nowBeamBucketArray.push_back(first_state);
+	nowBeamBucketQueues[0].push(first_state);
+	/*
+		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
+			nowBeamBucketQueues[parallelNum] = std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>>();
+		}
+	*/
 	//秒数に合わせて計算打ち切る工夫追加。とりあえずこれだけあれば動けないことはない。
 	//WAGNI:余った時間に合わせてビーム幅を調整する工夫？
 	for (nowSearchDepth = 0; nowSearchDepth < search_depth; nowSearchDepth++) {
@@ -1166,287 +1233,341 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 			}
 		}
 
+		//このループを並列化する。多分、
+		std::future<std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>>> beamSearchFuture[parallelSize];
 
-		//enumerate
-		while (!nowBeamBucketQueue.empty()) {
-			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
-			nowBeamBucketQueue.pop();
+		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
+			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, search_depth, beam_size, field_width, field_height](
+				std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueue) {
 
-			//8^9はビームサーチでも計算不能に近い削らないと
-			//枝狩り探索を呼び出して、ここでいい感じにする。
-			//機能としては、Fieldとteamsを与えることで1000-10000前後の方向の集合を返す。
-			assert(pruneBranchesAlgorithm);
+					std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nextBeamBucketQueue;
 
-			pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
+					PruneBranchesAlgorithm pruneBranches;
 
-			//bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
-			//assert(okPrune);
+					std::bitset<1023> visitFast = {};
+					std::bitset<1023> isTeamColorFast = {};
+					unsigned short qFast[2000] = {};
 
-			int32 next_dir[8] = {};
+					//方向の集合用にここで確保する。
+					//[エージェント番号][方向番号（終端を-2にしておいて）] = 方向;
+					std::array<std::array<Point, 10>, 8> enumerateDir;
 
-			bool enumerateLoop = true;
-			while (enumerateLoop) {
+					constexpr int dxy[10] = { 1,-1,-1,0,-1,1,0,0,1,1 };
 
-				bool skip = false;
+					auto InRange = [&](s3d::Point p) {
+						return 0 <= p.x && p.x < field_width && 0 <= p.y && p.y < field_height;
+					};
 
-				//実際に移動させてみる。
-				for (int agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
-					now_state.teams.first.agents[agent_num].nextPosition
-						= now_state.teams.first.agents[agent_num].nowPosition
-						+ enumerateDir[agent_num][next_dir[agent_num]];
+					//enumerate
+					while (!nowBeamBucketQueue.empty()) {
 
-					if (!InRange(now_state.teams.first.agents[agent_num].nextPosition))
-						skip = true;
-				}
+						BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
+						nowBeamBucketQueue.pop();
 
-				//now nextの被り検出
-				for (int agent_num1 = 0; agent_num1 < now_state.teams.first.agentNum; agent_num1++) {
-					for (int agent_num2 = 0; agent_num2 < now_state.teams.first.agentNum; agent_num2++) {
-						if (agent_num1 == agent_num2) {
-							continue;
-						}
-						if (now_state.teams.first.agents[agent_num1].nowPosition == now_state.teams.first.agents[agent_num2].nextPosition) {
-							skip = true;
-							agent_num1 = agent_num2 = 10;
-						}
-					}
-				}
+						//8^9はビームサーチでも計算不能に近い削らないと
+						//枝狩り探索を呼び出して、ここでいい感じにする。
+						//機能としては、Fieldとteamsを与えることで1000-10000前後の方向の集合を返す。
+						//assert(pruneBranchesAlgorithm);
 
-				//next nextの被り検出
-				for (int agent_num1 = 0; agent_num1 < now_state.teams.first.agentNum; agent_num1++) {
-					for (int agent_num2 = 0; agent_num2 < now_state.teams.first.agentNum; agent_num2++) {
-						if (agent_num1 == agent_num2) {
-							continue;
-						}
-						if (now_state.teams.first.agents[agent_num1].nextPosition == now_state.teams.first.agents[agent_num2].nextPosition) {
-							skip = true;
-							agent_num1 = agent_num2 = 10;
-						}
-					}
-				}
+						//8エージェントの場合 8^10=10^9ぐらいになりえるのでたまらん
+						//5secから15secらしい、
+						//2^10=1024で昨年、1secだから
+						//8^4=4096ぐらいにしたい。
+						//可能なシミュレーション手数一覧。
+						//+1は普通に見積もれる。
+						//3ぐらいまでは昨年と同じでいける。
+						//TODO:アルゴリズム固まってから計算量見つつビーム幅の調整しませう。
+						const int32 canSimulationNums[9] = { 0,0,13,8,8,5,4,3,3 };
 
-				//ここで次の移動方向を更新する。
-				//9方向だから9まで
-				for (int agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
-					next_dir[agent_num]++;
-					if (enumerateDir[agent_num][next_dir[agent_num]] == Point(-2, -2)) {
-						next_dir[agent_num] = 0;
-						if (agent_num == now_state.teams.first.agentNum - 1) {
-							enumerateLoop = false;
-							break;
-						}
-					}
-					else {
-						break;
-					}
-				}
+						pruneBranches.pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
 
-				if (skip)
-					continue;
+						//bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
+						//assert(okPrune);
 
-				{
-					//move : false , remove : true
-					bool next_act[8] = {};
-					bool actionLoop = true;
+						int32 next_dir[8] = {};
 
-					while (actionLoop) {
-						BeamSearchData next_state = now_state;
+						bool enumerateLoop = true;
+						while (enumerateLoop) {
 
-						bool mustCalcFirstScore = false;
-						bool mustCalcSecondScore = false;
+							bool skip = false;
 
-						//シミュレーションしてみる。やばそうには理論的にならない
-						//WAGNI:負けている際、にらみ合いのロック解除の機構
-						//自分色のマイナス点をmoveとremoveするステートを作る。
-						for (int agent_num = 0; agent_num < next_state.teams.first.agentNum; agent_num++) {
+							//実際に移動させてみる。
+							for (int agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
+								now_state.teams.first.agents[agent_num].nextPosition
+									= now_state.teams.first.agents[agent_num].nowPosition
+									+ enumerateDir[agent_num][next_dir[agent_num]];
 
-							Tile& targetTile = next_state.field.m_board.at(next_state.teams.first.agents[agent_num].nextPosition);
+								if (!InRange(now_state.teams.first.agents[agent_num].nextPosition))
+									skip = true;
+							}
 
-							if (nowSearchDepth == 0) {
+							//now nextの被り検出
+							for (int agent_num1 = 0; agent_num1 < now_state.teams.first.agentNum; agent_num1++) {
+								for (int agent_num2 = 0; agent_num2 < now_state.teams.first.agentNum; agent_num2++) {
+									if (agent_num1 == agent_num2) {
+										continue;
+									}
+									if (now_state.teams.first.agents[agent_num1].nowPosition == now_state.teams.first.agents[agent_num2].nextPosition) {
+										skip = true;
+										agent_num1 = agent_num2 = 10;
+									}
+								}
+							}
 
-								next_state.first_dir[agent_num] =
-									next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition;
+							//next nextの被り検出
+							for (int agent_num1 = 0; agent_num1 < now_state.teams.first.agentNum; agent_num1++) {
+								for (int agent_num2 = 0; agent_num2 < now_state.teams.first.agentNum; agent_num2++) {
+									if (agent_num1 == agent_num2) {
+										continue;
+									}
+									if (now_state.teams.first.agents[agent_num1].nextPosition == now_state.teams.first.agents[agent_num2].nextPosition) {
+										skip = true;
+										agent_num1 = agent_num2 = 10;
+									}
+								}
+							}
 
-								switch (targetTile.color) {
-								case TeamColor::Blue:
-									next_state.first_act[agent_num] = next_act[agent_num] ? Action::Remove : Action::Move;
-									break;
-								case TeamColor::Red:
-									next_state.first_act[agent_num] = Action::Remove;
-									break;
-								case TeamColor::None:
-									next_state.first_act[agent_num] = Action::Move;
+							//ここで次の移動方向を更新する。
+							//9方向だから9まで
+							for (int agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
+								next_dir[agent_num]++;
+								if (enumerateDir[agent_num][next_dir[agent_num]] == Point(-2, -2)) {
+									next_dir[agent_num] = 0;
+									if (agent_num == now_state.teams.first.agentNum - 1) {
+										enumerateLoop = false;
+										break;
+									}
+								}
+								else {
 									break;
 								}
 							}
 
-							//フィールドとエージェントの位置更新
-							//エージェントの次に行くタイルの色
-							switch (targetTile.color) {
-							case TeamColor::Blue:
-								if (!next_act[agent_num]) {//Move
-									if (next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {//Moved
-										next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
-										next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
-									}
-									else//Wait
-										next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
-								}
-								else {//Remove
-									targetTile.color = TeamColor::None;
+							if (skip)
+								continue;
 
-									{
-										//青が両脇2か所以上あったら
-										int tileCount = 0;
+							{
+								//move : false , remove : true
+								bool next_act[8] = {};
+								bool actionLoop = true;
 
-										for (int direction = 0; direction < 9; direction++) {
-											if (dxy[direction] == 0 && dxy[direction + 1] == 0)
-												continue;
-											if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
-												next_state.field.m_board.at(
-													next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-													next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
-												color == next_state.teams.first.color)
-												tileCount++;
+								while (actionLoop) {
+									BeamSearchData next_state = now_state;
+
+									bool mustCalcFirstScore = false;
+									bool mustCalcSecondScore = false;
+
+									//シミュレーションしてみる。やばそうには理論的にならない
+									//WAGNI:負けている際、にらみ合いのロック解除の機構
+									//自分色のマイナス点をmoveとremoveするステートを作る。
+									for (int agent_num = 0; agent_num < next_state.teams.first.agentNum; agent_num++) {
+
+										Tile& targetTile = next_state.field.m_board.at(next_state.teams.first.agents[agent_num].nextPosition);
+
+										if (nowSearchDepth == 0) {
+
+											next_state.first_dir[agent_num] =
+												next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition;
+
+											switch (targetTile.color) {
+											case TeamColor::Blue:
+												next_state.first_act[agent_num] = next_act[agent_num] ? Action::Remove : Action::Move;
+												break;
+											case TeamColor::Red:
+												next_state.first_act[agent_num] = Action::Remove;
+												break;
+											case TeamColor::None:
+												next_state.first_act[agent_num] = Action::Move;
+												break;
+											}
 										}
 
-										if (tileCount >= 2)
-											mustCalcFirstScore = true;
+										//フィールドとエージェントの位置更新
+										//エージェントの次に行くタイルの色
+										switch (targetTile.color) {
+										case TeamColor::Blue:
+											if (!next_act[agent_num]) {//Move
+												if (next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {//Moved
+													next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
+													next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+												}
+												else//Wait
+													next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+											}
+											else {//Remove
+												targetTile.color = TeamColor::None;
+
+												{
+													//青が両脇2か所以上あったら
+													int tileCount = 0;
+
+													for (int direction = 0; direction < 9; direction++) {
+														if (dxy[direction] == 0 && dxy[direction + 1] == 0)
+															continue;
+														if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+															next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
+															next_state.field.m_board.at(
+																next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+																next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+															color == next_state.teams.first.color)
+															tileCount++;
+													}
+
+													if (tileCount >= 2)
+														mustCalcFirstScore = true;
+													else {
+														next_state.teams.first.tileScore -= targetTile.score;
+														next_state.teams.first.areaScore -= targetTile.score;
+													}
+												}
+
+												if (targetTile.score <= 0)
+													next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + mine_remove_demerit) * enemy_peel_bonus;
+												else
+													next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
+											}
+											break;
+										case TeamColor::Red:
+											targetTile.color = TeamColor::None;
+
+											{
+												//赤が両脇2か所以上あったら
+												int tileCount = 0;
+
+												for (int direction = 0; direction < 9; direction++) {
+													if (dxy[direction] == 0 && dxy[direction + 1] == 0)
+														continue;
+													if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+														next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
+														next_state.field.m_board.at(
+															next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+															next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+														color == next_state.teams.second.color)
+														tileCount++;
+												}
+
+												if (tileCount >= 2)
+													mustCalcSecondScore = true;
+												else {
+													next_state.teams.second.tileScore -= targetTile.score;
+													next_state.teams.second.areaScore -= targetTile.score;
+												}
+											}
+
+											if (targetTile.score <= 0)
+												next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + minus_demerit) * enemy_peel_bonus;
+											else
+												next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth)) * enemy_peel_bonus;
+
+											break;
+										case TeamColor::None:
+											const bool isDiagonal = (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).x != 0
+												&& (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).y != 0;
+											next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
+
+											targetTile.color = next_state.teams.first.color;
+											{
+												//青が両脇2か所以上あったら
+												int tileCount = 0;
+
+												for (int direction = 0; direction < 9; direction++) {
+													if (dxy[direction] == 0 && dxy[direction + 1] == 0)
+														continue;
+													if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+														next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
+														next_state.field.m_board.at(
+															next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
+															next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
+														color == next_state.teams.first.color)
+														tileCount++;
+												}
+
+												if (tileCount >= 2)
+													mustCalcFirstScore = true;
+												else {
+													next_state.teams.first.tileScore -= targetTile.score;
+													next_state.teams.first.areaScore -= targetTile.score;
+												}
+											}
+
+											next_state.evaluatedScore += isDiagonal * diagonal_bonus;
+											if (targetTile.score <= 0)
+												next_state.evaluatedScore += (targetTile.score + minus_demerit) * pow(fast_bonus, search_depth - nowSearchDepth);
+											else
+												next_state.evaluatedScore += targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth);
+
+											break;
+										}
+									}
+
+									if (mustCalcFirstScore) {
+										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, TeamColor::Blue, qFast, visitFast, isTeamColorFast);
+										next_state.teams.first.tileScore = s.first;
+										next_state.teams.first.areaScore = s.second;
+										next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
+									}
+									if (mustCalcSecondScore) {
+										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, TeamColor::Red, qFast, visitFast, isTeamColorFast);
+										next_state.teams.second.tileScore = s.first;
+										next_state.teams.second.areaScore = s.second;
+										next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
+									}
+
+									next_state.evaluatedScore += (next_state.teams.first.areaScore - now_state.teams.first.areaScore) * my_area_merit +
+										(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - nowSearchDepth);
+
+									//いけそうだからpushする。
+									if (nextBeamBucketQueue.size() > beam_size) {
+										if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
+											nextBeamBucketQueue.pop();
+											nextBeamBucketQueue.push(std::move(next_state));
+										}
+									}
+									else {
+										nextBeamBucketQueue.push(std::move(next_state));
+									}
+
+									//move or remove
+									for (int agent_num = 0; agent_num < next_state.teams.first.agentNum; agent_num++) {
+										if (next_act[agent_num] == true) {
+											next_act[agent_num] = false;
+										}
 										else {
-											next_state.teams.first.tileScore -= targetTile.score;
-											next_state.teams.first.areaScore -= targetTile.score;
+											if (next_state.field.m_board.at(next_state.teams.first.agents[agent_num].nextPosition).color
+												== next_state.teams.first.color
+												&& next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {
+												next_act[agent_num] = true;
+												break;
+											}
+										}
+										if (agent_num == next_state.teams.first.agentNum - 1) {
+											actionLoop = false;
 										}
 									}
-
-									if (targetTile.score <= 0)
-										next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + mine_remove_demerit) * enemy_peel_bonus;
-									else
-										next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 								}
-								break;
-							case TeamColor::Red:
-								targetTile.color = TeamColor::None;
-
-								{
-									//赤が両脇2か所以上あったら
-									int tileCount = 0;
-
-									for (int direction = 0; direction < 9; direction++) {
-										if (dxy[direction] == 0 && dxy[direction + 1] == 0)
-											continue;
-										if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
-											next_state.field.m_board.at(
-												next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
-											color == next_state.teams.second.color)
-											tileCount++;
-									}
-
-									if (tileCount >= 2)
-										mustCalcSecondScore = true;
-									else {
-										next_state.teams.second.tileScore -= targetTile.score;
-										next_state.teams.second.areaScore -= targetTile.score;
-									}
-								}
-
-								if (targetTile.score <= 0)
-									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + minus_demerit) * enemy_peel_bonus;
-								else
-									next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth)) * enemy_peel_bonus;
-
-								break;
-							case TeamColor::None:
-								const bool isDiagonal = (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).x != 0
-									&& (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).y != 0;
-								next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
-
-								targetTile.color = next_state.teams.first.color;
-								{
-									//青が両脇2か所以上あったら
-									int tileCount = 0;
-
-									for (int direction = 0; direction < 9; direction++) {
-										if (dxy[direction] == 0 && dxy[direction + 1] == 0)
-											continue;
-										if (InRange(Point(next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-											next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1])) &&
-											next_state.field.m_board.at(
-												next_state.teams.first.agents[agent_num].nextPosition.y + dxy[direction],
-												next_state.teams.first.agents[agent_num].nextPosition.x + dxy[direction + 1]).
-											color == next_state.teams.first.color)
-											tileCount++;
-									}
-
-									if (tileCount >= 2)
-										mustCalcFirstScore = true;
-									else {
-										next_state.teams.first.tileScore -= targetTile.score;
-										next_state.teams.first.areaScore -= targetTile.score;
-									}
-								}
-
-								next_state.evaluatedScore += isDiagonal * diagonal_bonus;
-								if (targetTile.score <= 0)
-									next_state.evaluatedScore += (targetTile.score + minus_demerit) * pow(fast_bonus, search_depth - nowSearchDepth);
-								else
-									next_state.evaluatedScore += targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth);
-
-								break;
-							}
-						}
-
-						if (mustCalcFirstScore) {
-							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, TeamColor::Blue);
-							next_state.teams.first.tileScore = s.first;
-							next_state.teams.first.areaScore = s.second;
-							next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
-						}
-						if (mustCalcSecondScore) {
-							std::pair<int32, int32> s = this->calculateScoreFast(next_state.field, TeamColor::Red);
-							next_state.teams.second.tileScore = s.first;
-							next_state.teams.second.areaScore = s.second;
-							next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
-						}
-
-						next_state.evaluatedScore += (next_state.teams.first.areaScore - now_state.teams.first.areaScore) * my_area_merit +
-							(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - nowSearchDepth);
-
-						//いけそうだからpushする。
-						if (nextBeamBucketQueue.size() > beam_size) {
-							if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
-								nextBeamBucketQueue.pop();
-								nextBeamBucketQueue.push(std::move(next_state));
-							}
-						}
-						else {
-							nextBeamBucketQueue.push(std::move(next_state));
-						}
-
-						//move or remove
-						for (int agent_num = 0; agent_num < next_state.teams.first.agentNum; agent_num++) {
-							if (next_act[agent_num] == true) {
-								next_act[agent_num] = false;
-							}
-							else {
-								if (next_state.field.m_board.at(next_state.teams.first.agents[agent_num].nextPosition).color
-									== next_state.teams.first.color
-									&& next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {
-									next_act[agent_num] = true;
-									break;
-								}
-							}
-							if (agent_num == next_state.teams.first.agentNum - 1) {
-								actionLoop = false;
 							}
 						}
 					}
-				}
 
+					return nextBeamBucketQueue;
+				}
+			, nowBeamBucketQueues[parallelNum]);
+		}
+
+		nowBeamBucketArray.clear();
+
+		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
+			std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> result = beamSearchFuture[parallelNum].get();
+
+			//popする。
+			while (!result.empty()) {
+				nowBeamBucketArray.push_back(std::move(result.top()));
+				result.pop();
 			}
 		}
+
+		std::sort(nowBeamBucketArray.begin(), nowBeamBucketArray.end());
+
 
 		//ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。ここまででメインのBeamSearchいじるの一旦終了かも
 
@@ -1454,23 +1575,15 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 		//現在の占有しているマップが一緒なら減点したい
 		//もしくは、現在の位置が一緒なら減点
 
-
-		std::list<BeamSearchData> nowBeamBucket;
-
-		//popする。
-		while (!nextBeamBucketQueue.empty()) {
-			nowBeamBucket.push_back(std::move(nextBeamBucketQueue.top()));
-			nextBeamBucketQueue.pop();
-		}
 		//stackする。
 		//減点する(とりあえず2乗)
-		nowBeamBucket.reverse();
+		nowBeamBucketArray.reverse();
 
 		//実装済み:同じ盤面なら枝狩り
 		//実装済み:同じエージェント位置なら枝狩り。
 		//実装済み:ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。=>結果差が大してないのではまあ、遅くはなってないしうーん。
-		for (auto itr = nowBeamBucket.begin(); itr != nowBeamBucket.end(); itr++) {
-			for (auto minScoreItr = itr; minScoreItr != nowBeamBucket.end(); minScoreItr++) {
+		for (auto itr = nowBeamBucketArray.begin(); itr != nowBeamBucketArray.end(); itr++) {
+			for (auto minScoreItr = itr; minScoreItr != nowBeamBucketArray.end(); minScoreItr++) {
 				if (minScoreItr == itr)
 					continue;
 				bool same = true;
@@ -1501,45 +1614,40 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 			}
 		}
 
-		//pushする。
-		for (auto itr = nowBeamBucket.begin(); itr != nowBeamBucket.end(); itr++) {
-			nowBeamBucketQueue.push(*itr);
+		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
+			while (!nowBeamBucketQueues[parallelNum].empty()) {
+				nowBeamBucketQueues[parallelNum].pop();
+			}
 		}
-		//nowBeamBucketQueue.swap(nextBeamBucketQueue);
+
+		std::sort(nowBeamBucketArray.begin(), nowBeamBucketArray.end(), std::greater<BeamSearchData>());
+
+		for (int32 beamCount = 0; beamCount < beam_size; beamCount++) {
+			nowBeamBucketQueues[beamCount % parallelSize].push(nowBeamBucketArray[beamCount]);
+		}
 
 	}
-
-
 
 	SearchResult result;
 
 	result.code = AlgorithmStateCode::None;
 
-
-	if (nowBeamBucketQueue.size() == 0) {
-		assert(nowBeamBucketQueue.size() != 0);
+	if (nowBeamBucketArray.size() == 0) {
+		assert(nowBeamBucketArray.size() != 0);
 	}
 	else {
 
-		Array<BeamSearchData> nowBeamBucket;
-
-		while (!nowBeamBucketQueue.empty()) {
-			nowBeamBucket << nowBeamBucketQueue.top();
-			nowBeamBucketQueue.pop();
-		}
-
-		nowBeamBucket.reverse();
 
 		int32 count = 0;
-		for (int i = 0; i < nowBeamBucket.size() && count < result_size; i++) {
-			const auto& now_state = nowBeamBucket[i];
+		for (int i = 0; i < nowBeamBucketArray.size() && count < result_size; i++) {
+			const auto& now_state = nowBeamBucketArray[i];
 
 			bool same = false;
 			for (int k = 0; k < i; k++)
 			{
 				bool check = true;
 				for (int m = 0; m < now_state.teams.first.agentNum; m++) {
-					if (nowBeamBucket[k].first_dir[m] != now_state.first_dir[m] || nowBeamBucket[k].first_act[m] != now_state.first_act[m]) {
+					if (nowBeamBucketArray[k].first_dir[m] != now_state.first_dir[m] || nowBeamBucketArray[k].first_act[m] != now_state.first_act[m]) {
 						check = false;
 					}
 				}

@@ -589,14 +589,14 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 		games[i].teams.first.teamID = (i == 0 ? 1 : 2);
 		games[i].programEnd = ProgramEnd;
 		//CATION:かなり無理やり一時的だから許して
-		
-		if(i == 0)
+
+		if (i == 0)
 			//games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8))));
 			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(100));
 		else
 			//games[i].algorithm.reset(new Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::PruneBranchesAlgorithm())));
-			games[i].algorithm.reset(new Procon30::RandAlgorithm());
-		
+			games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(100));
+
 	}
 
 	Scene::SetBackground(Color(128));
@@ -731,8 +731,10 @@ void Procon30::VirtualServer::update()
 		Logger << U"gameNum:1 {} posted"_fmt(posted[1]);
 
 		//アクションデータの解析。
-		parseActionData(U"json/VirtualServer/post_{}_{}.json"_fmt(0, turn));
-		parseActionData(U"json/VirtualServer/post_{}_{}.json"_fmt(1, turn));
+		if (posted[0] != -1)
+			parseActionData(U"json/VirtualServer/post_{}_{}.json"_fmt(0, turn));
+		if (posted[1] != -1)
+			parseActionData(U"json/VirtualServer/post_{}_{}.json"_fmt(1, turn));
 
 		//シミュレーションを行う。
 		simulation();
@@ -771,6 +773,8 @@ void Procon30::VirtualServer::update()
 		turnTimer.restart();
 		isStrategyStep = true;
 
+		if (turn == v_MaxTurn)
+			this->programEnd->store(true);
 		//シミュレーションを行ったらフラグを立てて置いてここでGameを起こすようにする
 		Procon30::Game::HTTPReceived();
 	}
@@ -822,7 +826,6 @@ void Procon30::VirtualServer::update()
 			}
 		}
 
-		this->programEnd->store(true);
 		return;
 	}
 
@@ -973,7 +976,7 @@ bool Procon30::VirtualServer::parseActionData(const FilePath& filePath)
 
 	const auto& object = reader[U"actions"];
 
-	if(reader){
+	if (reader) {
 		for (int32 i = 0; i < object.arrayCount(); i++)
 		{
 			const JSONValue& action = object.arrayView()[i];
