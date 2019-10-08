@@ -234,7 +234,21 @@ Procon30::PublicFields::PublicFields() {
 	FilePath filePath = U"json/PublicField/";
 	for (int i = 0; i < 15; i++) {
 		FilePath path = Format(filePath, fileNames[i], U".json");
-		fields[i].parseJson(path);
+
+		s3d::JSONReader reader(path);
+
+		fields[i].boardSize.y = reader[U"height"].get<int32>();
+		fields[i].boardSize.x = reader[U"width"].get<int32>();
+
+		{
+			for (int32 y = 0; y < reader[U"points"].arrayCount(); y++) {
+				for (int32 x = 0; x < reader[U"points"].arrayView()[y].arrayCount(); x++) {
+					fields[i].m_board.at(y, x).score = reader[U"points"].arrayView()[y].arrayView()[x].get<int32>();
+					fields[i].m_board.at(y, x).exist = true;
+				}
+			}
+		}
+
 	}
 }
 
@@ -245,11 +259,11 @@ void Procon30::PublicFields::read() {
 Procon30::PublicField Procon30::PublicFields::checkPublicField(const Game& game) {
 	bool worng = false;
 	for (int i = 0; i < 15; i++, worng = false) {
-		if (game.field.boardSize.x != fields[i].field.boardSize.x)continue;
-		if (game.field.boardSize.y != fields[i].field.boardSize.y)continue;
+		if (game.field.boardSize.x != fields[i].boardSize.x)continue;
+		if (game.field.boardSize.y != fields[i].boardSize.y)continue;
 		for (int y : step(game.field.boardSize.y)) {
 			for (int x : step(game.field.boardSize.x)) {
-				if (game.field.m_board[y][x].score != fields[i].field.m_board[y][x].score) {
+				if (game.field.m_board[y][x].score != fields[i].m_board[y][x].score) {
 					worng = true;
 					break;
 				}

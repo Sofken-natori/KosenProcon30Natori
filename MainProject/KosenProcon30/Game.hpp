@@ -88,7 +88,7 @@ namespace Procon30 {
 
 	class PublicFields {
 	private:
-		std::array<Game, 16> fields;
+		std::array<Field, 16> fields;
 
 	public:
 		PublicFields();
