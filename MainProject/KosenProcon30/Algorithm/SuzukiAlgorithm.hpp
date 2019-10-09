@@ -23,6 +23,6 @@ namespace Procon30::SUZUKI {
 		SearchResult PruningExecute(const Game& game) override final;
 	};
 
-	//TODO:PruneAlgorithm無茶苦茶だから改善。少なくとも、きちんと勾配で点数つけるように。
+	//TODO:PruneAlgorithm無茶苦茶だから改善。少なくとも、きちんと勾配で点数つけるように。きっと高橋君がやってくれるはず。
 
 }

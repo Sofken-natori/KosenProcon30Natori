@@ -52,7 +52,7 @@ namespace Procon30 {
 	class PruneBranchesAlgorithm {
 	public:
 		//canSimulateNumは1エージェント当たりの列挙可能数、enumerateDirに探索する方向を入れる。終端は、-1,-1にして。
-		virtual bool pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams);
+		virtual bool pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams) const;
 		virtual void initilize(const Game& game);
 	};
 
@@ -98,7 +98,7 @@ namespace Procon30 {
 	};
 
 
-	//TODO:木曜日から実装していく、目標は、土曜日には実装終わり。
+	//TODO:実装NOW、目標は、土曜日には実装終わり。
 	//公開フィールドのpruneBranchesAlgorithmには、初期化時にフィールド番号がわたるようにして置く。
 	class PublicAlgorithm : public Algorithm {
 	private:

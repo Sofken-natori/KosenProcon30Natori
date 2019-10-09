@@ -22,8 +22,6 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 {
 	using BeamSearchData = Procon30::BeamSearchAlgorithm::BeamSearchData;
 
-	//TODO:交互ビームサーチを追加実装
-
 	//相手の動作を得る。
 	Game gameCopy;
 	gameCopy.field = game.field;
@@ -69,7 +67,7 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 	constexpr int32 parallelSize = 3;
 	constexpr double cancel_demerit = 0.9;
 
-	//TODO:ターンが進めば進むほど実際の評価と同じようになるようにする。
+	//TODO:ターンが進めば進むほど実際の評価と同じようになるようにする?終盤で評価値を変えた方がいいのでは？
 	//演算子の準備
 	//騒乱をもたらしたためoperatorをオーバーライドして実装
 	//auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
@@ -148,7 +146,6 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 						//可能なシミュレーション手数一覧。
 						//+1は普通に見積もれる。
 						//3ぐらいまでは昨年と同じでいける。
-						//TODO:アルゴリズム固まってから計算量見つつビーム幅の調整しませう。
 						const int32 canSimulationNums[9] = { 0,0,9,8,8,5,4,3,3 };
 
 						pruneBranches->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);

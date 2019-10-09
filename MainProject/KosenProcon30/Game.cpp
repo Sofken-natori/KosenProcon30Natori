@@ -217,6 +217,7 @@ Procon30::Game& Procon30::Game::operator=(const Procon30::Game& right)
 	this->startedAtUnixTime = right.startedAtUnixTime;
 	this->teams = right.teams;
 	this->isSearchFinished = right.isSearchFinished;
+	this->fieldType = this->fieldType;
 
 	return (*this);
 }

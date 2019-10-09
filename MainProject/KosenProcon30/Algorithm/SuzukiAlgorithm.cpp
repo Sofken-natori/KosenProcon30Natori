@@ -701,8 +701,6 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 	const int mine_remove_demerit = -1;
 
 	//WAGNI:Listへの置き換え。追加は早くなる気がする。
-
-	//TODO:もっと強い枝狩りを実装しよう。
 	//WAGNI:左下に滞留問題＝＞解決。そもそもPOSTされてないせいだった。その内、時間で自動で切るように
 
 	//Array<BeamSearchData> nowBeamBucket;
@@ -1192,7 +1190,6 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	constexpr int32 timeMargin = 1000;
 	constexpr int32 parallelSize = 3;
 
-	//TODO:ターンが進めば進むほど実際の評価と同じようになるようにする。
 	//演算子の準備
 	//騒乱をもたらしたためoperatorをオーバーライドして実装
 	//auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
@@ -1272,7 +1269,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 						//可能なシミュレーション手数一覧。
 						//+1は普通に見積もれる。
 						//3ぐらいまでは昨年と同じでいける。
-						//TODO:アルゴリズム固まってから計算量見つつビーム幅の調整しませう。
+						//TODO:アルゴリズム固まってから計算量見つつビーム幅の調整しませう。NOW
 						const int32 canSimulationNums[9] = { 0,0,13,8,8,5,4,3,3 };
 
 						pruneBranches.pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);

@@ -9,7 +9,6 @@ namespace Procon30 {
 	class Observer
 	{
 	private:
-		//TODO: thread partial lock.
 		//いったん全てのリソースをロックするようにする。これでバグらないはず。
 		std::mutex resourceMtx;
 
