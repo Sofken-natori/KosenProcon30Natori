@@ -7,6 +7,8 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 	//とりまその方向のタイルの値の合計、自分の色だと、0.3倍、相手の色だと1.1倍、マイナス値だと0.7倍、エージェントがいると0、
 	//フィールド用の配列準備して、累積和して、区間取得すればいいか。
 
+	const int32 simulateNum = std::min(9,canSimulateNum);
+
 	constexpr double my_ratio = 0.3;
 	constexpr double enemy_ratio = 1.2;
 	constexpr double minus_ratio = 0.6;
@@ -97,10 +99,10 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 		sort(sortedDirs.begin(), sortedDirs.end(),
 			[](const std::pair<double, s3d::Point> left, const std::pair<double, s3d::Point> right) {return left.first < right.first; });
 
-		for (int i = 8; i > 8 - canSimulateNum; i--) {
+		for (int i = 8; i >= 9 - simulateNum; i--) {
 			enumerateDir[agent_num][8 - i] = sortedDirs[i].second;
 		}
-		enumerateDir[agent_num][canSimulateNum] = { -2,-2 };
+		enumerateDir[agent_num][simulateNum] = { -2,-2 };
 	}
 
 	return true;
