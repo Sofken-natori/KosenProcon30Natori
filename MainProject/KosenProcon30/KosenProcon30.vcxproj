@@ -125,7 +125,9 @@
     <ClCompile Include="HTTPCommunication.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Observer.cpp" />
+    <ClCompile Include="PrivateAlgorithm.cpp" />
     <ClCompile Include="PruneBranchesAlgorithm.cpp" />
+    <ClCompile Include="PublicAlgorithm.cpp" />
     <ClCompile Include="SendBuffer.cpp" />
     <ClCompile Include="Team.cpp" />
     <ClCompile Include="VirtualServer.cpp" />

@@ -26,7 +26,7 @@ namespace Procon30 {
 
 		////////////  対戦用にHTTPCommunicationと同じような機能を持たせる。  //////////////////
 
-		static const int32 v_turnMillis = 5000;
+		static const int32 v_turnMillis = 10000;
 		static const int32 v_intervalMillis = 1000;
 		static const int32 v_MaxTurn = 40;
 
