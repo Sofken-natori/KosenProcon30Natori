@@ -689,8 +689,6 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 
 	const size_t beam_size = beamWidth;
 	const size_t result_size = 3;
-	const TeamColor my_team = TeamColor::Blue;
-	const TeamColor enemy_team = TeamColor::Red;
 	const int search_depth = std::min(10, game.MaxTurn - game.turn);
 	const int was_moved_demerit = -5;
 	const int wait_demerit = -10;
@@ -1079,7 +1077,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 }
 
 
-std::pair<int32, int32> innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast, std::bitset<1023> & isTeamColorFast)
+std::pair<int32, int32> Procon30::innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast, std::bitset<1023> & isTeamColorFast)
 {
 
 	//short is 16bit and 2byte.
@@ -1177,8 +1175,6 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	const size_t beam_size = beamWidth;
 
 	constexpr size_t result_size = 3;
-	constexpr TeamColor my_team = TeamColor::Blue;
-	constexpr TeamColor enemy_team = TeamColor::Red;
 	const int search_depth = std::min(10, game.MaxTurn - game.turn);
 	const int field_width = game.field.boardSize.x;
 	const int field_height = game.field.boardSize.y;
@@ -1369,23 +1365,20 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 											next_state.first_dir[agent_num] =
 												next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition;
 
-											switch (targetTile.color) {
-											case TeamColor::Blue:
+											if (targetTile.color == next_state.teams.first.color) {
 												next_state.first_act[agent_num] = next_act[agent_num] ? Action::Remove : Action::Move;
-												break;
-											case TeamColor::Red:
+											}
+											else if (targetTile.color == next_state.teams.second.color) {
 												next_state.first_act[agent_num] = Action::Remove;
-												break;
-											case TeamColor::None:
+											}
+											else if (targetTile.color == TeamColor::None) {
 												next_state.first_act[agent_num] = Action::Move;
-												break;
 											}
 										}
 
 										//フィールドとエージェントの位置更新
 										//エージェントの次に行くタイルの色
-										switch (targetTile.color) {
-										case TeamColor::Blue:
+										if (targetTile.color == next_state.teams.first.color) {
 											if (!next_act[agent_num]) {//Move
 												if (next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {//Moved
 													next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
@@ -1426,8 +1419,8 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 												else
 													next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 											}
-											break;
-										case TeamColor::Red:
+										}
+										else if (targetTile.color == next_state.teams.second.color) {
 											targetTile.color = TeamColor::None;
 
 											{
@@ -1459,8 +1452,8 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 											else
 												next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth)) * enemy_peel_bonus;
 
-											break;
-										case TeamColor::None:
+										}
+										else if(targetTile.color == TeamColor::None) {
 											const bool isDiagonal = (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).x != 0
 												&& (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).y != 0;
 											next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
@@ -1495,19 +1488,17 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 												next_state.evaluatedScore += (targetTile.score + minus_demerit) * pow(fast_bonus, search_depth - nowSearchDepth);
 											else
 												next_state.evaluatedScore += targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth);
-
-											break;
 										}
 									}
 
 									if (mustCalcFirstScore) {
-										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, TeamColor::Blue, qFast, visitFast, isTeamColorFast);
+										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, next_state.teams.first.color, qFast, visitFast, isTeamColorFast);
 										next_state.teams.first.tileScore = s.first;
 										next_state.teams.first.areaScore = s.second;
 										next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
 									}
 									if (mustCalcSecondScore) {
-										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, TeamColor::Red, qFast, visitFast, isTeamColorFast);
+										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, next_state.teams.second.color, qFast, visitFast, isTeamColorFast);
 										next_state.teams.second.tileScore = s.first;
 										next_state.teams.second.areaScore = s.second;
 										next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;

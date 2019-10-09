@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "../KosenProcon30.hpp"
 #include "../Game.hpp"
 #include "../Algorithm.hpp"
