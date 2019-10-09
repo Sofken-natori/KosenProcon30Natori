@@ -87,13 +87,12 @@ void Main()
 		games[i].ThreadRun();
 	}
 	gui.dataUpdate();
-	//TODO:あとでthreadGuardにします。
 	while (System::Update())
 	{
 		
 		gui.draw();
 
-		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
+		Circle(Cursor::Pos(), 30).draw(ColorF(1, 0, 0, 0.5));
 		if (ProgramEnd->load()) {
 			break;
 		}

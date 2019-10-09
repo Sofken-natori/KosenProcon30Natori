@@ -2,7 +2,7 @@
 
 
 //enumerateDirは使いまわしているのでゴミ情報が入っている。
-bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams)
+bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams) const
 {
 	//とりまその方向のタイルの値の合計、自分の色だと、0.3倍、相手の色だと1.1倍、マイナス値だと0.7倍、エージェントがいると0、
 	//フィールド用の配列準備して、累積和して、区間取得すればいいか。

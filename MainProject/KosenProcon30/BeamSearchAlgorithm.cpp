@@ -422,7 +422,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	//可能なシミュレーション手数一覧。
 	//+1は普通に見積もれる。
 	//3ぐらいまでは昨年と同じでいける。
-	//TODO:計算量見つつビーム幅の調整しませう
 	const int canSimulationNums[9] = { 0,0,13,8,8,5,4,3,3 };
 
 	BeamSearchData first_state;
@@ -433,7 +432,6 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 
 	nowBeamBucketQueue.push(first_state);
 
-	//TODO:いい加減秒数に合わせて計算打ち切る工夫追加しろ！あほ！このままだと本番死ぬぞ
 	for (int i = 0; i < search_depth; i++) {
 		//enumerate
 		while(!nowBeamBucketQueue.empty()) {

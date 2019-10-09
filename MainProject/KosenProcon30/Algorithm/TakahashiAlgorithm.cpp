@@ -22,7 +22,7 @@ void Procon30::YASAI::CompressBranch::initilize(const Game& game)
 	SafeConsole(U"initilize Done",game.gameNum);
 }
 
-bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams)
+bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams) const
 {
 
 	s3d::Point dirs[9] = { {0,0},{1,0},{-1,0},{0,-1},{0,1},{-1,-1},{-1,1},{1,-1},{1,1} };

@@ -615,13 +615,10 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 	server.ThreadRun();
 
 	gui.dataUpdate();
-	//TODO:‚ ‚Æ‚ÅthreadGuard‚É‚µ‚Ü‚·B
 	while (System::Update())
 	{
-
 		gui.draw();
-
-		Circle(Cursor::Pos(), 60).draw(ColorF(1, 0, 0, 0.5));
+		Circle(Cursor::Pos(), 30).draw(ColorF(1, 0, 0, 0.5));
 		if (ProgramEnd->load()) {
 			break;
 		}

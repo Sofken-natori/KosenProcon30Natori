@@ -151,8 +151,7 @@ namespace Procon30 {
 
 		[[nodiscard]] int32 getGameIDfromGameNum(const int32& num);
 
-		//TODO: operator=‚Ì’†g‚ğÀ‘•‚·‚é
-		//DONT USE:This function is not implement
+
 		HTTPCommunication& operator=(const Procon30::HTTPCommunication& right);
 	};
 
