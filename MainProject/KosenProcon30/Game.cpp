@@ -149,6 +149,11 @@ void Procon30::Game::Loop()
 		{
 			assert(algorithm);
 
+			if (fieldType == PublicField::NONE) {
+				PublicFields publicFields;
+				fieldType = publicFields.checkPublicField(*this);
+			}
+
 			algorithm->initilize(*this);
 
 			auto result = algorithm->execute(*this);
