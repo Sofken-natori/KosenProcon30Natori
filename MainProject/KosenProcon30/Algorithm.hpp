@@ -1,7 +1,8 @@
 #pragma once
+#include <bitset>
+#include <array>
 #include "KosenProcon30.hpp"
 #include "Game.hpp"
-#include <bitset>
 
 namespace Procon30 {
 
@@ -81,13 +82,35 @@ namespace Procon30 {
 		std::unique_ptr<PruneBranchesAlgorithm> pruneBranchesAlgorithm;
 	};
 
-	class PrivateAlgorithm : public BeamSearchAlgorithm {
+	constexpr int32 parallelSize = 3;
 
+	//デバッグする
+	class PrivateAlgorithm : public Algorithm {
+	private:
+		int32 m_beamWidth;
+		std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> pruneBranchesAlgorithms;
+		std::unique_ptr<Algorithm> secondBeamSearchAlgorithm;
+	public:
+		PrivateAlgorithm(int32 beamWidth, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms,
+			std::unique_ptr<Algorithm> secondAlgorithm);
+		virtual SearchResult execute(const Game& game) override final;
+		virtual void initilize(const Game& game) override final;
 	};
 
 
-	class PublicAlgorithm : public BeamSearchAlgorithm {
+	//TODO:木曜日から実装していく、目標は、土曜日には実装終わり。
+	//公開フィールドのpruneBranchesAlgorithmには、初期化時にフィールド番号がわたるようにして置く。
+	class PublicAlgorithm : public Algorithm {
+	private:
+
+
+	public:
+
 
 	};
+
+	std::pair<int32, int32> innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast, std::bitset<1023> & isTeamColorFast);
 
 }
+
+

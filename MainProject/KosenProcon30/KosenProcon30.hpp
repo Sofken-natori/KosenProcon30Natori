@@ -72,6 +72,7 @@ namespace Procon30 {
 
 	enum class PublicField {
 		NONE,
+		NON_MATCHING,
 		A_1,
 		A_2,
 		A_3,
