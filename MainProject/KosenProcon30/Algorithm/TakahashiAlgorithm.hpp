@@ -8,10 +8,12 @@ namespace Procon30 {
 	namespace YASAI {
 		class CompressBranch : public PruneBranchesAlgorithm {
 		private:
+			using FieldFlag = Grid<uint8>;
 			Size fieldSize;
 			std::array<std::array<double, 20>, 20> weightSum;
 			std::array<double, 21> distanceWeight;
 			double weight;
+			FieldFlag innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor) const;
 		public:
 			//weight:　マスの距離に対する重さ(weight^-n)
 			CompressBranch(double weight);
