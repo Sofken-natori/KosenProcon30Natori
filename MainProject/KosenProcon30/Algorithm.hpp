@@ -86,12 +86,34 @@ namespace Procon30 {
 
 	//デバッグする
 	class PrivateAlgorithm : public Algorithm {
+	public:
+		struct PrivateAlgorithmParameter {
+			int32 beamWidth;
+			size_t resultSize = 3;
+			int32 targetSearchDepth = 20;
+			double sameLocationDemerit = 0.7;
+			double sameAreaDemerit = 0.7;
+			int wasMovedDemerit = -5;
+			int waitDemerit = -10;
+			double diagonalBonus = 1.5;
+			double fastBonus = 1.03;
+			double enemyPeelBonus = 0.9;
+			double myAreaMerit = 0.4;
+			double enemyAreaMerit = 0.8;
+			int minusDemerit = -2;
+			int mineRemoveDemerit = -1;
+			int32 timeMargin = 1000;
+			double cancelDemerit = 0.9;
+		};
 	private:
-		int32 m_beamWidth;
 		std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> pruneBranchesAlgorithms;
 		std::unique_ptr<Algorithm> secondBeamSearchAlgorithm;
+		PrivateAlgorithmParameter parameter;
 	public:
+
 		PrivateAlgorithm(int32 beamWidth, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms,
+			std::unique_ptr<Algorithm> secondAlgorithm);
+		PrivateAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms,
 			std::unique_ptr<Algorithm> secondAlgorithm);
 		virtual SearchResult execute(const Game& game) override final;
 		virtual void initilize(const Game& game) override final;
@@ -109,7 +131,7 @@ namespace Procon30 {
 
 	};
 
-	std::pair<int32, int32> innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast, std::bitset<1023> & isTeamColorFast);
+	std::pair<int32, int32> innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast);
 
 }
 

@@ -598,10 +598,10 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 			//games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(100));
 			std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBArray;
 
-			for (int32 i = 0; i < parallelSize; i++)
-				PBArray[i] = std::unique_ptr<PruneBranchesAlgorithm>(new PruneBranchesAlgorithm());
+			for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
+				PBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new PruneBranchesAlgorithm());
 
-			games[i].algorithm.reset(new Procon30::PrivateAlgorithm(100, std::move(PBArray),std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(100))));
+			games[i].algorithm.reset(new Procon30::PrivateAlgorithm(U"json/VirtualServer/parameter.ini", std::move(PBArray),std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(30))));
 		}
 
 	}

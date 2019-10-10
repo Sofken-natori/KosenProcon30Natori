@@ -147,12 +147,16 @@ void Procon30::Game::Loop()
 		this->turnTimer.restart();
 		//Algo実行
 		{
-			assert(algorithm);
 
 			if (fieldType == PublicField::NONE) {
 				PublicFields publicFields;
 				fieldType = publicFields.checkPublicField(*this);
+				//ここでアルゴリズムの初期化をしては？相談案件。
+
+
 			}
+
+			assert(algorithm);
 
 			algorithm->initilize(*this);
 

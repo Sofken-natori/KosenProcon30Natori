@@ -687,9 +687,14 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 
 	//内部定数はスネークケースで統一許して
 
+
+	const int32 canSimulationNums[9] = { 0,0,9,9,9,6,5,4,4 };
+	const int32 wishSearchDepth[9] = { 0,0,10,15,15,15,20,20,15 };
+
 	const size_t beam_size = beamWidth;
+	const int32 canSimulateNum = canSimulationNums[game.teams.first.agentNum];
+	const int search_depth = std::min(wishSearchDepth[game.teams.first.agentNum], game.MaxTurn - game.turn);
 	const size_t result_size = 3;
-	const int search_depth = std::min(10, game.MaxTurn - game.turn);
 	const int was_moved_demerit = -5;
 	const int wait_demerit = -10;
 	const double diagonal_bonus = 1.5;
@@ -1075,7 +1080,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(cons
 }
 
 
-std::pair<int32, int32> Procon30::innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast, std::bitset<1023> & isTeamColorFast)
+std::pair<int32, int32> Procon30::innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast)
 {
 
 	//short is 16bit and 2byte.
@@ -1101,12 +1106,6 @@ std::pair<int32, int32> Procon30::innerCalculateScoreFast(Procon30::Field& field
 		qFast[q_end++] = XY_TO_SHORT(x, fieldSizeY - 1);
 	}
 
-	for (auto y : step(fieldSizeY)) {
-		for (auto x : step(fieldSizeX)) {
-			isTeamColorFast[XY_TO_SHORT(x, y)] = field.m_board.at(y, x).color != teamColor;
-		}
-	}
-
 	while (q_front < q_end) {
 
 		const auto& now = qFast[q_front++];
@@ -1115,7 +1114,7 @@ std::pair<int32, int32> Procon30::innerCalculateScoreFast(Procon30::Field& field
 
 			visitFast[now] = true;
 
-			if (isTeamColorFast[now]) {
+			if (field.m_board.at(SHORT_TO_Y(now), SHORT_TO_X(now)).color != teamColor) {
 				if (SHORT_TO_X(now) != 0)
 					qFast[q_end++] = now - (1 << 5);
 				//qFast[q_end++] = XY_TO_SHORT(SHORT_TO_X(now) - 1, SHORT_TO_Y(now));
@@ -1172,8 +1171,12 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 	const size_t beam_size = beamWidth;
 
+	const int32 canSimulateNums[9] = { 0,0,9,9,9,7,5,4,4 };
+	const int32 wishSearchDepth[9] = { 0,0,10,15,15,15,20,20,15 };
+
 	constexpr size_t result_size = 3;
-	const int search_depth = std::min(10, game.MaxTurn - game.turn);
+	const int32 canSimulateNum = canSimulateNums[game.teams.first.agentNum];
+	const int search_depth = std::min(wishSearchDepth[game.teams.first.agentNum], game.MaxTurn - game.turn);
 	const int field_width = game.field.boardSize.x;
 	const int field_height = game.field.boardSize.y;
 	constexpr double same_location_demerit = 0.7;
@@ -1188,14 +1191,14 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	constexpr int minus_demerit = -2;
 	constexpr int mine_remove_demerit = -1;
 	constexpr int32 timeMargin = 1000;
-	constexpr int32 parallelSize = 3;
 
 	//演算子の準備
 	//騒乱をもたらしたためoperatorをオーバーライドして実装
 	//auto compare = [](const BeamSearchData& left, const BeamSearchData& right) {return left.evaluatedScore > right.evaluatedScore; };
 
 
-	int32 beforeOneDepthSearchEnd = game.turnTimer.ms();
+	int32 beforeOneDepthSearchUsingTime = 0;
+	int32 beforeOneDepthSearchEndTime = game.turnTimer.ms();
 	int32 nowSearchDepth;
 
 	Array<BeamSearchData> nowBeamBucketArray;
@@ -1220,8 +1223,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	for (nowSearchDepth = 0; nowSearchDepth < search_depth; nowSearchDepth++) {
 
 		if (nowSearchDepth != 0) {
-			beforeOneDepthSearchEnd = game.turnTimer.ms() - beforeOneDepthSearchEnd;
-			if ((game.turnMillis - timeMargin) < game.turnTimer.ms() + beforeOneDepthSearchEnd) {
+			const int32 turnTimerMs = game.turnTimer.ms();
+			beforeOneDepthSearchUsingTime = turnTimerMs - beforeOneDepthSearchEndTime;
+			beforeOneDepthSearchEndTime = turnTimerMs;
+			if ((game.turnMillis - timeMargin) < game.turnTimer.ms() + beforeOneDepthSearchUsingTime) {
 				break;
 			}
 		}
@@ -1230,7 +1235,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 		std::future<std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>>> beamSearchFuture[parallelSize];
 
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
-			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, search_depth, beam_size, field_width, field_height](
+			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, search_depth, beam_size, field_width, field_height, canSimulateNum](
 				std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueue) {
 
 					std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nextBeamBucketQueue;
@@ -1238,7 +1243,6 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 					PruneBranchesAlgorithm pruneBranches;
 
 					std::bitset<1023> visitFast = {};
-					std::bitset<1023> isTeamColorFast = {};
 					unsigned short qFast[2000] = {};
 
 					//方向の集合用にここで確保する。
@@ -1270,9 +1274,8 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 						//+1は普通に見積もれる。
 						//3ぐらいまでは昨年と同じでいける。
 						//TODO:アルゴリズム固まってから計算量見つつビーム幅の調整しませう。NOW
-						const int32 canSimulationNums[9] = { 0,0,13,8,8,5,4,3,3 };
 
-						pruneBranches.pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
+						pruneBranches.pruneBranches(canSimulateNum, enumerateDir, now_state.field, now_state.teams);
 
 						//bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
 						//assert(okPrune);
@@ -1450,7 +1453,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 												next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth)) * enemy_peel_bonus;
 
 										}
-										else if(targetTile.color == TeamColor::None) {
+										else if (targetTile.color == TeamColor::None) {
 											const bool isDiagonal = (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).x != 0
 												&& (next_state.teams.first.agents[agent_num].nextPosition - next_state.teams.first.agents[agent_num].nowPosition).y != 0;
 											next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
@@ -1489,13 +1492,13 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 									}
 
 									if (mustCalcFirstScore) {
-										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, next_state.teams.first.color, qFast, visitFast, isTeamColorFast);
+										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, next_state.teams.first.color, qFast, visitFast);
 										next_state.teams.first.tileScore = s.first;
 										next_state.teams.first.areaScore = s.second;
 										next_state.teams.first.score = next_state.teams.first.tileScore + next_state.teams.first.areaScore;
 									}
 									if (mustCalcSecondScore) {
-										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, next_state.teams.second.color, qFast, visitFast, isTeamColorFast);
+										std::pair<int32, int32> s = innerCalculateScoreFast(next_state.field, next_state.teams.second.color, qFast, visitFast);
 										next_state.teams.second.tileScore = s.first;
 										next_state.teams.second.areaScore = s.second;
 										next_state.teams.second.score = next_state.teams.second.tileScore + next_state.teams.second.areaScore;
@@ -1614,6 +1617,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 			nowBeamBucketQueues[beamCount % parallelSize].push(nowBeamBucketArray[beamCount]);
 		}
 
+	}
+
+	if (search_depth != nowSearchDepth) {
+		SafeConsole(U"SuzukiAlgorithm探索打ち切り深さ:", nowSearchDepth);
 	}
 
 	SearchResult result;
