@@ -24,10 +24,10 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 	const double myAreaWeight = 0.6;
 	const double enemyAreaWeight = 1.4;
 	//Tileがminusの時(TileWeight - minusWeightDiff)にweightを変更するための調整変数
-	const double minusWeightDiff = 1.2;
+	const double minusWeightDiff = 1.3;
 	//これらはscore*TileWeight* distweight
-	const double myTileWeight = 0.4;
-	const double enemyTileWeight = 1.1;
+	const double myTileWeight = 0.5;
+	const double enemyTileWeight = 1.2;
 	//0点マスに対してネガティブな補正をかける
 	//zeroPenarty * distWeight;
 	const double zeroPenarty = -1.2;
@@ -152,6 +152,10 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 				evaluate(agent, Point(x, y), 8);
 			}
 		}
+		sortedDirs[5].first *= 1.15;
+		sortedDirs[6].first *= 1.15;
+		sortedDirs[7].first *= 1.15;
+		sortedDirs[8].first *= 1.15;
 
 		sort(sortedDirs.begin(), sortedDirs.end(),
 			[](const std::pair<double, s3d::Point> left, const std::pair<double, s3d::Point> right) {return left.first > right.first; });
