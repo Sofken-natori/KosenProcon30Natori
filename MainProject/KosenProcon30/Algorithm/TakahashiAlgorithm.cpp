@@ -58,7 +58,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		}
 		if (enemyTeamFlag[pos] == 1) {
 			if (TILE(pos).score < 0) {
-				sortedDirs[index].first += (double)(TILE(pos).score) * distanceWeight[dist] * (enemyTileWeight - minusWeightDiff);
+				sortedDirs[index].first -= (double)(TILE(pos).score) * distanceWeight[dist] * (enemyTileWeight);
 			}
 			else {
 				sortedDirs[index].first += (double)(TILE(pos).score) * distanceWeight[dist] * (enemyTileWeight);
@@ -92,8 +92,8 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		//¶
 		sortedDirs[2].first = 0;
 		sortedDirs[2].second = { -1,0 };
-		for (int8 x = -1; (agent.nowPosition.x + x) >= 0; x--) {
-			for (int8 y = Max(agent.nowPosition.y + (x + 1), 0); y < Min(agent.nowPosition.y - x, fieldSize.y); y++) {
+		for (int32 x = -1; (agent.nowPosition.x + x) >= 0; x--) {
+			for (int32 y = Max(agent.nowPosition.y + (x + 1), 0); y < Min(agent.nowPosition.y - x, fieldSize.y); y++) {
 				const Point nowPos = { x + agent.nowPosition.x,y };
 				evaluate(agent, nowPos, 2);
 			}
@@ -102,8 +102,8 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		//ã
 		sortedDirs[3].first = 0;
 		sortedDirs[3].second = { 0,-1 };
-		for (int8 y = -1; (agent.nowPosition.y + y) >= 0; y--) {
-			for (int8 x = Max(agent.nowPosition.x + (y + 1), 0); x < Min(agent.nowPosition.x - y, fieldSize.y); x++) {
+		for (int32 y = -1; (agent.nowPosition.y + y) >= 0; y--) {
+			for (int32 x = Max(agent.nowPosition.x + (y + 1), 0); x < Min(agent.nowPosition.x - y, fieldSize.y); x++) {
 				const Point nowPos = { x,y + agent.nowPosition.y };
 				evaluate(agent, nowPos, 3);
 			}
@@ -112,8 +112,8 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		//‰º
 		sortedDirs[4].first = 0;
 		sortedDirs[4].second = { 0,1 };
-		for (int8 y = 1; y < (fieldSize.y - agent.nowPosition.y); y++) {
-			for (int8 x = Max(agent.nowPosition.x - (y - 1), 0); x < Min(agent.nowPosition.x + y, fieldSize.y); x++) {
+		for (int32 y = 1; y < (fieldSize.y - agent.nowPosition.y); y++) {
+			for (int32 x = Max(agent.nowPosition.x - (y - 1), 0); x < Min(agent.nowPosition.x + y, fieldSize.y); x++) {
 				const Point nowPos = { x,y + agent.nowPosition.y };
 				evaluate(agent, nowPos, 4);
 			}
@@ -129,8 +129,8 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		//‰Eã
 		sortedDirs[6].first = 0;
 		sortedDirs[6].second = { 1,-1 };
-		for (int8 x = agent.nowPosition.x + 1; x < fieldSize.x; x++) {
-			for (int8 y = 0; y < agent.nowPosition.y; y++) {
+		for (int32 x = agent.nowPosition.x + 1; x < fieldSize.x; x++) {
+			for (int32 y = 0; y < agent.nowPosition.y; y++) {
 				evaluate(agent, Point(x, y), 6);
 			}
 		}
@@ -138,8 +138,8 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		//¶‰º
 		sortedDirs[7].first = 0;
 		sortedDirs[7].second = { -1,1 };
-		for (int8 x = 0; x < agent.nowPosition.x; x++) {
-			for (int8 y = agent.nowPosition.y + 1; y < fieldSize.y; y++) {
+		for (int32 x = 0; x < agent.nowPosition.x; x++) {
+			for (int32 y = agent.nowPosition.y + 1; y < fieldSize.y; y++) {
 				evaluate(agent, Point(x, y), 7);
 			}
 		}
@@ -147,8 +147,8 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		//‰E‰º
 		sortedDirs[8].first = 0;
 		sortedDirs[8].second = { 1,1 };
-		for (int8 x = agent.nowPosition.x+1; x < fieldSize.x; x++) {
-			for (int8 y = agent.nowPosition.y+1; y < fieldSize.y; y++) {
+		for (int32 x = agent.nowPosition.x+1; x < fieldSize.x; x++) {
+			for (int32 y = agent.nowPosition.y+1; y < fieldSize.y; y++) {
 				evaluate(agent, Point(x, y), 8);
 			}
 		}
