@@ -71,8 +71,8 @@ namespace Procon30 {
 	};
 
 	enum class PublicField {
-		NONE,
-		NON_MATCHING,
+		NONE,//未マッチング
+		NON_MATCHING,//マッチングなし
 		A_1,
 		A_2,
 		A_3,

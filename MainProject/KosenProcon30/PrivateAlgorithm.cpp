@@ -19,7 +19,7 @@ Procon30::PrivateAlgorithm::PrivateAlgorithm(int32 beamWidth, std::array<std::un
 */
 
 Procon30::PrivateAlgorithm::PrivateAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms, std::unique_ptr<Algorithm> secondAlgorithm)
-	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), secondBeamSearchAlgorithm(std::move(secondAlgorithm)) , parameterFilePath(parameterFile)
+	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), secondBeamSearchAlgorithm(std::move(secondAlgorithm)), parameterFilePath(parameterFile)
 {
 }
 
@@ -94,6 +94,38 @@ void Procon30::PrivateAlgorithm::initilize(const Game& game)
 	gameCopy.turnMillis /= 2;
 
 	secondBeamSearchAlgorithm->initilize(gameCopy);
+
+	if (game.fieldType != PublicField::NONE && game.fieldType != PublicField::NON_MATCHING) {
+		//定石の読み込み
+		//許して
+		std::array<String, 15> fileNames = {
+			U"A-1",U"A-2",U"A-3",U"A-4",
+			U"B-1",U"B-2",U"B-3",
+			U"C-1",U"C-2",
+			U"D-1",U"D-2",
+			U"E-1",U"E-2",
+			U"F-1",U"F-2" };
+
+		FilePath filePath = U"json/PublicField/";
+		FilePath path = Format(filePath, fileNames[(int32)game.fieldType - 2], U".pbook");
+
+		//以下読み込み
+		s3d::TextReader reader(path);
+
+		if (reader) {
+
+			Optional<String> line = reader.readLine();
+			book.firstPos.x = ParseInt<int32>(line->split(' ')[0]);
+			book.firstPos.y = ParseInt<int32>(line->split(' ')[1]);
+
+			line = reader.readLine();
+			book.secondPos.x = ParseInt<int32>(line->split(' ')[0]);
+			book.secondPos.y = ParseInt<int32>(line->split(' ')[1]);
+
+			//以下patternのマッチング
+		}
+	}
+
 }
 
 Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
@@ -126,6 +158,7 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 	const int32 turn = game.turn;
 	const int32 field_width = game.field.boardSize.x;
 	const int32 field_height = game.field.boardSize.y;
+	const PublicField fieldType = game.fieldType;
 
 	//アルゴリズムに関係するパラメーター(非変化)
 	const double time_margin = parameter.timeMargin;
@@ -186,9 +219,10 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 		std::future<std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>>> beamSearchFuture[parallelSize];
 
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
-			//CATION:second_resultのコピーができているかを確認すること。
-			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, field_width, field_height, cancel_demerit,
-				max_turn, turn, was_moved_demerit, enemy_peel_bonus, enemy_area_merit, mine_remove_demerit, my_area_merit, fast_bonus, wait_demerit, diagonal_bonus, minus_demerit, second_result](
+			//CAUTION:second_resultのコピーができているかを確認すること。
+			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, field_width, field_height, max_turn, turn, fieldType,
+				cancel_demerit, was_moved_demerit, enemy_peel_bonus, enemy_area_merit, mine_remove_demerit, my_area_merit, fast_bonus,
+				wait_demerit, diagonal_bonus, minus_demerit, second_result](
 					size_t beam_size, int32 search_depth, int32 can_simulate_num,
 					std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueue, std::unique_ptr<PruneBranchesAlgorithm>& pruneBranches) {
 
@@ -226,6 +260,17 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 							//+1は普通に見積もれる。
 							//3ぐらいまでは昨年と同じでいける。
 							pruneBranches->pruneBranches(can_simulate_num, enumerateDir, now_state.field, now_state.teams);
+
+							//できるならここらへんであれしたい。initilizeであれできるからあっちでもいい。でもうーん。turnあるからそとかな
+							if (fieldType != PublicField::NON_MATCHING) {
+
+								//pattern1 {x,y,dxyNum};
+								//pattern2 
+								//pattern1 , pattern2 の見分けは、initializeでやり、構造体を注入する
+
+
+
+							}
 
 							//bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
 							//assert(okPrune);

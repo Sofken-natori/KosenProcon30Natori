@@ -304,11 +304,6 @@ Procon30::Game& Procon30::Game::operator=(const Procon30::Game& right)
 	return (*this);
 }
 
-
-
-
-
-
 Procon30::PublicFields::PublicFields() {
 	//‹–‚µ‚Ä
 	std::array<String, 15> fileNames = {
@@ -359,7 +354,7 @@ Procon30::PublicField Procon30::PublicFields::checkPublicField(const Game& game)
 			if (worng)break;
 		}
 		if (worng)continue;
-		return PublicField(i + 1);
+		return PublicField(i + 2);
 	}
-	return PublicField(0);
+	return PublicField(1);
 }

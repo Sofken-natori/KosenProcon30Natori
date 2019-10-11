@@ -69,7 +69,7 @@ namespace Procon30 {
 	class PruneBranchesAlgorithm {
 	public:
 		//canSimulateNumは1エージェント当たりの列挙可能数、enumerateDirに探索する方向を入れる。終端は、-1,-1にして。
-		virtual bool pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir,const Field& field,const std::pair<Team, Team>& teams) const;
+		virtual bool pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, const Field& field, const std::pair<Team, Team>& teams) const;
 		virtual void initilize(const Game& game);
 	};
 
@@ -104,9 +104,45 @@ namespace Procon30 {
 	//デバッグする
 	class PrivateAlgorithm : public Algorithm {
 	private:
-	private:
+
+		struct Book {
+			//左上のエージェントの位置。パターンの判別に使います。
+			Point firstPos;
+			Point secondPos;
+
+			int32 pattern;
+
+			//pos.x==-1は指定なし。どう動いてもいいagentは、pos.x==-1にしておいてください。pos.x==-1で読み飛ばすので、他は適当でいいです。
+			//trun agent (point,int) == (現在位置、方向)
+			std::array<std::array<std::pair<Point, Point>, 8>, 20> firstData;
+			std::array<std::array<std::pair<Point, Point>, 8>, 20> secondData;
+
+			/*
+			//定石ファイル書式
+			//無効値は、pos.x == -1, pos.y == -1です。どっちかだけでもいいです。
+			5 4
+			3 2
+			3
+			2
+			3 2 1 -1 5 3 0 1  5  0 1 0
+			4 1 1  1 5 4 1 0 -1 -1 0 0
+
+			firstPos.x firstPos.y
+			secondPos.x secondPos.y
+			agent_num
+			read_turn
+			pattern1_turn1_line => agent[0].pos.x pos.y dir.x dir.y agent[1].pos.x pos.y dir.x dir.y agent[2].pos.x pos.y dir.x dir.y
+			pattern1_turn2_line => agent[0].pos.x pos.y dir.x dir.y agent[1].pos.x pos.y dir.x dir.y agent[2].pos.x pos.y dir.x dir.y
+			pattern2_turn1_line =>
+			pattern2_turn2_line =>
+			*/
+		};
+
+		//定石データ
+		Book book;
+
 		FilePath parameterFilePath;
-		
+
 		std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> pruneBranchesAlgorithms;
 		std::unique_ptr<Algorithm> secondBeamSearchAlgorithm;
 		BeamSearchParameter parameter;
