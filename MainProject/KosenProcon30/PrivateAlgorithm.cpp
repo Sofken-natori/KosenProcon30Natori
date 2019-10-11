@@ -18,12 +18,12 @@ Procon30::PrivateAlgorithm::PrivateAlgorithm(int32 beamWidth, std::array<std::un
 }
 */
 
-Procon30::PrivateAlgorithm::PrivateAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms, std::unique_ptr<Algorithm> secondAlgorithm)
+Procon30::ProconAlgorithm::ProconAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms, std::unique_ptr<Algorithm> secondAlgorithm)
 	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), secondBeamSearchAlgorithm(std::move(secondAlgorithm)), parameterFilePath(parameterFile)
 {
 }
 
-void Procon30::PrivateAlgorithm::initilize(const Game& game)
+void Procon30::ProconAlgorithm::initilize(const Game& game)
 {
 	if (isInitilized)return;
 	isInitilized = true;
@@ -128,7 +128,7 @@ void Procon30::PrivateAlgorithm::initilize(const Game& game)
 
 }
 
-Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
+Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 {
 	using BeamSearchData = Procon30::BeamSearchAlgorithm::BeamSearchData;
 

@@ -1243,7 +1243,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	const int field_height = game.field.boardSize.y;
 
 	//アルゴリズムに関係するパラメーター(非変化)
-	const int32 time_margin = parameter.timeMargin;
+	const double time_margin = parameter.timeMargin;
 	const size_t result_size = parameter.resultSize;
 	const double same_location_demerit = parameter.sameLocationDemerit;
 	const double same_area_demerit = parameter.sameAreaDemerit;
@@ -1254,8 +1254,8 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	const double enemy_peel_bonus = parameter.enemyPeelBonus;
 	const double my_area_merit = parameter.myAreaMerit;
 	const double enemy_area_merit = parameter.enemyAreaMerit;
-	const int minus_demerit = parameter.minusDemerit;
-	const int mine_remove_demerit = parameter.mineRemoveDemerit;
+	const double minus_demerit = parameter.minusDemerit;
+	const double mine_remove_demerit = parameter.mineRemoveDemerit;
 
 	//演算子の準備
 	//騒乱をもたらしたためoperatorをオーバーライドして実装

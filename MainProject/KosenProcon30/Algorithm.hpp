@@ -102,7 +102,7 @@ namespace Procon30 {
 	constexpr int32 parallelSize = 3;
 
 	//デバッグする
-	class PrivateAlgorithm : public Algorithm {
+	class ProconAlgorithm : public Algorithm {
 	private:
 
 		struct Book {
@@ -163,22 +163,10 @@ namespace Procon30 {
 		PrivateAlgorithm(int32 beamWidth, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms,
 			std::unique_ptr<Algorithm> secondAlgorithm);
 		*/
-		PrivateAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms,
+		ProconAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms,
 			std::unique_ptr<Algorithm> secondAlgorithm);
 		virtual SearchResult execute(const Game& game) override final;
 		virtual void initilize(const Game& game) override final;
-	};
-
-
-	//TODO:実装NOW、目標は、土曜日には実装終わり。
-	//公開フィールドのpruneBranchesAlgorithmには、初期化時にフィールド番号がわたるようにして置く。
-	class PublicAlgorithm : public Algorithm {
-	private:
-
-
-	public:
-
-
 	};
 
 	std::pair<int32, int32> innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor, unsigned short qFast[2000], std::bitset<1023> & visitFast);
