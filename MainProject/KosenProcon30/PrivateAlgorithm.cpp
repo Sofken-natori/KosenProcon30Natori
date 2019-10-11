@@ -19,7 +19,7 @@ Procon30::PrivateAlgorithm::PrivateAlgorithm(int32 beamWidth, std::array<std::un
 */
 
 Procon30::PrivateAlgorithm::PrivateAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms, std::unique_ptr<Algorithm> secondAlgorithm)
-	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), secondBeamSearchAlgorithm(std::move(secondAlgorithm))
+	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), secondBeamSearchAlgorithm(std::move(secondAlgorithm)) , parameterFilePath(parameterFile)
 {
 }
 

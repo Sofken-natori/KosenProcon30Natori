@@ -684,6 +684,10 @@ Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::SuzukiBeamSearchAlgorithm(FilePath 
 
 void Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::initilize(const Game& game)
 {
+	if (Algorithm::isInitilized)
+		return;
+	isInitilized = true;
+
 	{
 		//TODO:åüèÿ
 		s3d::INIData parameterData(parameterFilePath);
@@ -1693,6 +1697,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	}
 	else {
 
+		result.code = AlgorithmStateCode::None;
 
 		int32 count = 0;
 		for (int i = 0; i < nowBeamBucketArray.size() && count < result_size; i++) {

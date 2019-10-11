@@ -731,8 +731,7 @@ void Procon30::VirtualServer::update()
 		turnTimer.restart();
 		isStrategyStep = false;
 
-		SafeConsole(U"gameNum:0 {} posted"_fmt(posted[0]));
-		SafeConsole(U"gameNum:1 {} posted"_fmt(posted[1]));
+		SafeConsole(U"Post Time= 0:{} , 1:{} posted"_fmt(posted[0],posted[1]));
 
 		//アクションデータの解析。
 		if (posted[0] != -1)
