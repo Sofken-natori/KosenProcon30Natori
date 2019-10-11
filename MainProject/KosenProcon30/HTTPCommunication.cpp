@@ -21,8 +21,8 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 		CURLcode result = this->future.get();
 		uint32 code;
 		if (result != CURLE_OK) {
-			Logger << U"curl_easy_perform() failed.\nUnixTime(Milli):"
-				<< Time::GetMillisecSinceEpoch();
+			SafeConsole(U"curl_easy_perform() failed.\nUnixTime(Milli):"
+				,Time::GetMillisecSinceEpoch());
 			SafeConsole(U"curl_easy_perform() failed.");
 			return ConnectionStatusCode::ConnectionLost;
 		}
@@ -90,7 +90,7 @@ bool Procon30::HTTPCommunication::checkResult()
 {
 
 	JSONReader jsonReader;
-	int32 thisTurn;
+	int32 thisTurn = 0;
 	if (comData.nowConnecting) {
 		switch (getState())
 		{
@@ -122,11 +122,11 @@ bool Procon30::HTTPCommunication::checkResult()
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
 					FileSystem::Copy(jsonBuffer, Format(U"json/",comData.connectionMatchNumber, U"/nowfield.json"), CopyOption::OverwriteExisting);
-					SafeConsole(U"gotMatchInfoof:", comData.connectionMatchNumber);
+					SafeConsole(U"gotMatchInfo:", comData.connectionMatchNumber);
 					if (isFormLoop) {
 						comData.gotMatchInfomationNum++;
-					}else if (thisTurn > comData.gotMatchInfoOfTurn[comData.connectionMatchNumber]) {
-						comData.gotMatchInfoOfTurn[comData.connectionMatchNumber] = thisTurn;
+					}else if (thisTurn > comData.gotMatchInfoOfTurn.at(comData.connectionMatchNumber)) {
+						comData.gotMatchInfoOfTurn.at(comData.connectionMatchNumber) = thisTurn;
 						comData.gotMatchInfomationNum++;
 					}
 					else {
@@ -139,7 +139,7 @@ bool Procon30::HTTPCommunication::checkResult()
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
 					FileSystem::Copy(jsonBuffer, Format(U"json/", comData.connectionMatchNumber, U"/nowField.json"), CopyOption::OverwriteExisting);
-					SafeConsole(U"postActionof:",comData.connectionMatchNumber);
+					SafeConsole(U"postAction:",comData.connectionMatchNumber);
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
@@ -150,7 +150,7 @@ bool Procon30::HTTPCommunication::checkResult()
 				comData.receiveJsonPath = Format(U"json/", comData.connectionMatchNumber, U"/field_", comData.connectionMatchNumber, U"_TE.json");
 				jsonReader.close();
 				FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
-				SafeConsole(U"gotMatchInfoof:", comData.gotMatchInfomationNum, U"::TooEarly");
+				SafeConsole(U"gotMatchInfo:", comData.gotMatchInfomationNum, U"::TooEarly");
 				if (isFormLoop) {
 					comData.gotMatchInfomationNum++;
 				}
@@ -332,8 +332,9 @@ Procon30::HTTPCommunication::HTTPCommunication()
 		comData.token = reader[U"Token"].getString();
 		comData.host = reader[U"Host"].getString();
 	}
-	for (int32& i : comData.gotMatchInfoOfTurn) {
-		i = -1;
+
+	for (int32 i = 0; i < comData.gotMatchInfoOfTurn.size(); i++) {
+		comData.gotMatchInfoOfTurn[i] = -1;
 	}
 
 	//Setting Header
