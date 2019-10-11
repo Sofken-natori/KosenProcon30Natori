@@ -182,7 +182,12 @@ void Procon30::Game::Loop()
 						break;
 					}
 
-					algorithm.reset(new Procon30::PrivateAlgorithm(parameterFilePath, std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(secondSearchParameterFilePath))));
+					std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> secondPBArray;
+
+					for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
+						secondPBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
+
+					algorithm.reset(new Procon30::PrivateAlgorithm(parameterFilePath, std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(secondSearchParameterFilePath ,std::move(secondPBArray)))));
 				}
 				else {
 					//Public

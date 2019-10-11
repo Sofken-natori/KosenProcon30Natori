@@ -7,7 +7,6 @@ Procon30::YASAI::CompressBranch::CompressBranch(double weight)
 	for (size_t i = 1; i < 21; i++) {
 		distanceWeight[i] = distanceWeight[i - 1] / weight;
 	}
-	fieldSize = Size(20,20);
 }
 
 void Procon30::YASAI::CompressBranch::initilize(const Game& game)

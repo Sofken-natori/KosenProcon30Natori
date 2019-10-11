@@ -590,9 +590,16 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 		games[i].programEnd = ProgramEnd;
 		//CATION:かなり無理やり一時的だから許して
 
-		if (i == 0)
+		if (i == 0) {
 			//games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8))));
-			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(U"parameters/parameter.ini"));
+			std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBArray;
+
+			for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
+				PBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
+
+			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(U"parameters/parameter.ini", std::move(PBArray)));
+
+		}
 		else {
 			//games[i].algorithm.reset(new Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::PruneBranchesAlgorithm())));
 			//games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(100));
@@ -601,7 +608,12 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 			for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
 				PBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
 
-			games[i].algorithm.reset(new Procon30::PrivateAlgorithm(U"parameters/parameter.ini", std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(U"parameters/parameter.ini"))));
+			std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> secondPBArray;
+
+			for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
+				secondPBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
+
+			games[i].algorithm.reset(new Procon30::PrivateAlgorithm(U"parameters/parameter.ini", std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(U"parameters/parameter.ini", std::move(secondPBArray)))));
 		}
 
 	}
@@ -731,7 +743,7 @@ void Procon30::VirtualServer::update()
 		turnTimer.restart();
 		isStrategyStep = false;
 
-		SafeConsole(U"Post Time= 0:{} , 1:{} posted"_fmt(posted[0],posted[1]));
+		SafeConsole(U"Post Time= 0:{} , 1:{} posted"_fmt(posted[0], posted[1]));
 
 		//アクションデータの解析。
 		if (posted[0] != -1)
