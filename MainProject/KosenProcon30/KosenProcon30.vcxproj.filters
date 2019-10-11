@@ -117,10 +117,7 @@
     <ClCompile Include="Algorithm\TakahashiAlgorithm.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="PrivateAlgorithm.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="PublicAlgorithm.cpp">
+    <ClCompile Include="ProconAlgorithm.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
   </ItemGroup>

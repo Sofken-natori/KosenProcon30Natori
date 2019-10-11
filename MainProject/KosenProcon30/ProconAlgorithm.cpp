@@ -244,7 +244,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 						//enumerate
 						while (!nowBeamBucketQueue.empty()) {
 
-							BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
+							BeamSearchData now_state = (nowBeamBucketQueue.top());
 							nowBeamBucketQueue.pop();
 
 							//8^9はビームサーチでも計算不能に近い削らないと
@@ -539,7 +539,6 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 																	mustCalcFirstScore = true;
 
-																	//TeamColor::NoneにMove
 																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
 																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score + minus_demerit) * pow(fast_bonus, search_depth - nowSearchDepth);
 																	else {
@@ -819,11 +818,11 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 										if (nextBeamBucketQueue.size() > beam_size) {
 											if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
 												nextBeamBucketQueue.pop();
-												nextBeamBucketQueue.push(std::move(next_state));
+												nextBeamBucketQueue.push((next_state));
 											}
 										}
 										else {
-											nextBeamBucketQueue.push(std::move(next_state));
+											nextBeamBucketQueue.push((next_state));
 										}
 
 										//move or remove
@@ -860,7 +859,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 			//popする。
 			while (!result.empty()) {
-				nowBeamBucketArray.push_back(std::move(result.top()));
+				nowBeamBucketArray.push_back((result.top()));
 				result.pop();
 			}
 		}

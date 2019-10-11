@@ -87,7 +87,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 	for (int i = 0; i < search_depth; i++) {
 		//enumerate
 		while (!nowBeamBucketQueue.empty()) {
-			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
+			BeamSearchData now_state = (nowBeamBucketQueue.top());
 			nowBeamBucketQueue.pop();
 
 			int32 next_dir[8] = {};
@@ -261,11 +261,11 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::execute(const Game& game)
 						if (nextBeamBucketQueue.size() > beam_size) {
 							if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
 								nextBeamBucketQueue.pop();
-								nextBeamBucketQueue.push(std::move(next_state));
+								nextBeamBucketQueue.push(next_state);
 							}
 						}
 						else {
-							nextBeamBucketQueue.push(std::move(next_state));
+							nextBeamBucketQueue.push((next_state));
 						}
 
 						//次の移動方向への更新。先頭でやると入ってすぐ更新されておかしな話になる。
@@ -435,7 +435,7 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 	for (int i = 0; i < search_depth; i++) {
 		//enumerate
 		while(!nowBeamBucketQueue.empty()) {
-			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
+			BeamSearchData now_state = (nowBeamBucketQueue.top());
 			nowBeamBucketQueue.pop();
 
 			//8^9はビームサーチでも計算不能に近い削らないと
@@ -613,11 +613,11 @@ Procon30::SearchResult Procon30::BeamSearchAlgorithm::PruningExecute(const Game&
 						if(nextBeamBucketQueue.size() > beam_size){
 							if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
 								nextBeamBucketQueue.pop();
-								nextBeamBucketQueue.push(std::move(next_state));
+								nextBeamBucketQueue.push((next_state));
 							}
 						}
 						else {
-							nextBeamBucketQueue.push(std::move(next_state));
+							nextBeamBucketQueue.push((next_state));
 						}
 
 						//move or remove

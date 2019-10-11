@@ -86,7 +86,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 	for (int i = 0; i < search_depth; i++) {
 		//enumerate
 		while (!nowBeamBucketQueue.empty()) {
-			BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
+			BeamSearchData now_state = nowBeamBucketQueue.top();
 			nowBeamBucketQueue.pop();
 
 			//8^9はビームサーチでも計算不能に近い削らないと
@@ -366,17 +366,17 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 													mustCalcFirstScore = true;
 
 													if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
-														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score + minus_demerit) * pow(fast_bonus, search_depth - agent_num);
+														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score + minus_demerit) * pow(fast_bonus, search_depth - i);
 													else {
 														next_state.evaluatedScore += isDiagonal * diagonal_bonus;
-														next_state.evaluatedScore += next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
+														next_state.evaluatedScore += next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - i);
 													}
 
 													agent.nowPosition = agent.nextPosition;
 													next_state.field.m_board.at(agent.nextPosition).color = TeamColor::Blue;
 												}
 												else if (next_state.field.m_board.at(agent.nextPosition).color == TeamColor::Blue) {
-													next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - agent_num);
+													next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - i);
 													agent.nowPosition = agent.nextPosition;
 												}
 												break;
@@ -384,34 +384,34 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 
 												if (next_state.field.m_board.at(agent.nextPosition).color == TeamColor::Blue) {
 													if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
-														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num) + mine_remove_demerit) * enemy_peel_bonus;
+														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - i) + mine_remove_demerit) * enemy_peel_bonus;
 													else
 														next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 												}
 												else {
 													if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
-														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num) + minus_demerit) * enemy_peel_bonus;
+														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - i) + minus_demerit) * enemy_peel_bonus;
 													else
-														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num)) * enemy_peel_bonus;
+														next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - i)) * enemy_peel_bonus;
 												}
 
 												next_state.field.m_board.at(agent.nextPosition).color = TeamColor::None;
 												break;
 											case Action::Stay:
-												next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
+												next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - i);
 												break;
 											}
 										}
 										else if (flag[0][agent_num] == 2) {
 											//next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
 											if (firstDestroyedFlag[agent_num]) {//動きをつぶされる
-												next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
+												next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - i);
 											}
 											else {//動きをつぶしあう
 												if (next_state.teams.first.score > next_state.teams.second.score)
-													next_state.evaluatedScore += 1.2 * cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
+													next_state.evaluatedScore += 1.2 * cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - i);
 												else
-													next_state.evaluatedScore += cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
+													next_state.evaluatedScore += cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - i);
 											}
 										}
 										if (flag[0][agent_num] == 0 || flag[0][agent_num] == 1 || flag[0][agent_num] == 2) {
@@ -445,7 +445,7 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 										}
 										if (flag[1][agent_num] == 2) {
 											if (secondDestroyedFlag[agent_num]) {//動きをうまくつぶした
-												next_state.evaluatedScore -= wait_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num);
+												next_state.evaluatedScore -= wait_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - i);
 											}
 											else {//動きをつぶしあった
 
@@ -558,11 +558,11 @@ Procon30::SearchResult Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm::execute
 						if (nextBeamBucketQueue.size() > beam_size) {
 							if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
 								nextBeamBucketQueue.pop();
-								nextBeamBucketQueue.push(std::move(next_state));
+								nextBeamBucketQueue.push((next_state));
 							}
 						}
 						else {
-							nextBeamBucketQueue.push(std::move(next_state));
+							nextBeamBucketQueue.push((next_state));
 						}
 
 						//次の移動方向への更新。先頭でやると入ってすぐ更新されておかしな話になる。
@@ -684,7 +684,7 @@ Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::SuzukiBeamSearchAlgorithm(FilePath 
 
 void Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::initilize(const Game& game)
 {
-	if (Algorithm::isInitilized)
+	if (isInitilized)
 		return;
 	isInitilized = true;
 	for (int32 i = 0; i < parallelSize; i++)
@@ -728,6 +728,9 @@ void Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::initilize(const Game& game)
 	beam_size = autoBeamWidth;
 	search_depth = wishSearchDepth[game.teams.first.agentNum];
 	can_simulate_num = canSimulateNums[game.teams.first.agentNum];
+
+	beam_size = 100;
+	search_depth = 15;
 
 	SafeConsole(U"SuzukiAlgorithm ビーム幅：", autoBeamWidth);
 }
@@ -1323,7 +1326,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 						//enumerate
 						while (!nowBeamBucketQueue.empty()) {
 
-							BeamSearchData now_state = std::move(nowBeamBucketQueue.top());
+							BeamSearchData now_state = (nowBeamBucketQueue.top());
 							nowBeamBucketQueue.pop();
 
 							//8^9はビームサーチでも計算不能に近い削らないと
@@ -1576,11 +1579,11 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 										if (nextBeamBucketQueue.size() > beam_size) {
 											if (nextBeamBucketQueue.top().evaluatedScore < next_state.evaluatedScore) {
 												nextBeamBucketQueue.pop();
-												nextBeamBucketQueue.push(std::move(next_state));
+												nextBeamBucketQueue.push((next_state));
 											}
 										}
 										else {
-											nextBeamBucketQueue.push(std::move(next_state));
+											nextBeamBucketQueue.push((next_state));
 										}
 
 										//move or remove
@@ -1618,7 +1621,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 			//popする。
 			while (!result.empty()) {
-				nowBeamBucketArray.push_back(std::move(result.top()));
+				nowBeamBucketArray.push_back((result.top()));
 				result.pop();
 			}
 		}
