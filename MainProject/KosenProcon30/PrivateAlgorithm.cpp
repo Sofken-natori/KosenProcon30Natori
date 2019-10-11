@@ -5,52 +5,22 @@
 #include "Algorithm.hpp"
 #include "Algorithm/SuzukiAlgorithm.hpp"
 
+/*
 Procon30::PrivateAlgorithm::PrivateAlgorithm(int32 beamWidth, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms, std::unique_ptr<Algorithm> secondAlgorithm)
 	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), secondBeamSearchAlgorithm(std::move(secondAlgorithm))
 {
 	parameter.beamWidth = beamWidth;
+	const int32 canSimulateNums[9] = { 0,0,9,9,9,6,5,3,3 };
+	const int32 wishSearchDepth[9] = { 0,0,10,15,15,15,20,20,15 };
+
+	parameter.targetSearchDepth = wishSearchDepth
+
 }
+*/
 
 Procon30::PrivateAlgorithm::PrivateAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms, std::unique_ptr<Algorithm> secondAlgorithm)
 	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), secondBeamSearchAlgorithm(std::move(secondAlgorithm))
 {
-	s3d::INIData parameterData(parameterFile);
-
-	/*
-			int32 beamWidth;
-			size_t resultSize = 3;
-			int32 targetSearchDepth = 10;
-			double sameLocationDemerit = 0.7;
-			double sameAreaDemerit = 0.7;
-			int wasMovedDemerit = -5;
-			int waitDemerit = -10;
-			double diagonalBonus = 1.5;
-			double fastBonus = 1.03;
-			double enemyPeelBonus = 0.9;
-			double myAreaMerit = 0.4;
-			double enemyAreaMerit = 0.8;
-			int minusDemerit = -2;
-			int mineRemoveDemerit = -1;
-			int32 timeMargin = 1000;
-			double cancelDemerit = 0.9;
-	*/
-	//TODO:デバッグとファイル追加
-	this->parameter.beamWidth = Parse<int32>(parameterData.getGlobalVaue(U"beamWidth"));
-	this->parameter.resultSize = Parse<int32>(parameterData.getGlobalVaue(U"resultSize"));
-	this->parameter.targetSearchDepth = Parse<int32>(parameterData.getGlobalVaue(U"targetSearchDepth"));
-	this->parameter.sameLocationDemerit = Parse<double>(parameterData.getGlobalVaue(U"sameLocationDemerit"));
-	this->parameter.sameAreaDemerit = Parse<double>(parameterData.getGlobalVaue(U"sameAreaDemerit"));
-	this->parameter.wasMovedDemerit = Parse<int32>(parameterData.getGlobalVaue(U"wasMovedDemerit"));
-	this->parameter.waitDemerit = Parse<int32>(parameterData.getGlobalVaue(U"waitDemerit"));
-	this->parameter.diagonalBonus = Parse<double>(parameterData.getGlobalVaue(U"diagonalBonus"));
-	this->parameter.fastBonus = Parse<double>(parameterData.getGlobalVaue(U"fastBonus"));
-	this->parameter.enemyPeelBonus = Parse<double>(parameterData.getGlobalVaue(U"enemyPeelBonus"));
-	this->parameter.myAreaMerit = Parse<double>(parameterData.getGlobalVaue(U"myAreaMerit"));
-	this->parameter.enemyAreaMerit = Parse<double>(parameterData.getGlobalVaue(U"enemyAreaMerit"));
-	this->parameter.minusDemerit = Parse<double>(parameterData.getGlobalVaue(U"minusDemerit"));
-	this->parameter.mineRemoveDemerit = Parse<double>(parameterData.getGlobalVaue(U"mineRemoveDemerit"));
-	this->parameter.timeMargin = Parse<double>(parameterData.getGlobalVaue(U"timeMargin"));
-	this->parameter.cancelDemerit = Parse<double>(parameterData.getGlobalVaue(U"cancelDemerit"));
 }
 
 void Procon30::PrivateAlgorithm::initilize(const Game& game)
@@ -60,25 +30,70 @@ void Procon30::PrivateAlgorithm::initilize(const Game& game)
 	for (int32 i = 0; i < parallelSize; i++)
 		this->pruneBranchesAlgorithms[i]->initilize(game);
 
+	//parameterの読み込みはinitilizeで行われる。
+	{
+		s3d::INIData parameterData(parameterFilePath);
+
+		/*
+				int32 beamWidth;
+				size_t resultSize = 3;
+				int32 targetSearchDepth = 10;
+				double sameLocationDemerit = 0.7;
+				double sameAreaDemerit = 0.7;
+				int wasMovedDemerit = -5;
+				int waitDemerit = -10;
+				double diagonalBonus = 1.5;
+				double fastBonus = 1.03;
+				double enemyPeelBonus = 0.9;
+				double myAreaMerit = 0.4;
+				double enemyAreaMerit = 0.8;
+				int minusDemerit = -2;
+				int mineRemoveDemerit = -1;
+				int32 timeMargin = 1000;
+				double cancelDemerit = 0.9;
+		*/
+		this->parameter.resultSize = Parse<int32>(parameterData.getGlobalVaue(U"resultSize"));
+		this->parameter.sameLocationDemerit = Parse<double>(parameterData.getGlobalVaue(U"sameLocationDemerit"));
+		this->parameter.sameAreaDemerit = Parse<double>(parameterData.getGlobalVaue(U"sameAreaDemerit"));
+		this->parameter.wasMovedDemerit = Parse<int32>(parameterData.getGlobalVaue(U"wasMovedDemerit"));
+		this->parameter.waitDemerit = Parse<int32>(parameterData.getGlobalVaue(U"waitDemerit"));
+		this->parameter.diagonalBonus = Parse<double>(parameterData.getGlobalVaue(U"diagonalBonus"));
+		this->parameter.fastBonus = Parse<double>(parameterData.getGlobalVaue(U"fastBonus"));
+		this->parameter.enemyPeelBonus = Parse<double>(parameterData.getGlobalVaue(U"enemyPeelBonus"));
+		this->parameter.myAreaMerit = Parse<double>(parameterData.getGlobalVaue(U"myAreaMerit"));
+		this->parameter.enemyAreaMerit = Parse<double>(parameterData.getGlobalVaue(U"enemyAreaMerit"));
+		this->parameter.minusDemerit = Parse<double>(parameterData.getGlobalVaue(U"minusDemerit"));
+		this->parameter.mineRemoveDemerit = Parse<double>(parameterData.getGlobalVaue(U"mineRemoveDemerit"));
+		this->parameter.timeMargin = Parse<double>(parameterData.getGlobalVaue(U"timeMargin"));
+		this->parameter.cancelDemerit = Parse<double>(parameterData.getGlobalVaue(U"cancelDemerit"));
+	}
+
+
 	//ビーム幅の自動調整
-	const int32 canSimulateNums[9] = { 0,0,9,9,9,6,5,4,4 };
+	const int32 canSimulateNums[9] = { 0,0,9,9,9,6,5,3,3 };
 	const int32 wishSearchDepth[9] = { 0,0,10,15,15,15,20,20,15 };
 	const double calcPerSec = 500'000'000;
 	const double actionNum = 3;
-
-	double autoBeamWidth = (parallelSize * (game.turnMillis - parameter.timeMargin) * calcPerSec)
-		/ (1000.0 * wishSearchDepth[game.teams.first.agentNum] *
-			pow(canSimulateNums[game.teams.first.agentNum],game.teams.first.agentNum) *
-			actionNum * game.field.boardSize.x * game.field.boardSize.y);
-
 	const double secondCalcTime = 0.4;
 
-	autoBeamWidth = std::min(1000.0,autoBeamWidth * secondCalcTime);
+	int32 autoBeamWidth = (int32)((parallelSize * (game.turnMillis - parameter.timeMargin) * calcPerSec)
+		/ (1000.0 * wishSearchDepth[game.teams.first.agentNum] *
+			pow(canSimulateNums[game.teams.first.agentNum], game.teams.first.agentNum) *
+			actionNum * game.field.boardSize.x * game.field.boardSize.y) * secondCalcTime);
 
-	parameter.beamWidth = autoBeamWidth;
-	parameter.targetSearchDepth = wishSearchDepth[game.teams.first.agentNum];
+	autoBeamWidth = std::min(1000, autoBeamWidth);
 
-	SafeConsole(U"ビーム幅：",autoBeamWidth);
+	beam_size = autoBeamWidth;
+	search_depth = wishSearchDepth[game.teams.first.agentNum];
+	can_simulate_num = canSimulateNums[game.teams.first.agentNum];
+
+	SafeConsole(U"PrivateAlgorithm ビーム幅：", autoBeamWidth);
+
+	Game gameCopy;
+	gameCopy = game;
+	gameCopy.turnMillis /= 2;
+
+	secondBeamSearchAlgorithm->initilize(gameCopy);
 }
 
 Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
@@ -89,22 +104,31 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 	Game gameCopy;
 	gameCopy = game;
 	std::swap(gameCopy.teams.first, gameCopy.teams.second);
+	//制限時間はバランシングを考えて半分
+	gameCopy.turnMillis /= 2;
 	//TODO:交互ビームサーチの実装をチームに依存しないようにする。
-	const auto& second_result = secondBeamSearchAlgorithm->execute(gameCopy);
+	auto second_result = secondBeamSearchAlgorithm->execute(gameCopy);
+
+	//たまに相手がどん詰まりになって動作が返ってこなくなることがあったので再発するようなら
+	/*
+	if (second_result.orders.size() == 0)
+	{
+		for (int32 i = 0; i < game.teams.first.agentNum; i++) {
+			second_result.orders[0][i].action = Action::Move;
+			second_result.orders[0][i].dir = Point(0, 0);
+		}
+	}
+	*/
 
 	//内部定数はスネークケースで統一許して
+	//試合に依存するパラメーター（変化、こちらで手を触れなくていい）
+	const int32 max_turn = game.MaxTurn;
+	const int32 turn = game.turn;
+	const int32 field_width = game.field.boardSize.x;
+	const int32 field_height = game.field.boardSize.y;
 
-	//ここで調整する
-	//とりあえず暫定でマップの広さと探索時間に関係はないため、（calcScoreの影響は未定）
-	//ビーム幅は、エージェント数で決めます。
-
-	//constexpr int32 canBeamWidths[9] = { 0,0,100,100,100, 100, 100, 100, 100 };
-
-	//beamWidth = canBeamWidths[game.teams.first.agentNum];
-
-	//アルゴリズムに関係するパラメーター
-	const size_t beam_size = parameter.beamWidth;
-
+	//アルゴリズムに関係するパラメーター(非変化)
+	const double time_margin = parameter.timeMargin;
 	const size_t result_size = parameter.resultSize;
 	const double same_location_demerit = parameter.sameLocationDemerit;
 	const double same_area_demerit = parameter.sameAreaDemerit;
@@ -115,19 +139,9 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 	const double enemy_peel_bonus = parameter.enemyPeelBonus;
 	const double my_area_merit = parameter.myAreaMerit;
 	const double enemy_area_merit = parameter.enemyAreaMerit;
-	const int minus_demerit = parameter.minusDemerit;
-	const int mine_remove_demerit = parameter.mineRemoveDemerit;
-	const int32 time_margin = parameter.timeMargin;
+	const double minus_demerit = parameter.minusDemerit;
+	const double mine_remove_demerit = parameter.mineRemoveDemerit;
 	const double cancel_demerit = parameter.cancelDemerit;
-
-	//試合に依存するパラメーター
-	const int32 search_depth = std::min(parameter.targetSearchDepth, game.MaxTurn - game.turn);
-	const int32 canSimulateNums[9] = { 0,0,9,9,9,6,5,4,4 };
-	const int32 canSimulateNum = canSimulateNums[game.teams.first.agentNum];
-	const int32 MaxTurn = game.MaxTurn;
-	const int32 turn = game.turn;
-	const int32 field_width = game.field.boardSize.x;
-	const int32 field_height = game.field.boardSize.y;
 
 	//TODO:ターンが進めば進むほど実際の評価と同じようになるようにする?終盤で評価値を変えた方がいいのでは？
 	//演算子の準備
@@ -157,7 +171,7 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 	*/
 	//秒数に合わせて計算打ち切る工夫追加。とりあえずこれだけあれば動けないことはない。
 	//WAGNI:余った時間に合わせてビーム幅を調整する工夫？
-	for (nowSearchDepth = 0; nowSearchDepth < search_depth; nowSearchDepth++) {
+	for (nowSearchDepth = 0; nowSearchDepth < std::min(search_depth, game.MaxTurn - game.turn); nowSearchDepth++) {
 
 		if (nowSearchDepth != 0) {
 			const int32 turnTimerMs = game.turnTimer.ms();
@@ -173,8 +187,9 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
 			//CATION:second_resultのコピーができているかを確認すること。
-			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, search_depth, beam_size, field_width, field_height, canSimulateNum,cancel_demerit,
-				MaxTurn, turn, was_moved_demerit, enemy_peel_bonus, enemy_area_merit, mine_remove_demerit, my_area_merit, fast_bonus, wait_demerit, diagonal_bonus, minus_demerit, second_result](
+			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, field_width, field_height, cancel_demerit,
+				max_turn, turn, was_moved_demerit, enemy_peel_bonus, enemy_area_merit, mine_remove_demerit, my_area_merit, fast_bonus, wait_demerit, diagonal_bonus, minus_demerit, second_result](
+					size_t beam_size, int32 search_depth, int32 can_simulate_num,
 					std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueue, std::unique_ptr<PruneBranchesAlgorithm>& pruneBranches) {
 
 						std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nextBeamBucketQueue;
@@ -210,7 +225,7 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 							//可能なシミュレーション手数一覧。
 							//+1は普通に見積もれる。
 							//3ぐらいまでは昨年と同じでいける。
-							pruneBranches->pruneBranches(canSimulateNum, enumerateDir, now_state.field, now_state.teams);
+							pruneBranches->pruneBranches(can_simulate_num, enumerateDir, now_state.field, now_state.teams);
 
 							//bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
 							//assert(okPrune);
@@ -498,7 +513,7 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 
 																if (next_state.field.m_board.at(agent.nextPosition).color == TeamColor::Blue) {
 																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
-																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - agent_num) + mine_remove_demerit) * enemy_peel_bonus;
+																		next_state.evaluatedScore += (abs(next_state.field.m_board.at(agent.nextPosition).score) * pow(fast_bonus, search_depth - agent_num) + mine_remove_demerit) * enemy_peel_bonus;
 																	else
 																		next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 																}
@@ -749,7 +764,7 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 
 
 										//終了でだんだん評価値が、ゲーム自体の勝敗と同じくなるように調整。
-										const double finish_slope = std::max(1 - (MaxTurn - turn - nowSearchDepth) / 10.0, 0.0);
+										const double finish_slope = std::max(1 - (max_turn - turn - nowSearchDepth) / 10.0, 0.0);
 
 										next_state.evaluatedScore = (1 - finish_slope) * next_state.evaluatedScore + finish_slope * ((next_state.teams.first.score - next_state.teams.second.score));
 
@@ -789,7 +804,7 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 
 						return nextBeamBucketQueue;
 				}
-			, nowBeamBucketQueues[parallelNum], ref(pruneBranchesAlgorithms[parallelNum]));
+			, beam_size, search_depth, can_simulate_num, nowBeamBucketQueues[parallelNum], ref(pruneBranchesAlgorithms[parallelNum]));
 		}
 
 		nowBeamBucketArray.clear();
@@ -860,7 +875,7 @@ Procon30::SearchResult Procon30::PrivateAlgorithm::execute(const Game& game)
 
 		std::sort(nowBeamBucketArray.begin(), nowBeamBucketArray.end(), std::greater<BeamSearchData>());
 
-		for (int32 beamCount = 0; beamCount < beam_size; beamCount++) {
+		for (int32 beamCount = 0; beamCount < Min(nowBeamBucketArray.size(), beam_size); beamCount++) {
 			nowBeamBucketQueues[beamCount % parallelSize].push(nowBeamBucketArray[beamCount]);
 		}
 

@@ -1,5 +1,8 @@
 #include "Game.hpp"
 #include "Observer.hpp"
+#include "Algorithm.hpp"
+#include "Algorithm/SuzukiAlgorithm.hpp"
+#include "Algorithm/TakahashiAlgorithm.hpp"
 
 bool Procon30::Game::dataReceived = false;
 std::mutex Procon30::Game::HTTPWaitMtx;
@@ -148,11 +151,81 @@ void Procon30::Game::Loop()
 		//Algo実行
 		{
 
-			if (fieldType == PublicField::NONE) {
+			//CAUTION:許して
+			if (fieldType == PublicField::NONE && !virtualServerMode) {
 				PublicFields publicFields;
 				fieldType = publicFields.checkPublicField(*this);
-				//ここでアルゴリズムの初期化をしては？相談案件。
+				//ここでアルゴリズムの初期化をする。
+				if (fieldType == PublicField::NON_MATCHING) {
+					//Private
+					std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBArray;
+					for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
+						PBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
 
+					FilePath parameterFilePath = U"parameters/parameter.ini";
+					FilePath secondSearchParameterFilePath = U"parameters/parameter.ini";
+
+					switch (this->teams.first.agentNum) {
+					case 2:
+						break;
+					case 3:
+						break;
+					case 4:
+						break;
+					case 5:
+						break;
+					case 6:
+						break;
+					case 7:
+						break;
+					case 8:
+						break;
+					}
+
+					algorithm.reset(new Procon30::PrivateAlgorithm(parameterFilePath, std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(secondSearchParameterFilePath))));
+				}
+				else {
+					//Public
+					switch (fieldType)
+					{
+					case Procon30::PublicField::NONE:
+
+						break;					
+					case Procon30::PublicField::A_1:
+						
+						break;
+					case Procon30::PublicField::A_2:
+						break;
+					case Procon30::PublicField::A_3:
+						break;
+					case Procon30::PublicField::A_4:
+						break;
+					case Procon30::PublicField::B_1:
+						break;
+					case Procon30::PublicField::B_2:
+						break;
+					case Procon30::PublicField::B_3:
+						break;
+					case Procon30::PublicField::C_1:
+						break;
+					case Procon30::PublicField::C_2:
+						break;
+					case Procon30::PublicField::D_1:
+						break;
+					case Procon30::PublicField::D_2:
+						break;
+					case Procon30::PublicField::E_1:
+						break;
+					case Procon30::PublicField::E_2:
+						break;
+					case Procon30::PublicField::F_1:
+						break;
+					case Procon30::PublicField::F_2:
+						break;
+					default:
+						break;
+					}
+				}
 
 			}
 
@@ -177,7 +250,7 @@ void Procon30::Game::Loop()
 		if (programEnd->load() == true)
 			break;
 	}
-	Logger << U"Game Thread End";
+	SafeConsole(U"Game Thread End");
 	return;
 }
 

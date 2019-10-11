@@ -2,7 +2,7 @@
 
 
 //enumerateDirは使いまわしているのでゴミ情報が入っている。
-bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams) const
+bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir,const Field& field,const std::pair<Team, Team>& teams) const
 {
 	//とりまその方向のタイルの値の合計、自分の色だと、0.3倍、相手の色だと1.1倍、マイナス値だと0.7倍、エージェントがいると0、
 	//フィールド用の配列準備して、累積和して、区間取得すればいいか。
@@ -23,8 +23,8 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 	int32 fieldSizeY = field.boardSize.y;
 	int32 fieldSizeX = field.boardSize.x;
 
-	for (auto y : step(fieldSizeY)) {
-		for (auto x : step(fieldSizeX)) {
+	for (int32 y = 0; y < fieldSizeY; y++) {
+		for (int32 x = 0; x < fieldSizeX; x++) {
 
 			double score = field.m_board.at(y, x).score;
 
@@ -108,6 +108,6 @@ bool Procon30::PruneBranchesAlgorithm::pruneBranches(const int canSimulateNum, s
 	return true;
 }
 
-void Procon30::PruneBranchesAlgorithm::initilize(const Game& game)
+void Procon30::PruneBranchesAlgorithm::initilize([[maybe_unused]] const Game& game)
 {
 }

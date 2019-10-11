@@ -6,6 +6,23 @@
 
 namespace Procon30 {
 
+	struct BeamSearchParameter {
+		size_t resultSize = 3;
+		double sameLocationDemerit = 0.7;
+		double sameAreaDemerit = 0.7;
+		int wasMovedDemerit = -5;
+		int waitDemerit = -10;
+		double diagonalBonus = 1.5;
+		double fastBonus = 1.03;
+		double enemyPeelBonus = 0.9;
+		double myAreaMerit = 0.4;
+		double enemyAreaMerit = 0.8;
+		double minusDemerit = -2.0;
+		double mineRemoveDemerit = -1.0;
+		double timeMargin = 1000.0;
+		double cancelDemerit = 0.9;
+	};
+
 	enum class AlgorithmStateCode : uint32 {
 		None,
 		TimeOver,
@@ -52,7 +69,7 @@ namespace Procon30 {
 	class PruneBranchesAlgorithm {
 	public:
 		//canSimulateNumは1エージェント当たりの列挙可能数、enumerateDirに探索する方向を入れる。終端は、-1,-1にして。
-		virtual bool pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams) const;
+		virtual bool pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir,const Field& field,const std::pair<Team, Team>& teams) const;
 		virtual void initilize(const Game& game);
 	};
 
@@ -86,33 +103,30 @@ namespace Procon30 {
 
 	//デバッグする
 	class PrivateAlgorithm : public Algorithm {
-	public:
-		struct PrivateAlgorithmParameter {
-			int32 beamWidth;
-			size_t resultSize = 3;
-			int32 targetSearchDepth = 20;
-			double sameLocationDemerit = 0.7;
-			double sameAreaDemerit = 0.7;
-			int wasMovedDemerit = -5;
-			int waitDemerit = -10;
-			double diagonalBonus = 1.5;
-			double fastBonus = 1.03;
-			double enemyPeelBonus = 0.9;
-			double myAreaMerit = 0.4;
-			double enemyAreaMerit = 0.8;
-			int minusDemerit = -2;
-			int mineRemoveDemerit = -1;
-			int32 timeMargin = 1000;
-			double cancelDemerit = 0.9;
-		};
 	private:
+	private:
+		FilePath parameterFilePath;
+		
 		std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> pruneBranchesAlgorithms;
 		std::unique_ptr<Algorithm> secondBeamSearchAlgorithm;
-		PrivateAlgorithmParameter parameter;
-	public:
+		BeamSearchParameter parameter;
 
+		//CAUTION:ここら辺のパラメーターはinitilizeで決定します。
+		//試合に依存するパラメーター（頻繁に変更の必要がある）
+		//考える余地は、これらのパラメーターを追い出すべきか、、、追い出すべきではない。むしろ一ヵ所に固めるべき。変更し忘れを防ぐ
+		//Agent数による。自動更新が望ましい。parameterを使わず明示的に、privateにおいては？
+		size_t beam_size;
+		//エージェント数による。しかし、調整してしまえば固定値。追い出すのが望ましい。
+		int32 search_depth;
+		//エージェント数による。しかし、調整してしまえば固定値。追い出すのが望ましい。
+		int32 can_simulate_num;
+
+	public:
+		/*
+		//非推奨なので消しました。
 		PrivateAlgorithm(int32 beamWidth, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms,
 			std::unique_ptr<Algorithm> secondAlgorithm);
+		*/
 		PrivateAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms,
 			std::unique_ptr<Algorithm> secondAlgorithm);
 		virtual SearchResult execute(const Game& game) override final;

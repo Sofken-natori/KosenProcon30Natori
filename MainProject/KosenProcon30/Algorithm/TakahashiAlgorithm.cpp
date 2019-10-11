@@ -7,6 +7,7 @@ Procon30::YASAI::CompressBranch::CompressBranch(double weight)
 	for (size_t i = 1; i < 21; i++) {
 		distanceWeight[i] = distanceWeight[i - 1] / weight;
 	}
+	fieldSize = Size(20,20);
 }
 
 void Procon30::YASAI::CompressBranch::initilize(const Game& game)
@@ -14,7 +15,7 @@ void Procon30::YASAI::CompressBranch::initilize(const Game& game)
 	fieldSize = game.field.boardSize;
 }
 
-bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir, Field& field, std::pair<Team, Team> teams) const
+bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, std::array<std::array<Point, 10>, 8> & enumerateDir,const Field& field,const std::pair<Team, Team>& teams) const
 {
 #define TILE(p) field.m_board[(p)]
 	const Array<s3d::Point> dirs = { {0,0},{1,0},{-1,0},{0,-1},{0,1},{-1,-1},{-1,1},{1,-1},{1,1} };
@@ -58,7 +59,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		}
 		if (enemyTeamFlag[pos] == 1) {
 			if (TILE(pos).score < 0) {
-				sortedDirs[index].first -= (double)(TILE(pos).score) * distanceWeight[dist] * (enemyTileWeight);
+				sortedDirs[index].first += (double)(TILE(pos).score) * distanceWeight[dist] * (enemyTileWeight);
 			}
 			else {
 				sortedDirs[index].first += (double)(TILE(pos).score) * distanceWeight[dist] * (enemyTileWeight);
@@ -122,8 +123,10 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		//¶ã
 		sortedDirs[5].first = 0;
 		sortedDirs[5].second = { -1,-1 };
-		for (Point nowPos : step(agent.nowPosition)) {
-			evaluate(agent, nowPos, 5);
+		for (int32 x = 0; x < agent.nowPosition.x; x++) {
+			for (int32 y = 0; y < agent.nowPosition.y; y++) {
+				evaluate(agent, Point(x, y), 5);
+			}
 		}
 
 		//‰Eã
@@ -168,7 +171,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 	return false;
 }
 
-Procon30::YASAI::CompressBranch::FieldFlag Procon30::YASAI::CompressBranch::innerCalculateScoreFast(Procon30::Field& field, Procon30::TeamColor teamColor) const
+Procon30::YASAI::CompressBranch::FieldFlag Procon30::YASAI::CompressBranch::innerCalculateScoreFast(const Procon30::Field& field, Procon30::TeamColor teamColor) const
 {
 	unsigned short qFast[2000];
 	std::bitset<1023> visitFast, isTeamColorFast;

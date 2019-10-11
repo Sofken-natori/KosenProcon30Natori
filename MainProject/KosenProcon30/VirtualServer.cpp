@@ -592,16 +592,16 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 
 		if (i == 0)
 			//games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8))));
-			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(100));
+			games[i].algorithm.reset(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(U"parameters/parameter.ini"));
 		else {
 			//games[i].algorithm.reset(new Procon30::SUZUKI::AlternatelyBeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::PruneBranchesAlgorithm())));
 			//games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(100));
 			std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBArray;
 
 			for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
-				PBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new PruneBranchesAlgorithm());
+				PBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
 
-			games[i].algorithm.reset(new Procon30::PrivateAlgorithm(U"json/VirtualServer/parameter.ini", std::move(PBArray),std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(30))));
+			games[i].algorithm.reset(new Procon30::PrivateAlgorithm(U"parameters/parameter.ini", std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(U"parameters/parameter.ini"))));
 		}
 
 	}
@@ -709,7 +709,7 @@ void Procon30::VirtualServer::Loop()
 			break;
 		}
 	}
-	Logger << U"VirtualServer Thread End";
+	SafeConsole(U"VirtualServer Thread End");
 	return;
 }
 
@@ -731,8 +731,8 @@ void Procon30::VirtualServer::update()
 		turnTimer.restart();
 		isStrategyStep = false;
 
-		Logger << U"gameNum:0 {} posted"_fmt(posted[0]);
-		Logger << U"gameNum:1 {} posted"_fmt(posted[1]);
+		SafeConsole(U"gameNum:0 {} posted"_fmt(posted[0]));
+		SafeConsole(U"gameNum:1 {} posted"_fmt(posted[1]));
 
 		//アクションデータの解析。
 		if (posted[0] != -1)

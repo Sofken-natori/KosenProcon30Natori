@@ -44,7 +44,7 @@ Procon30::SearchResult Procon30::RandAlgorithm::execute(const Game& game)
 	return result;
 }
 
-void Procon30::RandAlgorithm::initilize(const Game& game)
+void Procon30::RandAlgorithm::initilize([[maybe_unused]] const Game& game)
 {
 }
 
