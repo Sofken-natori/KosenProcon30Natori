@@ -26,11 +26,12 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 	//Tileがminusの時(TileWeight - minusWeightDiff)にweightを変更するための調整変数
 	const double minusWeightDiff = 1.3;
 	//これらはscore*TileWeight* distweight
-	const double myTileWeight = 0.5;
+	const double myTileWeight = -0.8;
 	const double enemyTileWeight = 1.2;
 	//0点マスに対してネガティブな補正をかける
 	//zeroPenarty * distWeight;
 	const double zeroPenarty = -1.2;
+	const double diagonalBounus = 1.15;
 
 	//0:none
 	//1:tile
@@ -80,14 +81,20 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		sortedDirs[0].second = { 0,0 };
 
 		//右
+		int32 tileCount = 0;
 		sortedDirs[1].first = 0;
 		sortedDirs[1].second = { 1,0 };
 		for (int32 x = 1; x < (fieldSize.x - agent.nowPosition.x); x++) {
 			for (int32 y = Max(agent.nowPosition.y - (x - 1), 0); y < Min(agent.nowPosition.y + x, fieldSize.y); y++) {
 				const Point nowPos = { x + agent.nowPosition.x,y };
 				evaluate(agent, nowPos, 1);
+				tileCount++;
 			}
 		}
+		if (tileCount == 0) {
+			sortedDirs[1].first = std::numeric_limits<double>::min();
+		}
+		tileCount = 0;
 
 		//左
 		sortedDirs[2].first = 0;
@@ -96,8 +103,13 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			for (int32 y = Max(agent.nowPosition.y + (x + 1), 0); y < Min(agent.nowPosition.y - x, fieldSize.y); y++) {
 				const Point nowPos = { x + agent.nowPosition.x,y };
 				evaluate(agent, nowPos, 2);
+				tileCount++;
 			}
 		}
+		if (tileCount == 0) {
+			sortedDirs[2].first = std::numeric_limits<double>::min();
+		}
+		tileCount = 0;
 
 		//上
 		sortedDirs[3].first = 0;
@@ -106,8 +118,13 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			for (int32 x = Max(agent.nowPosition.x + (y + 1), 0); x < Min(agent.nowPosition.x - y, fieldSize.y); x++) {
 				const Point nowPos = { x,y + agent.nowPosition.y };
 				evaluate(agent, nowPos, 3);
+				tileCount++;
 			}
 		}
+		if (tileCount == 0) {
+			sortedDirs[3].first = std::numeric_limits<double>::min();
+		}
+		tileCount = 0;
 
 		//下
 		sortedDirs[4].first = 0;
@@ -116,8 +133,13 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			for (int32 x = Max(agent.nowPosition.x - (y - 1), 0); x < Min(agent.nowPosition.x + y, fieldSize.y); x++) {
 				const Point nowPos = { x,y + agent.nowPosition.y };
 				evaluate(agent, nowPos, 4);
+				tileCount++;
 			}
 		}
+		if (tileCount == 0) {
+			sortedDirs[4].first = std::numeric_limits<double>::min();
+		}
+		tileCount = 0;
 
 		//左上
 		sortedDirs[5].first = 0;
@@ -125,8 +147,13 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		for (int32 x = 0; x < agent.nowPosition.x; x++) {
 			for (int32 y = 0; y < agent.nowPosition.y; y++) {
 				evaluate(agent, Point(x, y), 5);
+				tileCount++;
 			}
 		}
+		if (tileCount == 0) {
+			sortedDirs[5].first = std::numeric_limits<double>::min();
+		}
+		tileCount = 0;
 
 		//右上
 		sortedDirs[6].first = 0;
@@ -134,8 +161,13 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		for (int32 x = agent.nowPosition.x + 1; x < fieldSize.x; x++) {
 			for (int32 y = 0; y < agent.nowPosition.y; y++) {
 				evaluate(agent, Point(x, y), 6);
+				tileCount++;
 			}
 		}
+		if (tileCount == 0) {
+			sortedDirs[6].first = std::numeric_limits<double>::min();
+		}
+		tileCount = 0;
 
 		//左下
 		sortedDirs[7].first = 0;
@@ -143,8 +175,13 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		for (int32 x = 0; x < agent.nowPosition.x; x++) {
 			for (int32 y = agent.nowPosition.y + 1; y < fieldSize.y; y++) {
 				evaluate(agent, Point(x, y), 7);
+				tileCount++;
 			}
 		}
+		if (tileCount == 0) {
+			sortedDirs[7].first = std::numeric_limits<double>::min();
+		}
+		tileCount = 0;
 
 		//右下
 		sortedDirs[8].first = 0;
@@ -152,12 +189,18 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		for (int32 x = agent.nowPosition.x+1; x < fieldSize.x; x++) {
 			for (int32 y = agent.nowPosition.y+1; y < fieldSize.y; y++) {
 				evaluate(agent, Point(x, y), 8);
+				tileCount++;
 			}
 		}
-		sortedDirs[5].first *= 1.15;
-		sortedDirs[6].first *= 1.15;
-		sortedDirs[7].first *= 1.15;
-		sortedDirs[8].first *= 1.15;
+		if (tileCount == 0) {
+			sortedDirs[8].first = std::numeric_limits<double>::min();
+		}
+		tileCount = 0;
+
+		sortedDirs[5].first *= diagonalBounus;
+		sortedDirs[6].first *= diagonalBounus;
+		sortedDirs[7].first *= diagonalBounus;
+		sortedDirs[8].first *= diagonalBounus;
 
 		sort(sortedDirs.begin(), sortedDirs.end(),
 			[](const std::pair<double, s3d::Point> left, const std::pair<double, s3d::Point> right) {return left.first > right.first; });
@@ -167,6 +210,10 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		}
 		enumerateDir[agent_num][canSimulateNum] = { -2,-2 };
 	}
+
+	if (sortedDirs[0].first == std::numeric_limits<double>::min())
+		SafeConsole(U"You are bug.");
+
 	return false;
 }
 
