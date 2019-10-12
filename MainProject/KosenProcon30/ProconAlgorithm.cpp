@@ -137,7 +137,8 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 			for (int32 i = 0; i < readTurn; i++) {
 				line = reader.readLine();
 				auto points = line->split(' ');
-				if (points.size() != agentNum * 4)SafeConsole(U"WTF");
+				if (points.size() < agentNum * 4)
+					SafeConsole(U"WTF");
 				for (int j = 0; j < agentNum; j++) {
 					book.firstData[i][j].first.x = ParseInt<int32>(points[j * 4 + 0]);
 					book.firstData[i][j].first.y = ParseInt<int32>(points[j * 4 + 1]);
@@ -148,7 +149,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 			for (int32 i = 0; i < readTurn; i++) {
 				line = reader.readLine();
 				auto points = line->split(' ');
-				if (points.size() != agentNum * 4)SafeConsole(U"WTF");
+				if (points.size() < agentNum * 4)SafeConsole(U"WTF");
 				for (int j = 0; j < agentNum; j++) {
 					book.secondData[i][j].first.x = ParseInt<int32>(points[j * 4 + 0]);
 					book.secondData[i][j].first.y = ParseInt<int32>(points[j * 4 + 1]);
@@ -321,25 +322,29 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 									if (book.pattern == 1) {
 										//firstPosÇ∆çáív
-										for (int32 agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
-											//x,yÇ™çáívÇµÇƒÇ¢ÇΩÇÁë„ì¸
-											if (book.firstData[turn][agent_num].first.x == -1 || book.firstData[turn][agent_num].first.y == -1)
-												continue;
-											if (now_state.teams.first.agents[agent_num].nowPosition == book.firstData[turn][agent_num].first) {
-												enumerateDir[agent_num][0] = book.firstData[turn][agent_num].second;
-												enumerateDir[agent_num][1] = Point(-2, -2);
+										for (int32 agent_num1 = 0; agent_num1 < now_state.teams.first.agentNum; agent_num1++) {//now_state
+											for (int32 agent_num2 = 0; agent_num2 < now_state.teams.first.agentNum; agent_num2++) {//book
+												//x,yÇ™çáívÇµÇƒÇ¢ÇΩÇÁë„ì¸
+												if (book.firstData[turn][agent_num2].first.x == -1 || book.firstData[turn][agent_num2].first.y == -1)
+													continue;
+												if (now_state.teams.first.agents[agent_num1].nowPosition == book.firstData[turn][agent_num2].first) {
+													enumerateDir[agent_num1][0] = book.firstData[turn][agent_num2].second;
+													enumerateDir[agent_num1][1] = Point(-2, -2);
+												}
 											}
 										}
 									}
 									else if (book.pattern == 2) {
 										//secondPosÇ∆çáív
-										for (int32 agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
+										for (int32 agent_num1 = 0; agent_num1 < now_state.teams.first.agentNum; agent_num1++) {//now_state
+											for (int32 agent_num2 = 0; agent_num2 < now_state.teams.first.agentNum; agent_num2++) {//book
 											//x,yÇ™çáívÇµÇƒÇ¢ÇΩÇÁë„ì¸
-											if (book.secondData[turn][agent_num].first.x == -1 || book.secondData[turn][agent_num].first.y == -1)
-												continue;
-											if (now_state.teams.first.agents[agent_num].nowPosition == book.secondData[turn][agent_num].first) {
-												enumerateDir[agent_num][0] = book.secondData[turn][agent_num].second;
-												enumerateDir[agent_num][1] = Point(-2, -2);
+												if (book.secondData[turn][agent_num2].first.x == -1 || book.secondData[turn][agent_num2].first.y == -1)
+													continue;
+												if (now_state.teams.first.agents[agent_num1].nowPosition == book.secondData[turn][agent_num2].first) {
+													enumerateDir[agent_num1][0] = book.secondData[turn][agent_num2].second;
+													enumerateDir[agent_num1][1] = Point(-2, -2);
+												}
 											}
 										}
 									}
