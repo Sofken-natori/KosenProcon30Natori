@@ -963,35 +963,38 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 		//実装済み:同じエージェント位置なら枝狩り。
 		//実装済み:ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。=>結果差が大してないのではまあ、遅くはなってないしうーん。
 		for (auto itr = nowBeamBucketArray.begin(); itr != nowBeamBucketArray.end(); itr++) {
-			for (auto minScoreItr = itr; minScoreItr != nowBeamBucketArray.end(); minScoreItr++) {
-				if (minScoreItr == itr)
-					continue;
-				bool same = true;
-				bool sameLocation = true;
-				//TODO:ここ位置置き換え要りませんか。
-				for (int agent_num = 0; agent_num < itr->teams.first.agentNum; agent_num++) {
-					if (itr->first_dir[agent_num] != minScoreItr->first_dir[agent_num])
-						same = false;
-					if (itr->teams.first.agents[agent_num].nowPosition != minScoreItr->teams.first.agents[agent_num].nowPosition)
-						sameLocation = false;
-				}
+			for (auto itr = nowBeamBucketArray.begin(); itr != nowBeamBucketArray.end(); itr++) {
+				for (auto minScoreItr = itr; minScoreItr != nowBeamBucketArray.end(); minScoreItr++) {
+					if (minScoreItr == itr)
+						continue;
 
-				if (same) {
-					if (sameLocation) {
-						minScoreItr->evaluatedScore *= same_location_demerit;
+					int32 sameLocation = 0;
+					for (int agent_num1 = 0; agent_num1 < itr->teams.first.agentNum; agent_num1++) {
+						bool same = false;
+						for (int agent_num2 = 0; agent_num2 < minScoreItr->teams.first.agentNum; agent_num2++) {
+							if (itr->first_dir[agent_num1] == minScoreItr->first_dir[agent_num2])
+								same = true;
+						}
+						if (same)
+							sameLocation++;
 					}
 
-					bool sameArea = true;
-					for (const auto p : step(itr->field.boardSize)) {
-						if (itr->field.m_board.at(p).color != minScoreItr->field.m_board.at(p).color) {
-							sameArea = false;
+					if (sameLocation == minScoreItr->teams.first.agentNum) {
+						minScoreItr->evaluatedScore *= same_location_demerit;
+						bool sameArea = true;
+						for (const auto p : step(itr->field.boardSize)) {
+							if (itr->field.m_board.at(p).color != minScoreItr->field.m_board.at(p).color) {
+								sameArea = false;
+							}
+						}
+						if (sameArea) {
+							minScoreItr->evaluatedScore *= same_area_demerit;
 						}
 					}
-					if (sameArea) {
-						minScoreItr->evaluatedScore *= same_area_demerit;
-					}
-				}
 
+
+
+				}
 			}
 		}
 
