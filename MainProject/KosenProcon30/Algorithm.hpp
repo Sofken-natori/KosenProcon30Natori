@@ -113,7 +113,7 @@ namespace Procon30 {
 			int32 pattern;
 
 			//pos.x==-1は指定なし。どう動いてもいいagentは、pos.x==-1にしておいてください。pos.x==-1で読み飛ばすので、他は適当でいいです。
-			//trun agent (point,int) == (現在位置、方向)
+			//trun agent (point,point) == (現在位置、方向)
 			std::array<std::array<std::pair<Point, Point>, 8>, 20> firstData;
 			std::array<std::array<std::pair<Point, Point>, 8>, 20> secondData;
 

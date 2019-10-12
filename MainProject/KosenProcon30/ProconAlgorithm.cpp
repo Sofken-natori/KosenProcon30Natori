@@ -122,7 +122,48 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 			book.secondPos.x = ParseInt<int32>(line->split(' ')[0]);
 			book.secondPos.y = ParseInt<int32>(line->split(' ')[1]);
 
+			line = reader.readLine();
+			int32 agentNum = ParseInt<int32>(line.value_or(0));
+
+			line = reader.readLine();
+			int32 readTurn = ParseInt<int32>(line.value_or(0));
+			if (agentNum * readTurn == 0) {
+				SafeConsole(U"File read Fail");
+				return;
+			}
+			for (int32 i = 0; i < readTurn; i++) {
+				line = reader.readLine();
+				auto points = line->split(' ');
+				if (points.size() != agentNum * 4)SafeConsole(U"WTF");
+				for (int j = 0; j < agentNum; j++) {
+					book.firstData[i][j].first.x = ParseInt<int32>(points[j * 4 + 0]);
+					book.firstData[i][j].first.y = ParseInt<int32>(points[j * 4 + 1]);
+					book.firstData[i][j].second.x = ParseInt<int32>(points[j * 4 + 2]);
+					book.firstData[i][j].second.x = ParseInt<int32>(points[j * 4 + 3]);
+				}
+			}
+			for (int32 i = 0; i < readTurn; i++) {
+				line = reader.readLine();
+				auto points = line->split(' ');
+				if (points.size() != agentNum * 4)SafeConsole(U"WTF");
+				for (int j = 0; j < agentNum; j++) {
+					book.secondData[i][j].first.x = ParseInt<int32>(points[j * 4 + 0]);
+					book.secondData[i][j].first.y = ParseInt<int32>(points[j * 4 + 1]);
+					book.secondData[i][j].second.x = ParseInt<int32>(points[j * 4 + 2]);
+					book.secondData[i][j].second.x = ParseInt<int32>(points[j * 4 + 3]);
+				}
+			}
 			//以下patternのマッチング
+			for (auto i : game.teams.first.agents) {
+				if (i.nowPosition == book.firstPos) {
+					book.pattern = 1;
+					break;
+				}
+				if (i.nowPosition == book.secondPos) {
+					book.pattern = 2;
+					break;
+				}
+			}
 		}
 	}
 
