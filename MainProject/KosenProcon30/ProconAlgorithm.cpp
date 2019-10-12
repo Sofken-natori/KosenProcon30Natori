@@ -27,6 +27,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 {
 	if (isInitilized)return;
 	isInitilized = true;
+	SafeConsole(U"ProconAlgo init");
 	for (int32 i = 0; i < parallelSize; i++)
 		this->pruneBranchesAlgorithms[i]->initilize(game);
 
@@ -96,6 +97,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 	secondBeamSearchAlgorithm->initilize(gameCopy);
 
 	if (game.fieldType != PublicField::NONE && game.fieldType != PublicField::NON_MATCHING) {
+		SafeConsole(U"matching");
 		//íËêŒÇÃì«Ç›çûÇ›
 		//ãñÇµÇƒ
 		std::array<String, 15> fileNames = {
@@ -106,7 +108,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 			U"E-1",U"E-2",
 			U"F-1",U"F-2" };
 
-		FilePath filePath = U"json/PublicField/";
+		FilePath filePath = U"pbook/";
 		FilePath path = Format(filePath, fileNames[(int32)game.fieldType - 2], U".pbook");
 
 		//à»â∫ì«Ç›çûÇ›
@@ -123,10 +125,10 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 			book.secondPos.y = ParseInt<int32>(line->split(' ')[1]);
 
 			line = reader.readLine();
-			int32 agentNum = ParseInt<int32>(line.value_or(0));
+			int32 agentNum = ParseInt<int32>(line.value_or(U"0"));
 
 			line = reader.readLine();
-			int32 readTurn = ParseInt<int32>(line.value_or(0));
+			int32 readTurn = ParseInt<int32>(line.value_or(U"0"));
 			if (agentNum * readTurn == 0) {
 				SafeConsole(U"File read Fail");
 				return;
@@ -164,6 +166,11 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 					break;
 				}
 			}
+
+			SafeConsole(U"Booking load:",path);
+		}
+		else {
+			SafeConsole(U"Read Fail:", path);
 		}
 	}
 
