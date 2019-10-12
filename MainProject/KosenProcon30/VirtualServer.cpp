@@ -553,7 +553,7 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 	server.matchField = matchField;
 
 	//翔君の関数を使って自動生成する
-	constexpr bool isGeneratedField = false;
+	constexpr bool isGeneratedField = true;
 
 	if (isGeneratedField) {
 		//fieldTypeが
@@ -562,7 +562,7 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 		//2なら上下対称
 		//3なら点対称です。VirtualServerのコンストラクターの引数に入れてください。
 		//Fieldの高さと幅はコンストラクターでランダムに設定しています。任意の数にしたいときはRandomの所をコメントアウトして良い感じにやってください。
-		//エージェントの数はコンストラクターで良い感じに設定してます。
+		//エージェントの数はコンストラクターで良い感じに設定してます
 		server.writeJson(matchField);
 	}
 
