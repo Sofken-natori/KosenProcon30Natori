@@ -129,6 +129,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 
 			line = reader.readLine();
 			int32 readTurn = ParseInt<int32>(line.value_or(U"0"));
+			book.readTurn = readTurn;
 			if (agentNum * readTurn == 0) {
 				SafeConsole(U"File read Fail");
 				return;
@@ -141,7 +142,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 					book.firstData[i][j].first.x = ParseInt<int32>(points[j * 4 + 0]);
 					book.firstData[i][j].first.y = ParseInt<int32>(points[j * 4 + 1]);
 					book.firstData[i][j].second.x = ParseInt<int32>(points[j * 4 + 2]);
-					book.firstData[i][j].second.x = ParseInt<int32>(points[j * 4 + 3]);
+					book.firstData[i][j].second.y = ParseInt<int32>(points[j * 4 + 3]);
 				}
 			}
 			for (int32 i = 0; i < readTurn; i++) {
@@ -152,7 +153,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 					book.secondData[i][j].first.x = ParseInt<int32>(points[j * 4 + 0]);
 					book.secondData[i][j].first.y = ParseInt<int32>(points[j * 4 + 1]);
 					book.secondData[i][j].second.x = ParseInt<int32>(points[j * 4 + 2]);
-					book.secondData[i][j].second.x = ParseInt<int32>(points[j * 4 + 3]);
+					book.secondData[i][j].second.y = ParseInt<int32>(points[j * 4 + 3]);
 				}
 			}
 			//ˆÈ‰ºpattern‚Ìƒ}ƒbƒ`ƒ“ƒO
@@ -316,30 +317,35 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 								//pattern2 
 								//pattern1 , pattern2 ‚ÌŒ©•ª‚¯‚ÍAinitialize‚Å‚â‚èA\‘¢‘Ì‚ğ’“ü‚·‚é
 
-								if (book.pattern == 1) {
-									//firstPos‚Æ‡’v
-									for (int32 agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
-										//x,y‚ª‡’v‚µ‚Ä‚¢‚½‚ç‘ã“ü
-										if (now_state.teams.first.agents[agent_num].nowPosition == book.firstData[turn][agent_num].first) {
-											enumerateDir[agent_num][0] = book.firstData[turn][agent_num].second;
-											enumerateDir[agent_num][1] = Point(-2,-2);
+								if (book.readTurn > turn) {
+
+									if (book.pattern == 1) {
+										//firstPos‚Æ‡’v
+										for (int32 agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
+											//x,y‚ª‡’v‚µ‚Ä‚¢‚½‚ç‘ã“ü
+											if (book.firstData[turn][agent_num].first.x == -1 || book.firstData[turn][agent_num].first.y == -1)
+												continue;
+											if (now_state.teams.first.agents[agent_num].nowPosition == book.firstData[turn][agent_num].first) {
+												enumerateDir[agent_num][0] = book.firstData[turn][agent_num].second;
+												enumerateDir[agent_num][1] = Point(-2, -2);
+											}
 										}
 									}
-								}
-								else if (book.pattern == 2) {
-									//secondPos‚Æ‡’v
-									for (int32 agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
-										//x,y‚ª‡’v‚µ‚Ä‚¢‚½‚ç‘ã“ü
-										if (now_state.teams.first.agents[agent_num].nowPosition == book.secondData[turn][agent_num].first) {
-											enumerateDir[agent_num][0] = book.secondData[turn][agent_num].second;
-											enumerateDir[agent_num][1] = Point(-2, -2);
+									else if (book.pattern == 2) {
+										//secondPos‚Æ‡’v
+										for (int32 agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
+											//x,y‚ª‡’v‚µ‚Ä‚¢‚½‚ç‘ã“ü
+											if (book.secondData[turn][agent_num].first.x == -1 || book.secondData[turn][agent_num].first.y == -1)
+												continue;
+											if (now_state.teams.first.agents[agent_num].nowPosition == book.secondData[turn][agent_num].first) {
+												enumerateDir[agent_num][0] = book.secondData[turn][agent_num].second;
+												enumerateDir[agent_num][1] = Point(-2, -2);
+											}
 										}
 									}
 								}
 							}
 
-							//bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
-							//assert(okPrune);
 
 							int32 next_dir[8] = {};
 
@@ -995,7 +1001,10 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 	}
 
 	if (search_depth != nowSearchDepth) {
-		SafeConsole(U"PrivateAlgorithm’Tõ‘Å‚¿Ø‚è[‚³:", nowSearchDepth);
+		SafeConsole(U"PrivateAlgorithm’Tõ‘Å‚¿Ø‚è[‚³:", nowSearchDepth,U" ŠÔ",game.turnTimer.ms());
+	}
+	else {
+		SafeConsole(U"PrivateAlgorithm’TõI—¹ŠÔ", game.turnTimer.ms());
 	}
 
 	SearchResult result;

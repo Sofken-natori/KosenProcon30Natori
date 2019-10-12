@@ -117,6 +117,8 @@ namespace Procon30 {
 			std::array<std::array<std::pair<Point, Point>, 8>, 20> firstData;
 			std::array<std::array<std::pair<Point, Point>, 8>, 20> secondData;
 
+			int32 readTurn;
+
 			/*
 			//定石ファイル書式
 			//無効値は、pos.x == -1, pos.y == -1です。どっちかだけでもいいです。
