@@ -264,7 +264,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, field_width, field_height, max_turn, turn, fieldType,
 				cancel_demerit, was_moved_demerit, enemy_peel_bonus, enemy_area_merit, mine_remove_demerit, my_area_merit, fast_bonus,
 				wait_demerit, diagonal_bonus, minus_demerit, second_result](
-					size_t beam_size, int32 search_depth, int32 can_simulate_num,
+					size_t beam_size, int32 search_depth, int32 can_simulate_num, Book book,
 					std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueue, std::unique_ptr<PruneBranchesAlgorithm>& pruneBranches) {
 
 						std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nextBeamBucketQueue;
@@ -303,14 +303,32 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 							pruneBranches->pruneBranches(can_simulate_num, enumerateDir, now_state.field, now_state.teams);
 
 							//できるならここらへんであれしたい。initilizeであれできるからあっちでもいい。でもうーん。turnあるからそとかな
-							if (fieldType != PublicField::NON_MATCHING) {
+							if (fieldType != PublicField::NON_MATCHING && fieldType != PublicField::NONE) {
 
 								//pattern1 {x,y,dxyNum};
 								//pattern2 
 								//pattern1 , pattern2 の見分けは、initializeでやり、構造体を注入する
 
-
-
+								if (book.pattern == 1) {
+									//firstPosと合致
+									for (int32 agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
+										//x,yが合致していたら代入
+										if (now_state.teams.first.agents[agent_num].nowPosition == book.firstData[turn][agent_num].first) {
+											enumerateDir[agent_num][0] = book.firstData[turn][agent_num].second;
+											enumerateDir[agent_num][1] = Point(-2,-2);
+										}
+									}
+								}
+								else if (book.pattern == 2) {
+									//secondPosと合致
+									for (int32 agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
+										//x,yが合致していたら代入
+										if (now_state.teams.first.agents[agent_num].nowPosition == book.secondData[turn][agent_num].first) {
+											enumerateDir[agent_num][0] = book.secondData[turn][agent_num].second;
+											enumerateDir[agent_num][1] = Point(-2, -2);
+										}
+									}
+								}
 							}
 
 							//bool okPrune = pruneBranchesAlgorithm->pruneBranches(canSimulationNums[now_state.teams.first.agentNum], enumerateDir, now_state.field, now_state.teams);
@@ -890,8 +908,9 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 						return nextBeamBucketQueue;
 				}
-			, beam_size, search_depth, can_simulate_num, nowBeamBucketQueues[parallelNum], ref(pruneBranchesAlgorithms[parallelNum]));
-		}
+				, beam_size, search_depth, can_simulate_num, book,
+					nowBeamBucketQueues[parallelNum], ref(pruneBranchesAlgorithms[parallelNum]));
+	}
 
 		nowBeamBucketArray.clear();
 
@@ -927,6 +946,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 					continue;
 				bool same = true;
 				bool sameLocation = true;
+				//TODO:ここ位置置き換え要りませんか。
 				for (int agent_num = 0; agent_num < itr->teams.first.agentNum; agent_num++) {
 					if (itr->first_dir[agent_num] != minScoreItr->first_dir[agent_num])
 						same = false;

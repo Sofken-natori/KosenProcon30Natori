@@ -729,10 +729,8 @@ void Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::initilize(const Game& game)
 	search_depth = wishSearchDepth[game.teams.first.agentNum];
 	can_simulate_num = canSimulateNums[game.teams.first.agentNum];
 
-	beam_size = 100;
-	search_depth = 15;
-
-	SafeConsole(U"SuzukiAlgorithm ビーム幅：", autoBeamWidth);
+	
+	SafeConsole(U"SuzukiAlgorithm ビーム幅：", beam_size);
 }
 
 Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::execute(const Game& game)
@@ -1361,8 +1359,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 										= now_state.teams.first.agents[agent_num].nowPosition
 										+ enumerateDir[agent_num][next_dir[agent_num]];
 
-									if (!InRange(now_state.teams.first.agents[agent_num].nextPosition))
+									if (!InRange(now_state.teams.first.agents[agent_num].nextPosition)) {
 										skip = true;
+										//TODO:ここで範囲外のチェックした方がいい
+									}
 								}
 
 								//now nextの被り検出
@@ -1608,6 +1608,9 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 							}
 						}
 
+						if (nextBeamBucketQueue.size() == 0 && nowSearchDepth == 10)
+							SafeConsole(U"death", U" nowSerchDepth=", nowSearchDepth, U" nowQueueSize", nowBeamBucketQueue.size());
+
 						return nextBeamBucketQueue;
 				}
 				, beam_size, search_depth, can_simulate_num,
@@ -1619,6 +1622,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
 			std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> result = beamSearchFuture[parallelNum].get();
 
+			if (result.size() == 0 && nowBeamBucketQueues[parallelNum].size() != 0) {
+				SafeConsole(U"result = 0", U" nowSerchDepth=", nowSearchDepth, U" parallelNum=", parallelNum);
+			}
+
 			//popする。
 			while (!result.empty()) {
 				nowBeamBucketArray.push_back((result.top()));
@@ -1629,7 +1636,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 		std::sort(nowBeamBucketArray.begin(), nowBeamBucketArray.end());
 
 
-		//ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。ここまででメインのBeamSearchいじるの一旦終了かも
+		//TODO:ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。ここまででメインのBeamSearchいじるの一旦終了かも
 
 		//最初の方向が一緒な場合
 		//現在の占有しているマップが一緒なら減点したい
@@ -1674,6 +1681,14 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 			}
 		}
 
+		//努力の敗北
+		if (nowBeamBucketArray.size() == 0) {
+			SafeConsole(U"[努力の敗北] SuzukiAlgorithm 状態偏って次状態が無いので打ち切ります。");
+			nowBeamBucketArray.push_back(nowBeamBucketQueues[0].top());
+			break;
+		}
+
+		//ここで状態を空にしている。
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
 			while (!nowBeamBucketQueues[parallelNum].empty()) {
 				nowBeamBucketQueues[parallelNum].pop();
@@ -1699,6 +1714,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 	if (nowBeamBucketArray.size() == 0) {
 		assert(nowBeamBucketArray.size() != 0);
+		SafeConsole(U"next = 0");
 	}
 	else {
 
