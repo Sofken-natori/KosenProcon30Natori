@@ -152,7 +152,7 @@ void Procon30::Game::Loop()
 		{
 
 			//CAUTION:‹–‚µ‚Ä
-			if (fieldType == PublicField::NONE && !virtualServerMode) {
+			if (fieldType == PublicField::NONE) {
 				PublicFields publicFields;
 				fieldType = publicFields.checkPublicField(*this);
 				//‚±‚±‚ÅƒAƒ‹ƒSƒŠƒYƒ€‚Ì‰Šú‰»‚ğ‚·‚éB
