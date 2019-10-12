@@ -77,7 +77,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 	for (int agent_num = 0; agent_num < teams.first.agentNum; agent_num++) {
 		const auto& agent = teams.first.agents[agent_num];
 		//stay
-		sortedDirs[0].first = std::numeric_limits<double>::min();
+		sortedDirs[0].first = std::numeric_limits<double>::lowest();
 		sortedDirs[0].second = { 0,0 };
 
 		//‰E
@@ -92,7 +92,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			}
 		}
 		if (tileCount == 0) {
-			sortedDirs[1].first = std::numeric_limits<double>::min();
+			sortedDirs[1].first = std::numeric_limits<double>::lowest();
 		}
 		tileCount = 0;
 
@@ -107,7 +107,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			}
 		}
 		if (tileCount == 0) {
-			sortedDirs[2].first = std::numeric_limits<double>::min();
+			sortedDirs[2].first = std::numeric_limits<double>::lowest();
 		}
 		tileCount = 0;
 
@@ -122,7 +122,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			}
 		}
 		if (tileCount == 0) {
-			sortedDirs[3].first = std::numeric_limits<double>::min();
+			sortedDirs[3].first = std::numeric_limits<double>::lowest();
 		}
 		tileCount = 0;
 
@@ -137,7 +137,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			}
 		}
 		if (tileCount == 0) {
-			sortedDirs[4].first = std::numeric_limits<double>::min();
+			sortedDirs[4].first = std::numeric_limits<double>::lowest();
 		}
 		tileCount = 0;
 
@@ -151,7 +151,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			}
 		}
 		if (tileCount == 0) {
-			sortedDirs[5].first = std::numeric_limits<double>::min();
+			sortedDirs[5].first = std::numeric_limits<double>::lowest();
 		}
 		tileCount = 0;
 
@@ -165,7 +165,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			}
 		}
 		if (tileCount == 0) {
-			sortedDirs[6].first = std::numeric_limits<double>::min();
+			sortedDirs[6].first = std::numeric_limits<double>::lowest();
 		}
 		tileCount = 0;
 
@@ -179,7 +179,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			}
 		}
 		if (tileCount == 0) {
-			sortedDirs[7].first = std::numeric_limits<double>::min();
+			sortedDirs[7].first = std::numeric_limits<double>::lowest();
 		}
 		tileCount = 0;
 
@@ -193,7 +193,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 			}
 		}
 		if (tileCount == 0) {
-			sortedDirs[8].first = std::numeric_limits<double>::min();
+			sortedDirs[8].first = std::numeric_limits<double>::lowest();
 		}
 		tileCount = 0;
 
@@ -211,7 +211,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		enumerateDir[agent_num][canSimulateNum] = { -2,-2 };
 	}
 
-	if (sortedDirs[0].first == std::numeric_limits<double>::min())
+	if (sortedDirs[0].first == std::numeric_limits<double>::lowest())
 		SafeConsole(U"You are bug.");
 
 	return false;
