@@ -29,7 +29,7 @@ Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::SuzukiBeamSearchAlgorithm(int32 bea
 */
 
 Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::SuzukiBeamSearchAlgorithm(FilePath parameterFile, std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBAlgorithms)
-	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), parameterFilePath(parameterFile) , BeamSearchAlgorithm(0,nullptr)
+	: pruneBranchesAlgorithms(std::move(PBAlgorithms)), parameterFilePath(parameterFile), BeamSearchAlgorithm(0, nullptr)
 {
 }
 
@@ -94,7 +94,7 @@ void Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::initilize(const Game& game)
 	search_depth = wishSearchDepth[game.teams.first.agentNum];
 	can_simulate_num = canSimulateNums[game.teams.first.agentNum];
 
-	
+
 	SafeConsole(U"SuzukiAlgorithm ÉrÅ[ÉÄïùÅF", beam_size);
 }
 
@@ -1017,20 +1017,20 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 			for (auto minScoreItr = itr; minScoreItr != nowBeamBucketArray.end(); minScoreItr++) {
 				if (minScoreItr == itr)
 					continue;
-				bool same = true;
-				bool sameLocation = true;
-				for (int agent_num = 0; agent_num < itr->teams.first.agentNum; agent_num++) {
-					if (itr->first_dir[agent_num] != minScoreItr->first_dir[agent_num])
-						same = false;
-					if (itr->teams.first.agents[agent_num].nowPosition != minScoreItr->teams.first.agents[agent_num].nowPosition)
-						sameLocation = false;
+				
+				int32 sameLocation = 0;
+				for (int agent_num1 = 0; agent_num1 < itr->teams.first.agentNum; agent_num1++) {
+					bool same = false;
+					for (int agent_num2 = 0; agent_num2 < minScoreItr->teams.first.agentNum; agent_num2++) {
+						if (itr->first_dir[agent_num1] == minScoreItr->first_dir[agent_num2])
+							same = true;
+					}
+					if (same)
+						sameLocation++;
 				}
 
-				if (same) {
-					if (sameLocation) {
-						minScoreItr->evaluatedScore *= same_location_demerit;
-					}
-
+				if (sameLocation == minScoreItr->teams.first.agentNum) {
+					minScoreItr->evaluatedScore *= same_location_demerit;
 					bool sameArea = true;
 					for (const auto p : step(itr->field.boardSize)) {
 						if (itr->field.m_board.at(p).color != minScoreItr->field.m_board.at(p).color) {
@@ -1041,6 +1041,8 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 						minScoreItr->evaluatedScore *= same_area_demerit;
 					}
 				}
+
+
 
 			}
 		}

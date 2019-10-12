@@ -155,83 +155,23 @@ void Procon30::Game::Loop()
 			if (fieldType == PublicField::NONE) {
 				PublicFields publicFields;
 				fieldType = publicFields.checkPublicField(*this);
+
 				//Ç±Ç±Ç≈ÉAÉãÉSÉäÉYÉÄÇÃèâä˙âªÇÇ∑ÇÈÅB
-				if (fieldType == PublicField::NON_MATCHING) {
-					//Private
-					std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBArray;
-					for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
-						PBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
+				FilePath parameterFilePath = U"parameters/parameter.ini";
+				FilePath secondSearchParameterFilePath = U"parameters/parameter.ini";
 
-					FilePath parameterFilePath = U"parameters/parameter.ini";
-					FilePath secondSearchParameterFilePath = U"parameters/parameter.ini";
+				//ProconAlgorithm
+				std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBArray;
+				for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
+					PBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
 
-					switch (this->teams.first.agentNum) {
-					case 2:
-						break;
-					case 3:
-						break;
-					case 4:
-						break;
-					case 5:
-						break;
-					case 6:
-						break;
-					case 7:
-						break;
-					case 8:
-						break;
-					}
 
-					std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> secondPBArray;
+				std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> secondPBArray;
 
-					for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
-						secondPBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
+				for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++)
+					secondPBArray[parallelNum] = std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8));
 
-					algorithm.reset(new Procon30::ProconAlgorithm(parameterFilePath, std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(secondSearchParameterFilePath ,std::move(secondPBArray)))));
-				}
-				else {
-					//Public
-					switch (fieldType)
-					{
-					case Procon30::PublicField::NONE:
-
-						break;					
-					case Procon30::PublicField::A_1:
-						
-						break;
-					case Procon30::PublicField::A_2:
-						break;
-					case Procon30::PublicField::A_3:
-						break;
-					case Procon30::PublicField::A_4:
-						break;
-					case Procon30::PublicField::B_1:
-						break;
-					case Procon30::PublicField::B_2:
-						break;
-					case Procon30::PublicField::B_3:
-						break;
-					case Procon30::PublicField::C_1:
-						break;
-					case Procon30::PublicField::C_2:
-						break;
-					case Procon30::PublicField::D_1:
-						break;
-					case Procon30::PublicField::D_2:
-						break;
-					case Procon30::PublicField::E_1:
-						break;
-					case Procon30::PublicField::E_2:
-						break;
-					case Procon30::PublicField::F_1:
-						break;
-					case Procon30::PublicField::F_2:
-						break;
-					default:
-						break;
-					}
-				}
-
+				algorithm.reset(new Procon30::ProconAlgorithm(parameterFilePath, std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(secondSearchParameterFilePath, std::move(secondPBArray)))));
 			}
 
 			assert(algorithm);
@@ -336,7 +276,7 @@ Procon30::PublicFields::PublicFields() {
 }
 
 void Procon30::PublicFields::read() {
-	
+
 }
 
 Procon30::PublicField Procon30::PublicFields::checkPublicField(const Game& game) {

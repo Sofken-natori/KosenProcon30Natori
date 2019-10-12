@@ -182,7 +182,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 				}
 			}
 
-			SafeConsole(U"Booking load:",path);
+			SafeConsole(U"Booking load:", path);
 		}
 		else {
 			SafeConsole(U"Read Fail:", path);
@@ -548,9 +548,10 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 																}//move or remove , remove (nowPosition) or stay
 																else if (agent.nextPosition == s_agent.nowPosition) {
 																	flag[0][agent_num] = 2;//相手に動きをつぶされる
+																	//この場合交差して指定しているので
 																	//つまり動かないことで相手の動きもつぶせる
-																	if (s_agent.nextPosition != agent.nowPosition)
-																		firstDestroyedFlag[agent_num] = true;//多分ここの判定がバグっているはず。
+																	if (s_agent.nextPosition == agent.nowPosition)
+																		firstDestroyedFlag[agent_num] = true;
 
 																}
 																else {
@@ -584,7 +585,9 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 																}//move or remove , remove (nowPosition) or stay
 																else if (agent.nextPosition == f_agent.nowPosition) {
 																	flag[1][agent_num] = 2;
-																	secondDestroyedFlag[agent_num] = true;//firstに動きをつぶされる
+																	//一方的にfirstにつぶされた時だけカウントしたい
+																	if (agent.nowPosition != f_agent.nextPosition)
+																		secondDestroyedFlag[agent_num] = true;//firstに動きをつぶされる
 																}
 																else {
 																	if (flag[1][agent_num] == 0)
@@ -668,14 +671,15 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 														}
 														else if (flag[0][agent_num] == 2) {
 															//next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
-															if (firstDestroyedFlag[agent_num]) {//動きをつぶされる
-																next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
-															}
-															else {//動きをつぶしあう
+															if (firstDestroyedFlag[agent_num]) {//動きをつぶされるが同時につぶせる。
 																if (next_state.teams.first.score > next_state.teams.second.score)
 																	next_state.evaluatedScore += 1.2 * cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth);
 																else
 																	next_state.evaluatedScore += cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth);
+															}
+															else {//あいてにつぶされるだけ
+																next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+
 															}
 														}
 														if (flag[0][agent_num] == 0 || flag[0][agent_num] == 1 || flag[0][agent_num] == 2) {
@@ -708,7 +712,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 															}
 														}
 														if (flag[1][agent_num] == 2) {
-															if (secondDestroyedFlag[agent_num]) {//動きをうまくつぶした
+															if (secondDestroyedFlag[agent_num]) {//動きをうまくつぶした。
 																next_state.evaluatedScore -= wait_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth);
 															}
 															else {//動きをつぶしあった
@@ -941,7 +945,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 				}
 				, beam_size, search_depth, can_simulate_num, book,
 					nowBeamBucketQueues[parallelNum], ref(pruneBranchesAlgorithms[parallelNum]));
-	}
+		}
 
 		nowBeamBucketArray.clear();
 
@@ -972,35 +976,38 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 		//実装済み:同じエージェント位置なら枝狩り。
 		//実装済み:ここ状態を偏らせない工夫。去年を参考にして、でも対戦させながらかな。=>結果差が大してないのではまあ、遅くはなってないしうーん。
 		for (auto itr = nowBeamBucketArray.begin(); itr != nowBeamBucketArray.end(); itr++) {
-			for (auto minScoreItr = itr; minScoreItr != nowBeamBucketArray.end(); minScoreItr++) {
-				if (minScoreItr == itr)
-					continue;
-				bool same = true;
-				bool sameLocation = true;
-				//TODO:ここ位置置き換え要りませんか。
-				for (int agent_num = 0; agent_num < itr->teams.first.agentNum; agent_num++) {
-					if (itr->first_dir[agent_num] != minScoreItr->first_dir[agent_num])
-						same = false;
-					if (itr->teams.first.agents[agent_num].nowPosition != minScoreItr->teams.first.agents[agent_num].nowPosition)
-						sameLocation = false;
-				}
+			for (auto itr = nowBeamBucketArray.begin(); itr != nowBeamBucketArray.end(); itr++) {
+				for (auto minScoreItr = itr; minScoreItr != nowBeamBucketArray.end(); minScoreItr++) {
+					if (minScoreItr == itr)
+						continue;
 
-				if (same) {
-					if (sameLocation) {
-						minScoreItr->evaluatedScore *= same_location_demerit;
+					int32 sameLocation = 0;
+					for (int agent_num1 = 0; agent_num1 < itr->teams.first.agentNum; agent_num1++) {
+						bool same = false;
+						for (int agent_num2 = 0; agent_num2 < minScoreItr->teams.first.agentNum; agent_num2++) {
+							if (itr->first_dir[agent_num1] == minScoreItr->first_dir[agent_num2])
+								same = true;
+						}
+						if (same)
+							sameLocation++;
 					}
 
-					bool sameArea = true;
-					for (const auto p : step(itr->field.boardSize)) {
-						if (itr->field.m_board.at(p).color != minScoreItr->field.m_board.at(p).color) {
-							sameArea = false;
+					if (sameLocation == minScoreItr->teams.first.agentNum) {
+						minScoreItr->evaluatedScore *= same_location_demerit;
+						bool sameArea = true;
+						for (const auto p : step(itr->field.boardSize)) {
+							if (itr->field.m_board.at(p).color != minScoreItr->field.m_board.at(p).color) {
+								sameArea = false;
+							}
+						}
+						if (sameArea) {
+							minScoreItr->evaluatedScore *= same_area_demerit;
 						}
 					}
-					if (sameArea) {
-						minScoreItr->evaluatedScore *= same_area_demerit;
-					}
-				}
 
+
+
+				}
 			}
 		}
 
@@ -1019,7 +1026,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 	}
 
 	if (search_depth != nowSearchDepth) {
-		SafeConsole(U"PrivateAlgorithm探索打ち切り深さ:", nowSearchDepth,U" 時間",game.turnTimer.ms());
+		SafeConsole(U"PrivateAlgorithm探索打ち切り深さ:", nowSearchDepth, U" 時間", game.turnTimer.ms());
 	}
 	else {
 		SafeConsole(U"PrivateAlgorithm探索終了時間", game.turnTimer.ms());
