@@ -73,7 +73,8 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 	//ビーム幅の自動調整
 	const int32 canSimulateNums[9] = { 0,0,9,9,9,6,5,3,3 };
 	const int32 wishSearchDepth[9] = { 0,0,10,15,15,15,20,20,15 };
-	const double calcPerSec = 500'000'000;
+	const double staticBeamWidth[9] = { 0,0,100,40,13,7,3.4,2.9,2.3 };
+	const double calcPerSec = 300'000'000;
 	const double actionNum = 3;
 	const double secondCalcTime = 0.4;
 
@@ -83,12 +84,24 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 			actionNum * game.field.boardSize.x * game.field.boardSize.y) * secondCalcTime);
 
 	autoBeamWidth = std::min(1000, autoBeamWidth);
+	autoBeamWidth = (int32)((double)autoBeamWidth / (1 + Log2(autoBeamWidth) * 0.17));
 
 	beam_size = autoBeamWidth;
+	if (staticBeamWidth[game.teams.first.agentNum] != 0) {
+		beam_size = (size_t)(staticBeamWidth[game.teams.first.agentNum] * game.turnMillis / 1000.0);
+		if (beam_size >= 100) {
+			beam_size = (size_t)((double)beam_size * 9 / 10 + Min((double)beam_size / 2.2, 100.0));
+		}
+		else {
+			beam_size = (size_t)((double)beam_size * 9.5 / 10);
+		}
+		beam_size = Max(beam_size, (size_t)30);
+		SafeConsole(U"Static Width");
+	}
 	search_depth = wishSearchDepth[game.teams.first.agentNum];
 	can_simulate_num = canSimulateNums[game.teams.first.agentNum];
 
-	SafeConsole(U"PrivateAlgorithm ビーム幅：", autoBeamWidth);
+	SafeConsole(U"PrivateAlgorithm ビーム幅：", beam_size);
 
 	Game gameCopy;
 	gameCopy = game;
