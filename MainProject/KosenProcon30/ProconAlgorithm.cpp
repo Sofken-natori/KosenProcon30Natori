@@ -662,12 +662,12 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 															case Action::Remove:
 
 																if (next_state.field.m_board.at(agent.nextPosition).color == TeamColor::Blue) {
-																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
+																	if (next_state.field.m_board.at(agent.nextPosition).score < 0)
 																		next_state.evaluatedScore += (abs(next_state.field.m_board.at(agent.nextPosition).score) * turn_weight[nowSearchDepth] + mine_remove_demerit) * enemy_peel_bonus;
 																	else
 																		next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 																}
-																else {
+																else {//相手のタイルだったら
 																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
 																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth] + minus_demerit) * enemy_peel_bonus;
 																	else
@@ -725,7 +725,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 														}
 														if (flag[1][agent_num] == 2) {
 															if (secondDestroyedFlag[agent_num]) {//動きをうまくつぶした。
-																next_state.evaluatedScore -= wait_demerit * next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
+																next_state.evaluatedScore += -1 * wait_demerit + next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
 															}
 															else {//動きをつぶしあった
 
