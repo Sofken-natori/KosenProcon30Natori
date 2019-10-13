@@ -24,9 +24,9 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 	const double myAreaWeight = 0.6;
 	const double enemyAreaWeight = 1.4;
 	//Tileがminusの時(TileWeight - minusWeightDiff)にweightを変更するための調整変数
-	const double minusWeightDiff = 1.3;
+	const double minusWeightDiff = -1.9;
 	//これらはscore*TileWeight* distweight
-	const double myTileWeight = -0.8;
+	const double myTileWeight = 0.8;
 	const double enemyTileWeight = 1.2;
 	//0点マスに対してネガティブな補正をかける
 	//zeroPenarty * distWeight;
@@ -51,7 +51,7 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		}
 		if (myTeamFlag[pos] == 1) {
 			if (TILE(pos).score < 0) {
-				sortedDirs[index].first += (double)(TILE(pos).score) * distanceWeight[dist] * (myTileWeight - minusWeightDiff);
+				sortedDirs[index].first += (double)(TILE(pos).score) * distanceWeight[dist] * (myTileWeight + minusWeightDiff);
 			}
 			else {
 				sortedDirs[index].first += (double)(TILE(pos).score) * distanceWeight[dist] * (myTileWeight);

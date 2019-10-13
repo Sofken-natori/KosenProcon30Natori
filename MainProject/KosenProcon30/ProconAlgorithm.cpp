@@ -73,7 +73,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 	//ƒr[ƒ€•‚ÌŽ©“®’²®
 	const int32 canSimulateNums[9] = { 0,0,9,9,9,6,5,3,3 };
 	const int32 wishSearchDepth[9] = { 0,0,10,15,15,15,20,20,15 };
-	const double staticBeamWidth[9] = { 0,0,100,40,13,7,3.4,2.9,2.3 };
+	const double staticBeamWidth[9] = { 0,0,34,13,4.3,2.3,1.15,0.95,0.75 };
 	const double calcPerSec = 300'000'000;
 	const double actionNum = 3;
 	const double secondCalcTime = 0.4;
@@ -88,7 +88,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 
 	beam_size = autoBeamWidth;
 	if (staticBeamWidth[game.teams.first.agentNum] != 0) {
-		beam_size = (size_t)(staticBeamWidth[game.teams.first.agentNum] * game.turnMillis / 1000.0);
+		beam_size = (size_t)(staticBeamWidth[game.teams.first.agentNum] * game.turnMillis / 1000.0) * parallelSize;
 		if (beam_size >= 100) {
 			beam_size = (size_t)((double)beam_size * 9 / 10 + Min((double)beam_size / 2.2, 100.0));
 		}
