@@ -61,6 +61,12 @@ namespace Procon30 {
 		virtual void initilize(const Game& game) = 0;
 	};
 
+	class GreedyAlgorithm : public Algorithm {
+	public:
+		SearchResult execute(const Game& game) override final;
+		void initilize(const Game& game) override final;
+	};
+
 	class RandAlgorithm : public Algorithm {
 		SearchResult execute(const Game& game) override final;
 		void initilize(const Game& game) override final;

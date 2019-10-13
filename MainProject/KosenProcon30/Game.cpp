@@ -142,6 +142,8 @@ void Procon30::Game::sendToHTTP()
 
 void Procon30::Game::Loop()
 {
+	GreedyAlgorithm greedy;
+
 	while (true) {
 		updateData();
 		if (programEnd->load() == true)
@@ -176,6 +178,19 @@ void Procon30::Game::Loop()
 
 			assert(algorithm);
 
+			{
+				auto result = greedy.execute(*this);
+
+				const int32 selectedOrder = 0;// Random(result.orders.size() - 1);
+
+				for (int32 i = 0; i < this->teams.first.agentNum; i++) {
+					this->teams.first.agents[i].nextPosition = this->teams.first.agents[i].nowPosition + result.orders[selectedOrder][i].dir;
+					this->teams.first.agents[i].action = result.orders[selectedOrder][i].action;
+				}
+
+				sendToHTTP();
+			}
+			
 			algorithm->initilize(*this);
 
 			auto result = algorithm->execute(*this);
@@ -188,6 +203,7 @@ void Procon30::Game::Loop()
 				this->teams.first.agents[i].nextPosition = this->teams.first.agents[i].nowPosition + result.orders[selectedOrder][i].dir;
 				this->teams.first.agents[i].action = result.orders[selectedOrder][i].action;
 			}
+			
 		}
 		observer->notify(gameNum, *this);
 		sendToHTTP();

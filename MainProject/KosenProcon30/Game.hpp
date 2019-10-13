@@ -10,6 +10,7 @@ namespace Procon30 {
 
 	class Observer;
 	class Algorithm;
+	class GreedyAlgorithm;
 
 	class Game
 	{

@@ -122,6 +122,7 @@
     <ClCompile Include="Form.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameJson.cpp" />
+    <ClCompile Include="GreedyAlgorithm.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="HTTPCommunication.cpp" />
     <ClCompile Include="Main.cpp" />
