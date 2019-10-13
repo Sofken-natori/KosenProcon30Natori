@@ -103,7 +103,7 @@ Array<Procon30::HTTPCommunication::Form::school> Procon30::HTTPCommunication::in
 	curl_easy_setopt(TempHandle, CURLOPT_HEADER, 1L);
 	curl_easy_setopt(TempHandle, CURLOPT_WRITEFUNCTION, callbackWrite);
 	curl_easy_setopt(TempHandle, CURLOPT_WRITEDATA, &receiveRawData);
-	for (size_t i = 0; i < form.schools.size(); i++) {
+	for (int32 i = 0; i < form.schools.size(); i++) {
 		curl_easy_setopt(TempHandle, CURLOPT_URL, Format(U"http://", comData.host, U"/matches/", form.schools[i].id).narrow().c_str());
 		comData.nowConnecting = true;
 		comData.connectionType = ConnectionType::MatchInfomation;

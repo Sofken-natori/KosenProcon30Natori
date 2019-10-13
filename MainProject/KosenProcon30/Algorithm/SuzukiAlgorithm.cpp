@@ -265,7 +265,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
 			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, field_width, field_height, my_area_merit, enemy_area_merit, fast_bonus, minus_demerit, enemy_peel_bonus, wait_demerit, diagonal_bonus,
 				was_moved_demerit, mine_remove_demerit, turn_weight](
-					size_t beam_size, int32 search_depth, int32 can_simulate_num,
+					size_t beam_size, [[maybe_unused]]int32 search_depth, int32 can_simulate_num,
 					std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueue, std::unique_ptr<PruneBranchesAlgorithm>& pruneBranches) {
 
 						std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nextBeamBucketQueue;

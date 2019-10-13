@@ -576,9 +576,9 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 	for (size_t i = 0; i < server.getMatchNum(); i++) {
 		games[i].observer = gui.getObserver();
 		games[i].buffer = server.getBufferPtr();
-		games[i].gameNum = i;
+		games[i].gameNum = static_cast<int32>(i);
 		//gameIDは、先攻が1、後攻が2固定。また、公式配布のIDと同じとする
-		games[i].gameID = server.getGameIDfromGameNum(i);
+		games[i].gameID = static_cast<int32>(server.getGameIDfromGameNum(static_cast<int32>(i)));
 		//その内現在時間を入れる。
 		games[i].startedAtUnixTime = 0;
 		games[i].matchTo = (i == 0 ? U"A" : U"B");
@@ -934,7 +934,7 @@ bool Procon30::VirtualServer::initMatch(const FilePath& filePath)
 				this->teams.first.score = teamJsonData[U"tilePoint"].get<int32>() + teamJsonData[U"areaPoint"].get<int32>();
 				this->teams.first.color = TeamColor::Blue;
 
-				this->teams.first.agentNum = teamJsonData[U"agents"].arrayCount();
+				this->teams.first.agentNum = static_cast<int32>(teamJsonData[U"agents"].arrayCount());
 				this->teams.first.agents = Array< Agent >(this->teams.first.agentNum);
 
 				for (int32 i = 0; i < teamJsonData[U"agents"].arrayCount(); i++)
@@ -955,7 +955,7 @@ bool Procon30::VirtualServer::initMatch(const FilePath& filePath)
 				this->teams.second.score = teamJsonData[U"tilePoint"].get<int32>() + teamJsonData[U"areaPoint"].get<int32>();
 				this->teams.second.color = TeamColor::Red;
 
-				this->teams.second.agentNum = teamJsonData[U"agents"].arrayCount();
+				this->teams.second.agentNum = static_cast<int32>(teamJsonData[U"agents"].arrayCount());
 				this->teams.second.agents = Array< Agent >(this->teams.second.agentNum);
 
 				for (int32 i = 0; i < teamJsonData[U"agents"].arrayCount(); i++)
