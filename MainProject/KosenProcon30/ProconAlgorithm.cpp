@@ -73,7 +73,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 	//ƒr[ƒ€•‚Ì©“®’²®
 	const int32 canSimulateNums[9] = { 0,0,9,9,9,6,5,3,3 };
 	const int32 wishSearchDepth[9] = { 0,0,10,15,15,15,20,20,15 };
-	const double staticBeamWidth[9] = { 0,0,34,13,4.3,2.3,1.15,0.95,0.75 };
+	const double staticBeamWidth[9] = { 0,0,34,13,4.3,2.2,1,0.80,0.60 };
 	const double calcPerSec = 300'000'000;
 	const double actionNum = 3;
 	const double secondCalcTime = 0.4;
