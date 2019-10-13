@@ -80,6 +80,8 @@ void Procon30::GUI::draw() {
 	}
 
 
+	bigFont(U"Time : {}"_fmt(game.startedAtUnixTime)).draw(Vec2(1400,200));
+
 	//左側情報欄
 	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.28)).draw();
 	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.28)).drawFrame(10, 0, myTeamColor);
