@@ -5,7 +5,7 @@
 void Procon30::GUI::draw() {
 	//ゲームが信仰していなときに死ぬ or 初期状態で0番目のゲーム参照になる
 	SimpleGUI::RadioButtons(match, viewerStrings, Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.01));
-	SimpleGUI::RadioButtons(drawType, { U"タイル + エージェント",U"タイル + 点数" }, Vec2(MaxFieldX * TileSize * 1.2, MaxFieldY * TileSize * 0.01));
+	SimpleGUI::RadioButtons(drawType, { U"タイル + エージェント",U"タイル + 点数" }, Vec2(MaxFieldX * TileSize * 1.4, MaxFieldY * TileSize * 0.01));
 
 	if (observer->getUpdateFlag((int32)match)) {
 		dataUpdate();
@@ -68,6 +68,12 @@ void Procon30::GUI::draw() {
 
 	bigFont(U"現在のターン : ", game.turn).draw(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.15), Palette::White);
 
+
+	//bigFont(U"Time : {}"_fmt(game.startedAtUnixTime)).draw(Vec2(1400, MaxFieldY * TileSize * 0.15));
+	bigFont(U"Time : {}"_fmt(game.startedAtUnixTime)).draw(Vec2(MaxFieldX * TileSize * 1.4, MaxFieldY * TileSize * 0.15));
+	bigFont(U"Connect : {}"_fmt(observer->getStock().getComData().nowConnecting)).draw(Vec2(MaxFieldX * TileSize * 1.4, MaxFieldY * TileSize * 0.20));
+
+
 	//絵文字表示 +50 or -50 にて表情変化 
 	if (game.teams.first.score > game.teams.second.score + 50) {
 		texWinner.resized(90).draw(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.19);
@@ -79,8 +85,6 @@ void Procon30::GUI::draw() {
 		texEven.resized(90).draw(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.19);
 	}
 
-
-	bigFont(U"Time : {}"_fmt(game.startedAtUnixTime)).draw(Vec2(1400,200));
 
 	//左側情報欄
 	viewerBox.rounded(10).movedBy(Vec2(MaxFieldX * TileSize * 1.01, MaxFieldY * TileSize * 0.28)).draw();
@@ -139,7 +143,8 @@ void Procon30::GUI::dataUpdate()
 		scoreFont[i] = Font((int32)(correctedTileSize[i] * 0.46));
 
 		//viewerStrings.push_back(U"match_{}"_fmt(i));
-		viewerStrings.push_back(U"{}"_fmt(observer->getStock(static_cast<int32>(i)).gameID));
+		//viewerStrings.push_back(U"{}"_fmt(observer->getStock(static_cast<int32>(i)).gameID));
+		viewerStrings.push_back(U"{} ({})"_fmt(observer->getStock(static_cast<int32>(i)).matchTo, observer->getStock(static_cast<int32>(i)).gameID));
 	}
 }
 
