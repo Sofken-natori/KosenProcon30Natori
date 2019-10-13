@@ -1,2 +1,26 @@
-﻿[{"id":1,"intervalMillis":5000,"matchTo":"A高専","teamID":10,"turnMillis":10000,"turns":45},{"id":3,"intervalMillis":5000,"matchTo":"B高専","teamID":12,"turnMillis":20000,"turns":30},{"id":6,"intervalMillis":5000,"matchTo":"C高専","teamID":20,"turnMillis":30000,"turns":60}]
-
+﻿[
+  {
+    "id": 69,
+    "intervalMillis": 1000,
+    "matchTo": "石川",
+    "teamID": 138,
+    "turnMillis": 9000,
+    "turns": 15
+  },
+  {
+    "id": 71,
+    "intervalMillis": 1000,
+    "matchTo": "東京",
+    "teamID": 142,
+    "turnMillis": 9000,
+    "turns": 15
+  },
+  {
+    "id": 72,
+    "intervalMillis": 1000,
+    "matchTo": "広島商船",
+    "teamID": 144,
+    "turnMillis": 9000,
+    "turns": 15
+  }
+]
