@@ -3,7 +3,7 @@
 void Procon30::Game::parseAgentsData(Team& team, JSONValue object)
 {
 	if (team.agentNum == 0) {
-		team.agentNum = object.arrayCount();
+		team.agentNum = static_cast<int32>(object.arrayCount());
 		team.agents = Array< Agent >(team.agentNum);
 
 		for (int32 i = 0; i < object.arrayCount(); i++)

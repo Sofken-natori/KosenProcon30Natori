@@ -198,11 +198,14 @@ void Procon30::Game::Loop()
 
 			assert(result.code == Procon30::AlgorithmStateCode::None);
 
-			const int32 selectedOrder = 0;// Random(result.orders.size() - 1);
+			if (result.orders.size() != 0) {
 
-			for (int32 i = 0; i < this->teams.first.agentNum; i++) {
-				this->teams.first.agents[i].nextPosition = this->teams.first.agents[i].nowPosition + result.orders[selectedOrder][i].dir;
-				this->teams.first.agents[i].action = result.orders[selectedOrder][i].action;
+				const int32 selectedOrder = 0;// Random(result.orders.size() - 1);
+
+				for (int32 i = 0; i < this->teams.first.agentNum; i++) {
+					this->teams.first.agents[i].nextPosition = this->teams.first.agents[i].nowPosition + result.orders[selectedOrder][i].dir;
+					this->teams.first.agents[i].action = result.orders[selectedOrder][i].action;
+				}
 			}
 			
 		}

@@ -24,7 +24,7 @@ namespace Procon30 {
 		String host;
 
 		//‡‚Ì”
-		size_t matchNum;
+		int32 matchNum;
 
 		// gameID‚Ì•ÏŠ·ƒe[ƒuƒ‹
 		std::unordered_map<int32, int32> matchesConversionTable;

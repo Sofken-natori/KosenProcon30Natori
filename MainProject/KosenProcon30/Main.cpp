@@ -59,21 +59,21 @@ void Main()
 
 	std::array<Procon30::Game,Procon30::MaxGameNumber> games;
 
-	for (size_t i = 0; i < http.getMatchNum(); i++) {
+	for (int32 i = 0; i < http.getMatchNum(); i++) {
 		games[i].observer = gui.getObserver();
 		games[i].buffer = http.getBufferPtr();
-		games[i].gameNum = i;
-		games[i].gameID = schools[http.getGameIDfromGameNum(i)].id;
-		games[i].startedAtUnixTime = schools[http.getGameIDfromGameNum(i)].startedAtUnixTime;
-		games[i].matchTo = schools[http.getGameIDfromGameNum(i)].matchTo;
-		games[i].MaxTurn = schools[http.getGameIDfromGameNum(i)].turns;
-		games[i].turnMillis = schools[http.getGameIDfromGameNum(i)].turnMillis;
-		games[i].intervalMillis = schools[http.getGameIDfromGameNum(i)].intervalMillis;
-		games[i].teams.first.teamID = schools[http.getGameIDfromGameNum(i)].teamID;
+		games[i].gameNum = static_cast<int32>(i);
+		games[i].gameID = static_cast<int32>(schools[http.getGameIDfromGameNum(static_cast<int32>(i))].id);
+		games[i].startedAtUnixTime = schools[http.getGameIDfromGameNum(static_cast<int32>(i))].startedAtUnixTime;
+		games[i].matchTo = schools[http.getGameIDfromGameNum(static_cast<int32>(i))].matchTo;
+		games[i].MaxTurn = schools[http.getGameIDfromGameNum(static_cast<int32>(i))].turns;
+		games[i].turnMillis = schools[http.getGameIDfromGameNum(static_cast<int32>(i))].turnMillis;
+		games[i].intervalMillis = schools[http.getGameIDfromGameNum(static_cast<int32>(i))].intervalMillis;
+		games[i].teams.first.teamID = schools[http.getGameIDfromGameNum(static_cast<int32>(i))].teamID;
 		games[i].programEnd = ProgramEnd;
-		http.baseUnixTime = schools[http.getGameIDfromGameNum(i)].startedAtUnixTime;
-		http.baseIntervalMillis = static_cast<uint64>(schools[http.getGameIDfromGameNum(i)].intervalMillis);
-		http.baseTurnMillis = static_cast<uint64>(schools[http.getGameIDfromGameNum(i)].turnMillis);
+		http.baseUnixTime = schools[http.getGameIDfromGameNum(static_cast<int32>(i))].startedAtUnixTime;
+		http.baseIntervalMillis = static_cast<uint64>(schools[http.getGameIDfromGameNum(static_cast<int32>(i))].intervalMillis);
+		http.baseTurnMillis = static_cast<uint64>(schools[http.getGameIDfromGameNum(static_cast<int32>(i))].turnMillis);
 	}
 	http.baseUnixTime *= (uint64)1000;
 	//games[0].parseJson(U"example.json");
@@ -83,7 +83,7 @@ void Main()
 	
 
 	http.ThreadRun();
-	for (size_t i = 0; i < http.getMatchNum(); i++) {
+	for (int32 i = 0; i < http.getMatchNum(); i++) {
 		games[i].ThreadRun();
 	}
 	gui.dataUpdate();

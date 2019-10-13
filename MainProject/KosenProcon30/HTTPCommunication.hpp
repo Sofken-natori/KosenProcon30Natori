@@ -143,7 +143,7 @@ namespace Procon30 {
 		~HTTPCommunication();
 
 		//GUI‚ªobserver‚©‚çGame‚ğè‚É“ü‚ê‚éÛ‚ÉmatchSize‚ª•K—v‚È‚Ì‚Ågeter‚ğ’Ç‰Á‚µ‚Ü‚·B
-		[[nodiscard]] size_t getMatchNum() const;
+		[[nodiscard]] int32 getMatchNum() const;
 
 		[[nodiscard]] CommunicationData getComData() const;
 

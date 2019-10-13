@@ -119,6 +119,7 @@ bool Procon30::HTTPCommunication::checkResult()
 					jsonReader.open(jsonBuffer);
 					thisTurn = jsonReader[U"turn"].get<int32>();
 					baseUnixTime = jsonReader[U"startedAtUnixTime"].get<uint64>();
+					baseUnixTime *= (uint64)1000;
 					comData.receiveJsonPath = Format(U"json/", comData.connectionMatchNumber, U"/field_", comData.connectionMatchNumber, U"_", thisTurn, U".json");
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
@@ -190,7 +191,7 @@ bool Procon30::HTTPCommunication::checkResult()
 
 void Procon30::HTTPCommunication::setConversionTable(const Array<int>& arr)
 {
-	comData.matchNum = arr.size();
+	comData.matchNum = static_cast<int32>(arr.size());
 	for (int32 i = 0; i < comData.matchNum; i++) {
 		comData.matchesConversionTable[i] = arr[i];
 	}
@@ -220,34 +221,36 @@ void Procon30::HTTPCommunication::initilizeAllMatchHandles()
 
 void Procon30::HTTPCommunication::update()
 {
-	bool gotResult = checkResult();
-	//postèàóùÇÕâΩÇÊÇËÇ‡óDêÊÇ≥ÇÍÇÈÇ◊Ç´
-	bool postNow = checkPostAction();
-	if (comData.gotMatchInfomationNum == comData.matchNum) {
-		Procon30::Game::HTTPReceived();
-		comData.gotMatchInfomationNum = -1;
-	}
-	if (comData.gotMatchInfomationNum != -1) {
-		if (needWait)std::this_thread::sleep_for(500ms);
-		needWait = false;
-		getMatchInfomation();
-	}
-	if (baseUnixTime + ((baseIntervalMillis + baseTurnMillis) * (uint64)Max(comData.gotMatchInfoOfTurn[0], 0)) < Time::GetMillisecSinceEpoch()) {
-		if (needWait)std::this_thread::sleep_for(500ms);
-		needWait = false;
-		getMatchInfomation();
-	}
-
-	if (gotResult || postNow) {
-		observer->notify(*this);
-	}
+	
 }
 
 void Procon30::HTTPCommunication::Loop()
 {
 	observer->notify(*this);
+	comData.gotMatchInfomationNum = -1;
 	while (true) {
 		update();
+		bool gotResult = checkResult();
+		//postèàóùÇÕâΩÇÊÇËÇ‡óDêÊÇ≥ÇÍÇÈÇ◊Ç´
+		bool postNow = checkPostAction();
+		if (comData.gotMatchInfomationNum == comData.matchNum) {
+			Procon30::Game::HTTPReceived();
+			comData.gotMatchInfomationNum = -1;
+		}
+		if (comData.gotMatchInfomationNum != -1) {
+			if (needWait)std::this_thread::sleep_for(500ms);
+			needWait = false;
+			getMatchInfomation();
+		}
+		if (baseUnixTime + ((baseIntervalMillis + baseTurnMillis) * static_cast<uint64>(Max(comData.gotMatchInfoOfTurn[0], 0))) < Time::GetMillisecSinceEpoch()) {
+			if (needWait)std::this_thread::sleep_for(500ms);
+			needWait = false;
+			getMatchInfomation();
+		}
+
+		if (gotResult || postNow) {
+			observer->notify(*this);
+		}
 		if (programEnd->load() == true) {
 			//fake
 			Procon30::Game::HTTPReceived();
@@ -290,7 +293,7 @@ bool Procon30::HTTPCommunication::getAllMatchesInfomation()
 bool Procon30::HTTPCommunication::getMatchInfomation()
 {
 	if (comData.nowConnecting) return false;
-	if (comData.gotMatchInfomationNum >= comData.matchNum && !isFormLoop) return false;
+	if ((comData.gotMatchInfomationNum >= comData.matchNum) && !isFormLoop) return false;
 	if (comData.gotMatchInfomationNum == -1)comData.gotMatchInfomationNum = 0;
 	comData.nowConnecting = true;
 	comData.connectionType = ConnectionType::MatchInfomation;
@@ -370,7 +373,7 @@ Procon30::HTTPCommunication::~HTTPCommunication()
 	}
 }
 
-size_t Procon30::HTTPCommunication::getMatchNum() const
+int32 Procon30::HTTPCommunication::getMatchNum() const
 {
 	return this->comData.matchNum;
 }

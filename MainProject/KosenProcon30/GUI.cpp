@@ -128,10 +128,10 @@ void Procon30::GUI::dataUpdate()
 	viewerStrings.clear();
 
 	//CATION:ごめんちょっとだけ許して。
-	const size_t matchNum = (virtualServerMode ? 2 : observer->getStock().getMatchNum());
-	for (size_t i = 0; i < matchNum; i++) {
-		size_t width = observer->getStock((int32)i).field.boardSize.x;
-		size_t height = observer->getStock((int32)i).field.boardSize.y;
+	const int32 matchNum = (virtualServerMode ? 2 : observer->getStock().getMatchNum());
+	for (int32 i = 0; i < matchNum; i++) {
+		int32 width = observer->getStock((int32)i).field.boardSize.x;
+		int32 height = observer->getStock((int32)i).field.boardSize.y;
 		correctedTileSize[i] = (TileSize * MaxFieldX + .0) / (Max(width, height) * TileSize + .0) * TileSize;
 
 		teamTile[i] = RectF(correctedTileSize[i] * 0.96, correctedTileSize[i] * 0.96);
@@ -139,7 +139,7 @@ void Procon30::GUI::dataUpdate()
 		scoreFont[i] = Font((int32)(correctedTileSize[i] * 0.46));
 
 		//viewerStrings.push_back(U"match_{}"_fmt(i));
-		viewerStrings.push_back(U"{}"_fmt(observer->getStock(i).gameID));
+		viewerStrings.push_back(U"{}"_fmt(observer->getStock(static_cast<int32>(i)).gameID));
 	}
 }
 
