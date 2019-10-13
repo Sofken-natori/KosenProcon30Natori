@@ -622,6 +622,12 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 	const double enemy_area_merit = parameter.enemyAreaMerit;
 	const double minus_demerit = parameter.minusDemerit;
 	const double mine_remove_demerit = parameter.mineRemoveDemerit;
+	std::array<double,30> turn_weight = {};
+
+	//高速化のためにここで計算
+	for (int i = 0; i < 30; i++) {
+		turn_weight[i] = pow(fast_bonus, search_depth - i);
+	}
 
 	//演算子の準備
 	//騒乱をもたらしたためoperatorをオーバーライドして実装
@@ -667,7 +673,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
 			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, field_width, field_height, my_area_merit, enemy_area_merit, fast_bonus, minus_demerit, enemy_peel_bonus, wait_demerit, diagonal_bonus,
-				was_moved_demerit, mine_remove_demerit](
+				was_moved_demerit, mine_remove_demerit, turn_weight](
 					size_t beam_size, int32 search_depth, int32 can_simulate_num,
 					std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueue, std::unique_ptr<PruneBranchesAlgorithm>& pruneBranches) {
 
@@ -814,10 +820,10 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 												if (!next_act[agent_num]) {//Move
 													if (next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {//Moved
 														next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
-														next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+														next_state.evaluatedScore += was_moved_demerit * turn_weight[nowSearchDepth];
 													}
 													else//Wait
-														next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+														next_state.evaluatedScore += wait_demerit * turn_weight[nowSearchDepth];
 												}
 												else {//Remove
 													targetTile.color = TeamColor::None;
@@ -847,7 +853,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 													}
 
 													if (targetTile.score <= 0)
-														next_state.evaluatedScore += (abs(targetTile.score) * pow(fast_bonus, search_depth - nowSearchDepth) + mine_remove_demerit) * enemy_peel_bonus;
+														next_state.evaluatedScore += (abs(targetTile.score) * turn_weight[nowSearchDepth] + mine_remove_demerit) * enemy_peel_bonus;
 													else
 														next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 												}
@@ -880,9 +886,9 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 												}
 
 												if (targetTile.score <= 0)
-													next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + minus_demerit) * enemy_peel_bonus;
+													next_state.evaluatedScore += (targetTile.score * turn_weight[nowSearchDepth] + minus_demerit) * enemy_peel_bonus;
 												else
-													next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth)) * enemy_peel_bonus;
+													next_state.evaluatedScore += (targetTile.score * turn_weight[nowSearchDepth]) * enemy_peel_bonus;
 
 											}
 											else if (targetTile.color == TeamColor::None) {
@@ -917,9 +923,9 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 												next_state.evaluatedScore += isDiagonal * diagonal_bonus;
 												if (targetTile.score <= 0)
-													next_state.evaluatedScore += (targetTile.score + minus_demerit) * pow(fast_bonus, search_depth - nowSearchDepth);
+													next_state.evaluatedScore += (targetTile.score + minus_demerit) * turn_weight[nowSearchDepth];
 												else
-													next_state.evaluatedScore += targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth);
+													next_state.evaluatedScore += targetTile.score * turn_weight[nowSearchDepth];
 											}
 										}
 
@@ -937,7 +943,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 										}
 
 										next_state.evaluatedScore += (next_state.teams.first.areaScore - now_state.teams.first.areaScore) * my_area_merit +
-											(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - nowSearchDepth);
+											(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * turn_weight[nowSearchDepth];
 
 										//いけそうだからpushする。
 										if (nextBeamBucketQueue.size() > beam_size) {
