@@ -71,9 +71,9 @@ void Main()
 		games[i].intervalMillis = schools[http.getGameIDfromGameNum(i)].intervalMillis;
 		games[i].teams.first.teamID = schools[http.getGameIDfromGameNum(i)].teamID;
 		games[i].programEnd = ProgramEnd;
-		http.baseUnixTime = Min(http.baseUnixTime, schools[http.getGameIDfromGameNum(i)].startedAtUnixTime);
-		http.baseIntervalMillis = Min(http.baseIntervalMillis, static_cast<uint64>(schools[http.getGameIDfromGameNum(i)].intervalMillis));
-		http.baseTurnMillis = Min(http.baseTurnMillis, static_cast<uint64>(schools[http.getGameIDfromGameNum(i)].turnMillis));
+		http.baseUnixTime = schools[http.getGameIDfromGameNum(i)].startedAtUnixTime;
+		http.baseIntervalMillis = static_cast<uint64>(schools[http.getGameIDfromGameNum(i)].intervalMillis);
+		http.baseTurnMillis = static_cast<uint64>(schools[http.getGameIDfromGameNum(i)].turnMillis);
 	}
 	http.baseUnixTime *= (uint64)1000;
 	//games[0].parseJson(U"example.json");

@@ -22,7 +22,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 		uint32 code;
 		if (result != CURLE_OK) {
 			SafeConsole(U"curl_easy_perform() failed.\nUnixTime(Milli):"
-				,Time::GetMillisecSinceEpoch());
+				, Time::GetMillisecSinceEpoch());
 			SafeConsole(U"curl_easy_perform() failed.");
 			return ConnectionStatusCode::ConnectionLost;
 		}
@@ -37,7 +37,7 @@ Procon30::ConnectionStatusCode Procon30::HTTPCommunication::getResult()
 			receiveRawData.clear();
 		}
 		if (code != 200 && code != 201) {
-			SafeConsole(U"Status Error:",code);
+			SafeConsole(U"Status Error:", code);
 			if (code == 401) {
 				return ConnectionStatusCode::InvaildToken;
 			}
@@ -118,14 +118,17 @@ bool Procon30::HTTPCommunication::checkResult()
 				case Procon30::ConnectionType::MatchInfomation:
 					jsonReader.open(jsonBuffer);
 					thisTurn = jsonReader[U"turn"].get<int32>();
+					baseUnixTime = jsonReader[U"startedAtUnixTime"].get<uint64>();
 					comData.receiveJsonPath = Format(U"json/", comData.connectionMatchNumber, U"/field_", comData.connectionMatchNumber, U"_", thisTurn, U".json");
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
-					FileSystem::Copy(jsonBuffer, Format(U"json/",comData.connectionMatchNumber, U"/nowfield.json"), CopyOption::OverwriteExisting);
+					FileSystem::Copy(jsonBuffer, Format(U"json/", comData.connectionMatchNumber, U"/nowfield.json"), CopyOption::OverwriteExisting);
 					SafeConsole(U"gotMatchInfo:", comData.connectionMatchNumber);
+
 					if (isFormLoop) {
 						comData.gotMatchInfomationNum++;
-					}else if (thisTurn > comData.gotMatchInfoOfTurn.at(comData.connectionMatchNumber)) {
+					}
+					else if (thisTurn > comData.gotMatchInfoOfTurn.at(comData.connectionMatchNumber)) {
 						comData.gotMatchInfoOfTurn.at(comData.connectionMatchNumber) = thisTurn;
 						comData.gotMatchInfomationNum++;
 					}
@@ -139,7 +142,7 @@ bool Procon30::HTTPCommunication::checkResult()
 					jsonReader.close();
 					FileSystem::Copy(jsonBuffer, comData.receiveJsonPath, CopyOption::OverwriteExisting);
 					FileSystem::Copy(jsonBuffer, Format(U"json/", comData.connectionMatchNumber, U"/nowField.json"), CopyOption::OverwriteExisting);
-					SafeConsole(U"postAction:",comData.connectionMatchNumber);
+					SafeConsole(U"postAction:", comData.connectionMatchNumber);
 					break;
 				case Procon30::ConnectionType::Null:
 					break;
@@ -225,11 +228,11 @@ void Procon30::HTTPCommunication::update()
 		comData.gotMatchInfomationNum = -1;
 	}
 	if (comData.gotMatchInfomationNum != -1) {
-		if(needWait)std::this_thread::sleep_for(500ms);
+		if (needWait)std::this_thread::sleep_for(500ms);
 		needWait = false;
 		getMatchInfomation();
 	}
-	if (baseUnixTime + (baseIntervalMillis + baseTurnMillis) * comData.gotMatchInfoOfTurn[0] < Time::GetMillisecSinceEpoch()) {
+	if (baseUnixTime + ((baseIntervalMillis + baseTurnMillis) * (uint64)Max(comData.gotMatchInfoOfTurn[0], 0)) < Time::GetMillisecSinceEpoch()) {
 		if (needWait)std::this_thread::sleep_for(500ms);
 		needWait = false;
 		getMatchInfomation();
@@ -391,5 +394,8 @@ int32 Procon30::HTTPCommunication::getGameIDfromGameNum(const int32& num)
 Procon30::HTTPCommunication& Procon30::HTTPCommunication::operator=(const Procon30::HTTPCommunication& right)
 {
 	this->comData = right.comData;
+	this->baseUnixTime = right.baseUnixTime;
+	this->baseIntervalMillis = right.baseIntervalMillis;
+	this->baseTurnMillis = right.baseTurnMillis;
 	return (*this);
 }
