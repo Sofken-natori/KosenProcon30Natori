@@ -1055,7 +1055,7 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 		//“w—Í‚Ì”s–k
 		if (nowBeamBucketArray.size() == 0) {
-			SafeConsole(U"[“w—Í‚Ì”s–k] SuzukiAlgorithm ó‘Ô•Î‚Á‚ÄŸó‘Ô‚ª–³‚¢‚Ì‚Å‘Å‚¿Ø‚è‚Ü‚·B");
+			SafeConsole(U"[“w—Í‚Ì”s–k] SuzukiAlgorithm Ÿó‘Ô‚ª–³‚¢‚Ì‚Å‘Å‚¿Ø‚è‚Ü‚·B GameID:",game.gameID);
 			nowBeamBucketArray.push_back(nowBeamBucketQueues[0].top());
 			break;
 		}

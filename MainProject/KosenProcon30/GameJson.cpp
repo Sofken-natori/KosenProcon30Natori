@@ -131,6 +131,7 @@ void Procon30::Game::parseTeamsData(JSONValue object)
 
 void Procon30::Game::parseActionsData(JSONValue object)
 {
+	/*
 	{
 		for (int32 i = 0; i < object.arrayCount(); i++)
 		{
@@ -167,6 +168,7 @@ void Procon30::Game::parseActionsData(JSONValue object)
 			assert(ok);
 		}
 	}
+	*/
 }
 
 void Procon30::Game::parseJson(FilePath fileName)

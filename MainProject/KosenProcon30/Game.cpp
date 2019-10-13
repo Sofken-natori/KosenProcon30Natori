@@ -188,6 +188,7 @@ void Procon30::Game::Loop()
 					this->teams.first.agents[i].action = result.orders[selectedOrder][i].action;
 				}
 
+				observer->notify(gameNum, *this);
 				sendToHTTP();
 			}
 			

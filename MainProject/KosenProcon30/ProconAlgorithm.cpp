@@ -101,7 +101,7 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 	search_depth = wishSearchDepth[game.teams.first.agentNum];
 	can_simulate_num = canSimulateNums[game.teams.first.agentNum];
 
-	SafeConsole(U"PrivateAlgorithm ƒr[ƒ€•F", beam_size);
+	SafeConsole(U"ProconAlgorithm ƒr[ƒ€•F", beam_size);
 
 	Game gameCopy;
 	gameCopy = game;
@@ -1009,6 +1009,15 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 			}
 		}
 
+
+		//“w—Í‚Ì”s–k
+		if (nowBeamBucketArray.size() == 0) {
+			SafeConsole(U"[“w—Í‚Ì”s–k] ProconAlgorithm Ÿó‘Ô‚ª–³‚¢‚Ì‚Å‘Å‚¿Ø‚è‚Ü‚·B GameID:", game.gameID);
+			nowBeamBucketArray.push_back(nowBeamBucketQueues[0].top());
+			break;
+		}
+
+		//‚±‚±‚ÅŸó‘Ô‚ğ‹ó‚É‚µ‚Ü‚·
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
 			while (!nowBeamBucketQueues[parallelNum].empty()) {
 				nowBeamBucketQueues[parallelNum].pop();
@@ -1024,10 +1033,10 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 	}
 
 	if (search_depth != nowSearchDepth) {
-		SafeConsole(U"PrivateAlgorithm’Tõ‘Å‚¿Ø‚è[‚³:", nowSearchDepth, U" ŠÔ", game.turnTimer.ms());
+		SafeConsole(U"ProconAlgorithm’Tõ‘Å‚¿Ø‚è[‚³:", nowSearchDepth, U" ŠÔ", game.turnTimer.ms());
 	}
 	else {
-		SafeConsole(U"PrivateAlgorithm’TõI—¹ŠÔ", game.turnTimer.ms());
+		SafeConsole(U"ProconAlgorithm’TõI—¹ŠÔ", game.turnTimer.ms());
 	}
 
 	SearchResult result;

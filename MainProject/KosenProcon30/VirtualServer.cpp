@@ -553,7 +553,7 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 	server.matchField = matchField;
 
 	//ãÄŒN‚ÌŠÖ”‚ğg‚Á‚Ä©“®¶¬‚·‚é
-	constexpr bool isGeneratedField = true;
+	constexpr bool isGeneratedField = false;
 
 	if (isGeneratedField) {
 		//fieldType‚ª
@@ -590,6 +590,7 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 		games[i].programEnd = ProgramEnd;
 		//CATION:‚©‚È‚è–³—‚â‚èˆê“I‚¾‚©‚ç‹–‚µ‚Ä
 
+		/*
 		if (i == 0) {
 			//games[i].algorithm.reset(new Procon30::BeamSearchAlgorithm(80, std::unique_ptr<PruneBranchesAlgorithm>(new Procon30::YASAI::CompressBranch(1.8))));
 			std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBArray;
@@ -615,6 +616,7 @@ void Procon30::VirtualServer::VirtualServerMain(FilePath matchField)
 
 			games[i].algorithm.reset(new Procon30::ProconAlgorithm(U"parameters/parameter.ini", std::move(PBArray), std::unique_ptr<Algorithm>(new Procon30::SUZUKI::SuzukiBeamSearchAlgorithm(U"parameters/parameter.ini", std::move(secondPBArray)))));
 		}
+		*/
 
 	}
 
