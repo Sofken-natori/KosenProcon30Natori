@@ -679,7 +679,8 @@ Procon30::SearchResult Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::PruningExecu
 
 	if (nowBeamBucketArray.size() == 0) {
 		assert(nowBeamBucketArray.size() != 0);
-		SafeConsole(U"next = 0");
+		SafeConsole(U"Suzuki UnknownError");
+		result.code = AlgorithmStateCode::UnknownError;
 	}
 	else {
 

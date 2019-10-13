@@ -204,6 +204,10 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 	//TODO:交互ビームサーチの実装をチームに依存しないようにする。
 	auto second_result = secondBeamSearchAlgorithm->execute(gameCopy);
 
+	if (second_result.orders.size() == 0) {
+		SafeConsole(U"second_result.orders.sizse() ==",0);
+	}
+
 	//たまに相手がどん詰まりになって動作が返ってこなくなることがあったので再発するようなら
 	/*
 	if (second_result.orders.size() == 0)
@@ -238,6 +242,13 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 	const double minus_demerit = parameter.minusDemerit;
 	const double mine_remove_demerit = parameter.mineRemoveDemerit;
 	const double cancel_demerit = parameter.cancelDemerit;
+	std::array<double, 30> turn_weight = {};
+
+	//高速化のためにここで計算
+	for (int i = 0; i < 30; i++) {
+		turn_weight[i] = pow(fast_bonus, search_depth - i);
+	}
+
 
 	//TODO:ターンが進めば進むほど実際の評価と同じようになるようにする?終盤で評価値を変えた方がいいのでは？
 	//演算子の準備
@@ -284,7 +295,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 		for (int32 parallelNum = 0; parallelNum < parallelSize; parallelNum++) {
 			//CAUTION:second_resultのコピーができているかを確認すること。
 			beamSearchFuture[parallelNum] = std::async(std::launch::async, [nowSearchDepth, field_width, field_height, max_turn, turn, fieldType,
-				cancel_demerit, was_moved_demerit, enemy_peel_bonus, enemy_area_merit, mine_remove_demerit, my_area_merit, fast_bonus,
+				cancel_demerit, was_moved_demerit, enemy_peel_bonus, enemy_area_merit, mine_remove_demerit, my_area_merit, fast_bonus, turn_weight,
 				wait_demerit, diagonal_bonus, minus_demerit, second_result](
 					size_t beam_size, int32 search_depth, int32 can_simulate_num, Book book,
 					std::priority_queue<BeamSearchData, std::vector<BeamSearchData>, std::greater<BeamSearchData>> nowBeamBucketQueue, std::unique_ptr<PruneBranchesAlgorithm>& pruneBranches) {
@@ -633,10 +644,10 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 																	mustCalcFirstScore = true;
 
 																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
-																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score + minus_demerit) * pow(fast_bonus, search_depth - nowSearchDepth);
+																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score + minus_demerit) * turn_weight[nowSearchDepth];
 																	else {
 																		next_state.evaluatedScore += isDiagonal * diagonal_bonus;
-																		next_state.evaluatedScore += next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth);
+																		next_state.evaluatedScore += next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
 																	}
 
 																	//next_stateのエージェントのnow_position = next_positionにしている。つまり、出た時は、now_pos == next_pos
@@ -644,7 +655,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 																	next_state.field.m_board.at(agent.nextPosition).color = TeamColor::Blue;
 																}
 																else if (next_state.field.m_board.at(agent.nextPosition).color == TeamColor::Blue) {
-																	next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+																	next_state.evaluatedScore += was_moved_demerit * turn_weight[nowSearchDepth];
 																	agent.nowPosition = agent.nextPosition;
 																}
 																break;
@@ -652,34 +663,34 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 																if (next_state.field.m_board.at(agent.nextPosition).color == TeamColor::Blue) {
 																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
-																		next_state.evaluatedScore += (abs(next_state.field.m_board.at(agent.nextPosition).score) * pow(fast_bonus, search_depth - nowSearchDepth) + mine_remove_demerit) * enemy_peel_bonus;
+																		next_state.evaluatedScore += (abs(next_state.field.m_board.at(agent.nextPosition).score) * turn_weight[nowSearchDepth] + mine_remove_demerit) * enemy_peel_bonus;
 																	else
 																		next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 																}
 																else {
 																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
-																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth) + minus_demerit) * enemy_peel_bonus;
+																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth] + minus_demerit) * enemy_peel_bonus;
 																	else
-																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth)) * enemy_peel_bonus;
+																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth]) * enemy_peel_bonus;
 																}
 
 																next_state.field.m_board.at(agent.nextPosition).color = TeamColor::None;
 																break;
 															case Action::Stay:
-																next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+																next_state.evaluatedScore += wait_demerit * turn_weight[nowSearchDepth];
 																break;
 															}
 														}
 														else if (flag[0][agent_num] == 2) {
-															//next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - agent_num);
+															//next_state.evaluatedScore += wait_demerit * turn_weight[nowSearchDepth];
 															if (firstDestroyedFlag[agent_num]) {//動きをつぶされるが同時につぶせる。
 																if (next_state.teams.first.score > next_state.teams.second.score)
-																	next_state.evaluatedScore += 1.2 * cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth);
+																	next_state.evaluatedScore += 1.2 * cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
 																else
-																	next_state.evaluatedScore += cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth);
+																	next_state.evaluatedScore += cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
 															}
 															else {//あいてにつぶされるだけ
-																next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+																next_state.evaluatedScore += wait_demerit * turn_weight[nowSearchDepth];
 
 															}
 														}
@@ -714,7 +725,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 														}
 														if (flag[1][agent_num] == 2) {
 															if (secondDestroyedFlag[agent_num]) {//動きをうまくつぶした。
-																next_state.evaluatedScore -= wait_demerit * next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth);
+																next_state.evaluatedScore -= wait_demerit * next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
 															}
 															else {//動きをつぶしあった
 
@@ -774,10 +785,10 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 													if (!next_act[agent_num]) {//Move
 														if (next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {//Moved
 															next_state.teams.first.agents[agent_num].nowPosition = next_state.teams.first.agents[agent_num].nextPosition;
-															next_state.evaluatedScore += was_moved_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+															next_state.evaluatedScore += was_moved_demerit * turn_weight[nowSearchDepth];
 														}
 														else//Wait
-															next_state.evaluatedScore += wait_demerit * pow(fast_bonus, search_depth - nowSearchDepth);
+															next_state.evaluatedScore += wait_demerit * turn_weight[nowSearchDepth];
 													}
 													else {//Remove
 														targetTile.color = TeamColor::None;
@@ -807,7 +818,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 														}
 
 														if (targetTile.score <= 0)
-															next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + mine_remove_demerit) * enemy_peel_bonus;
+															next_state.evaluatedScore += (targetTile.score * turn_weight[nowSearchDepth] + mine_remove_demerit) * enemy_peel_bonus;
 														else
 															next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 													}
@@ -840,9 +851,9 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 													}
 
 													if (targetTile.score <= 0)
-														next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth) + minus_demerit) * enemy_peel_bonus;
+														next_state.evaluatedScore += (targetTile.score * turn_weight[nowSearchDepth] + minus_demerit) * enemy_peel_bonus;
 													else
-														next_state.evaluatedScore += (targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth)) * enemy_peel_bonus;
+														next_state.evaluatedScore += (targetTile.score * turn_weight[nowSearchDepth]) * enemy_peel_bonus;
 
 													break;
 												case TeamColor::None:
@@ -877,9 +888,9 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 													next_state.evaluatedScore += isDiagonal * diagonal_bonus;
 													if (targetTile.score <= 0)
-														next_state.evaluatedScore += (targetTile.score + minus_demerit) * pow(fast_bonus, search_depth - nowSearchDepth);
+														next_state.evaluatedScore += (targetTile.score + minus_demerit) * turn_weight[nowSearchDepth];
 													else
-														next_state.evaluatedScore += targetTile.score * pow(fast_bonus, search_depth - nowSearchDepth);
+														next_state.evaluatedScore += targetTile.score * turn_weight[nowSearchDepth];
 
 													break;
 												}
@@ -900,7 +911,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 										}
 
 										next_state.evaluatedScore += (next_state.teams.first.areaScore - now_state.teams.first.areaScore) * my_area_merit +
-											(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * pow(fast_bonus, search_depth - nowSearchDepth);
+											(now_state.teams.second.areaScore - next_state.teams.second.areaScore) * enemy_area_merit * turn_weight[nowSearchDepth];
 
 
 										//終了でだんだん評価値が、ゲーム自体の勝敗と同じくなるように調整。

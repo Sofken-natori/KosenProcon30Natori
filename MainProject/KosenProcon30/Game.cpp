@@ -179,7 +179,7 @@ void Procon30::Game::Loop()
 			assert(algorithm);
 
 			{
-				auto result = greedy.execute(*this);
+				SearchResult result = greedy.execute(*this);
 
 				const int32 selectedOrder = 0;// Random(result.orders.size() - 1);
 
@@ -193,21 +193,22 @@ void Procon30::Game::Loop()
 			}
 			
 			algorithm->initilize(*this);
+			{
+				SearchResult result = algorithm->execute(*this);
 
-			auto result = algorithm->execute(*this);
+				assert(result.code == Procon30::AlgorithmStateCode::None);
 
-			assert(result.code == Procon30::AlgorithmStateCode::None);
+				const int32 selectedOrder = 0;// Random(result.orders.size() - 1);
 
-			const int32 selectedOrder = 0;// Random(result.orders.size() - 1);
-
-			for (int32 i = 0; i < this->teams.first.agentNum; i++) {
-				this->teams.first.agents[i].nextPosition = this->teams.first.agents[i].nowPosition + result.orders[selectedOrder][i].dir;
-				this->teams.first.agents[i].action = result.orders[selectedOrder][i].action;
+				for (int32 i = 0; i < this->teams.first.agentNum; i++) {
+					this->teams.first.agents[i].nextPosition = this->teams.first.agents[i].nowPosition + result.orders[selectedOrder][i].dir;
+					this->teams.first.agents[i].action = result.orders[selectedOrder][i].action;
+				}
+				observer->notify(gameNum, *this);
+				sendToHTTP();
 			}
 			
 		}
-		observer->notify(gameNum, *this);
-		sendToHTTP();
 		observer->notify(gameNum, *this);
 		if (programEnd->load() == true)
 			break;
@@ -229,8 +230,10 @@ Procon30::Game::Game()
 	MaxTurn = 60;
 	turn = 0;
 	startedAtUnixTime = 0;
+	fieldType = PublicField::NONE;
+	this->gameTimer.start();
 
-	algorithm.reset(new BeamSearchAlgorithm(100));
+	//algorithm.reset(new BeamSearchAlgorithm(100));
 	//algorithm.reset(new RandAlgorithm());
 }
 
