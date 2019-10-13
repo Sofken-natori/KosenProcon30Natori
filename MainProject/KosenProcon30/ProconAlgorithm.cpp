@@ -639,6 +639,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 																		next_state.evaluatedScore += next_state.field.m_board.at(agent.nextPosition).score * pow(fast_bonus, search_depth - nowSearchDepth);
 																	}
 
+																	//next_stateのエージェントのnow_position = next_positionにしている。つまり、出た時は、now_pos == next_pos
 																	agent.nowPosition = agent.nextPosition;
 																	next_state.field.m_board.at(agent.nextPosition).color = TeamColor::Blue;
 																}
@@ -920,19 +921,20 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 										}
 
 										//move or remove
-										for (int agent_num = 0; agent_num < next_state.teams.first.agentNum; agent_num++) {
+										for (int agent_num = 0; agent_num < now_state.teams.first.agentNum; agent_num++) {
 											if (next_act[agent_num] == true) {
 												next_act[agent_num] = false;
 											}
 											else {
-												if (next_state.field.m_board.at(next_state.teams.first.agents[agent_num].nextPosition).color
-													== next_state.teams.first.color
-													&& next_state.teams.first.agents[agent_num].nowPosition != next_state.teams.first.agents[agent_num].nextPosition) {
+												if (now_state.field.m_board.at(now_state.teams.first.agents[agent_num].nextPosition).color
+													== now_state.teams.first.color
+													//ここ怪しくない？次の状態って
+													&& now_state.teams.first.agents[agent_num].nowPosition != now_state.teams.first.agents[agent_num].nextPosition) {
 													next_act[agent_num] = true;
 													break;
 												}
 											}
-											if (agent_num == next_state.teams.first.agentNum - 1) {
+											if (agent_num == now_state.teams.first.agentNum - 1) {
 												actionLoop = false;
 											}
 										}
@@ -1041,13 +1043,16 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 	SearchResult result;
 
-	result.code = AlgorithmStateCode::None;
 
 	if (nowBeamBucketArray.size() == 0) {
 		assert(nowBeamBucketArray.size() != 0);
+		result.code = AlgorithmStateCode::UnknownError;
+
+
 	}
 	else {
 
+		result.code = AlgorithmStateCode::None;
 
 		int32 count = 0;
 		for (int i = 0; i < nowBeamBucketArray.size() && count < result_size; i++) {
@@ -1057,11 +1062,14 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 			for (int k = 0; k < i; k++)
 			{
 				bool check = true;
+				//全てのエージェントの操作が同一なら
 				for (int m = 0; m < now_state.teams.first.agentNum; m++) {
+					//操作が同一でないなら false
 					if (nowBeamBucketArray[k].first_dir[m] != now_state.first_dir[m] || nowBeamBucketArray[k].first_act[m] != now_state.first_act[m]) {
 						check = false;
 					}
 				}
+				//check == true => same == true
 				if (check) {
 					same = true;
 				}
@@ -1084,6 +1092,9 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 		}
 	}
+
+	if (result.orders.size() == 0)
+		SafeConsole(U"OTITA",U" result.orders.size()=",result.orders.size());
 
 	return result;
 }

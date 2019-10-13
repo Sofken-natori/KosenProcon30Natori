@@ -93,7 +93,7 @@ Procon30::SearchResult Procon30::GreedyAlgorithm::execute(const Game& game)
 							order.at(i).action = getAction(game.teams.first.agents.at(i).nowPosition + dirs[dirNum]);
 						}
 						else if (state == 2) {
-							if (score < nextTile.score) {
+							if (score > nextTile.score) {
 								score = nextTile.score;
 								order.at(i).dir = dirs[dirNum];
 								order.at(i).action = getAction(game.teams.first.agents.at(i).nowPosition + dirs[dirNum]);
