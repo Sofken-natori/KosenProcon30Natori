@@ -42,23 +42,21 @@ void Procon30::SUZUKI::SuzukiBeamSearchAlgorithm::initilize(const Game& game)
 		this->pruneBranchesAlgorithms[i]->initilize(game);
 
 	{
-		//TODO:ŒŸØ
-		s3d::INIData parameterData(parameterFilePath);
-
-		this->parameter.resultSize = Parse<int32>(parameterData.getGlobalVaue(U"resultSize"));
-		this->parameter.sameLocationDemerit = Parse<double>(parameterData.getGlobalVaue(U"sameLocationDemerit"));
-		this->parameter.sameAreaDemerit = Parse<double>(parameterData.getGlobalVaue(U"sameAreaDemerit"));
-		this->parameter.wasMovedDemerit = Parse<int32>(parameterData.getGlobalVaue(U"wasMovedDemerit"));
-		this->parameter.waitDemerit = Parse<int32>(parameterData.getGlobalVaue(U"waitDemerit"));
-		this->parameter.diagonalBonus = Parse<double>(parameterData.getGlobalVaue(U"diagonalBonus"));
-		this->parameter.fastBonus = Parse<double>(parameterData.getGlobalVaue(U"fastBonus"));
-		this->parameter.enemyPeelBonus = Parse<double>(parameterData.getGlobalVaue(U"enemyPeelBonus"));
-		this->parameter.myAreaMerit = Parse<double>(parameterData.getGlobalVaue(U"myAreaMerit"));
-		this->parameter.enemyAreaMerit = Parse<double>(parameterData.getGlobalVaue(U"enemyAreaMerit"));
-		this->parameter.minusDemerit = Parse<double>(parameterData.getGlobalVaue(U"minusDemerit"));
-		this->parameter.mineRemoveDemerit = Parse<double>(parameterData.getGlobalVaue(U"mineRemoveDemerit"));
-		this->parameter.timeMargin = Parse<double>(parameterData.getGlobalVaue(U"timeMargin"));
-		this->parameter.cancelDemerit = Parse<double>(parameterData.getGlobalVaue(U"cancelDemerit"));
+		s3d::JSONReader parameterData(parameterFilePath);
+		this->parameter.resultSize = parameterData[(U"resultSize")].get<int32>();
+		this->parameter.sameLocationDemerit = parameterData[(U"sameLocationDemerit")].get<double>();
+		this->parameter.sameAreaDemerit = parameterData[(U"sameAreaDemerit")].get<double>();
+		this->parameter.wasMovedDemerit = parameterData[(U"wasMovedDemerit")].get<int32>();
+		this->parameter.waitDemerit = parameterData[(U"waitDemerit")].get<int32>();
+		this->parameter.diagonalBonus = parameterData[(U"diagonalBonus")].get<double>();
+		this->parameter.fastBonus = parameterData[(U"fastBonus")].get<double>();
+		this->parameter.enemyPeelBonus = parameterData[(U"enemyPeelBonus")].get<double>();
+		this->parameter.myAreaMerit = parameterData[(U"myAreaMerit")].get<double>();
+		this->parameter.enemyAreaMerit = parameterData[(U"enemyAreaMerit")].get<double>();
+		this->parameter.minusDemerit = parameterData[(U"minusDemerit")].get<double>();
+		this->parameter.mineRemoveDemerit = parameterData[(U"mineRemoveDemerit")].get<double>();
+		this->parameter.timeMargin = parameterData[(U"timeMargin")].get<double>();
+		this->parameter.cancelDemerit = parameterData[(U"cancelDemerit")].get<double>();
 	}
 
 

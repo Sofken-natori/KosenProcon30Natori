@@ -33,7 +33,6 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 
 	//parameterの読み込みはinitilizeで行われる。
 	{
-		s3d::INIData parameterData(parameterFilePath);
 
 		/*
 				int32 beamWidth;
@@ -53,20 +52,21 @@ void Procon30::ProconAlgorithm::initilize(const Game& game)
 				int32 timeMargin = 1000;
 				double cancelDemerit = 0.9;
 		*/
-		this->parameter.resultSize = Parse<int32>(parameterData.getGlobalVaue(U"resultSize"));
-		this->parameter.sameLocationDemerit = Parse<double>(parameterData.getGlobalVaue(U"sameLocationDemerit"));
-		this->parameter.sameAreaDemerit = Parse<double>(parameterData.getGlobalVaue(U"sameAreaDemerit"));
-		this->parameter.wasMovedDemerit = Parse<int32>(parameterData.getGlobalVaue(U"wasMovedDemerit"));
-		this->parameter.waitDemerit = Parse<int32>(parameterData.getGlobalVaue(U"waitDemerit"));
-		this->parameter.diagonalBonus = Parse<double>(parameterData.getGlobalVaue(U"diagonalBonus"));
-		this->parameter.fastBonus = Parse<double>(parameterData.getGlobalVaue(U"fastBonus"));
-		this->parameter.enemyPeelBonus = Parse<double>(parameterData.getGlobalVaue(U"enemyPeelBonus"));
-		this->parameter.myAreaMerit = Parse<double>(parameterData.getGlobalVaue(U"myAreaMerit"));
-		this->parameter.enemyAreaMerit = Parse<double>(parameterData.getGlobalVaue(U"enemyAreaMerit"));
-		this->parameter.minusDemerit = Parse<double>(parameterData.getGlobalVaue(U"minusDemerit"));
-		this->parameter.mineRemoveDemerit = Parse<double>(parameterData.getGlobalVaue(U"mineRemoveDemerit"));
-		this->parameter.timeMargin = Parse<double>(parameterData.getGlobalVaue(U"timeMargin"));
-		this->parameter.cancelDemerit = Parse<double>(parameterData.getGlobalVaue(U"cancelDemerit"));
+		s3d::JSONReader parameterData(parameterFilePath);
+		this->parameter.resultSize = parameterData[(U"resultSize")].get<int32>();
+		this->parameter.sameLocationDemerit = parameterData[(U"sameLocationDemerit")].get<double>();
+		this->parameter.sameAreaDemerit = parameterData[(U"sameAreaDemerit")].get<double>();
+		this->parameter.wasMovedDemerit = parameterData[(U"wasMovedDemerit")].get<int32>();
+		this->parameter.waitDemerit = parameterData[(U"waitDemerit")].get<int32>();
+		this->parameter.diagonalBonus = parameterData[(U"diagonalBonus")].get<double>();
+		this->parameter.fastBonus = parameterData[(U"fastBonus")].get<double>();
+		this->parameter.enemyPeelBonus = parameterData[(U"enemyPeelBonus")].get<double>();
+		this->parameter.myAreaMerit = parameterData[(U"myAreaMerit")].get<double>();
+		this->parameter.enemyAreaMerit = parameterData[(U"enemyAreaMerit")].get<double>();
+		this->parameter.minusDemerit = parameterData[(U"minusDemerit")].get<double>();
+		this->parameter.mineRemoveDemerit = parameterData[(U"mineRemoveDemerit")].get<double>();
+		this->parameter.timeMargin = parameterData[(U"timeMargin")].get<double>();
+		this->parameter.cancelDemerit = parameterData[(U"cancelDemerit")].get<double>();
 	}
 
 
@@ -205,7 +205,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 	auto second_result = secondBeamSearchAlgorithm->execute(gameCopy);
 
 	if (second_result.orders.size() == 0) {
-		SafeConsole(U"second_result.orders.sizse() ==",0);
+		SafeConsole(U"second_result.orders.sizse() ==", 0);
 	}
 
 	//たまに相手がどん詰まりになって動作が返ってこなくなることがあったので再発するようなら
@@ -643,8 +643,10 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 
 																	mustCalcFirstScore = true;
 
-																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
+																	//マイナス点へのmove
+																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0) {
 																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score + minus_demerit) * turn_weight[nowSearchDepth];
+																	}
 																	else {
 																		next_state.evaluatedScore += isDiagonal * diagonal_bonus;
 																		next_state.evaluatedScore += next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
@@ -655,6 +657,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 																	next_state.field.m_board.at(agent.nextPosition).color = TeamColor::Blue;
 																}
 																else if (next_state.field.m_board.at(agent.nextPosition).color == TeamColor::Blue) {
+																	//TODO:調整
 																	next_state.evaluatedScore += was_moved_demerit * turn_weight[nowSearchDepth];
 																	agent.nowPosition = agent.nextPosition;
 																}
@@ -668,8 +671,10 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 																		next_state.evaluatedScore = -100000000;//あり得ない、動かん方がまし
 																}
 																else {//相手のタイルだったら
-																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0)
+																	if (next_state.field.m_board.at(agent.nextPosition).score <= 0) {
+																		//これ剥がすの論外かな
 																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth] + minus_demerit) * enemy_peel_bonus;
+																	}
 																	else
 																		next_state.evaluatedScore += (next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth]) * enemy_peel_bonus;
 																}
@@ -684,10 +689,12 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 														else if (flag[0][agent_num] == 2) {
 															//next_state.evaluatedScore += wait_demerit * turn_weight[nowSearchDepth];
 															if (firstDestroyedFlag[agent_num]) {//動きをつぶされるが同時につぶせる。
-																if (next_state.teams.first.score > next_state.teams.second.score)
+																if (next_state.teams.first.score > next_state.teams.second.score) {
 																	next_state.evaluatedScore += 1.2 * cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
-																else
+																}
+																else {
 																	next_state.evaluatedScore += cancel_demerit * next_state.field.m_board.at(agent.nextPosition).score * turn_weight[nowSearchDepth];
+																}
 															}
 															else {//あいてにつぶされるだけ
 																next_state.evaluatedScore += wait_demerit * turn_weight[nowSearchDepth];
@@ -1105,7 +1112,7 @@ Procon30::SearchResult Procon30::ProconAlgorithm::execute(const Game& game)
 	}
 
 	if (result.orders.size() == 0)
-		SafeConsole(U"OTITA",U" result.orders.size()=",result.orders.size());
+		SafeConsole(U"OTITA", U" result.orders.size()=", result.orders.size());
 
 	return result;
 }

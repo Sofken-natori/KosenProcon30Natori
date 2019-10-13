@@ -159,8 +159,8 @@ void Procon30::Game::Loop()
 				fieldType = publicFields.checkPublicField(*this);
 
 				//‚±‚±‚ÅƒAƒ‹ƒSƒŠƒYƒ€‚Ì‰Šú‰»‚ğ‚·‚éB
-				FilePath parameterFilePath = U"parameters/parameter.ini";
-				FilePath secondSearchParameterFilePath = U"parameters/parameter.ini";
+				FilePath parameterFilePath = U"parameters/parameter.json";
+				FilePath secondSearchParameterFilePath = U"parameters/parameter.json";
 
 				//ProconAlgorithm
 				std::array<std::unique_ptr<PruneBranchesAlgorithm>, parallelSize> PBArray;
