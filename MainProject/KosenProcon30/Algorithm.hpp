@@ -105,7 +105,7 @@ namespace Procon30 {
 		std::unique_ptr<PruneBranchesAlgorithm> pruneBranchesAlgorithm;
 	};
 
-	constexpr int32 parallelSize = 3;
+	constexpr int32 parallelSize = 8;
 
 	//デバッグする
 	class ProconAlgorithm : public Algorithm {

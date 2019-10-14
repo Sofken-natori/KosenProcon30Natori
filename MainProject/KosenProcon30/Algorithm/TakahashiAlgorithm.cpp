@@ -202,6 +202,12 @@ bool Procon30::YASAI::CompressBranch::pruneBranches(const int canSimulateNum, st
 		sortedDirs[7].first *= diagonalBounus;
 		sortedDirs[8].first *= diagonalBounus;
 
+		for (int32 i = 1; i < 9; i++) {
+			if (myTeamFlag[(agent.nowPosition + sortedDirs[i].second)] == 2 && field.m_board[(agent.nowPosition + sortedDirs[i].second)].score < 0) {
+				sortedDirs[i].first = std::numeric_limits<double>::lowest();
+			}
+		}
+
 		sort(sortedDirs.begin(), sortedDirs.end(),
 			[](const std::pair<double, s3d::Point> left, const std::pair<double, s3d::Point> right) {return left.first > right.first; });
 
