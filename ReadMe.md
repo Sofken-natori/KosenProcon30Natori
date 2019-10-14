@@ -7,3 +7,6 @@
 * VisualStudio 2019
 * OpenSiv3D(0.4.0)
 * libcurl
+
+## 注意！！！
+アルゴリズムにバグがあり、タイルのないマスにremove行動を指示することがあります。
